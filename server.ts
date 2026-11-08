@@ -2,6 +2,7 @@ import express from "express";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI, Type } from "@google/genai";
 import path from "node:path";
+import fs from "node:fs";
 import {
   checkVoiceStudioStatus,
   processUploadedDialogueAudio,
@@ -473,6 +474,44 @@ Rules:
       return res.status(404).json({ error: "Blender render job not found" });
     }
     return res.json(job);
+  });
+
+  // Dedicated binary download endpoint with Content-Disposition attachment headers for iframe compatibility
+  app.get("/api/download", (req, res) => {
+    try {
+      const rawFile = String(req.query.file || "").trim();
+      const customName = String(req.query.name || "").trim();
+      if (!rawFile || (!rawFile.startsWith("/renders/") && !rawFile.startsWith("/generated-audio/"))) {
+        return res.status(400).json({ error: "Invalid download file path" });
+      }
+      const publicRoot = path.resolve("./public");
+      const targetPath = path.resolve(publicRoot, "." + rawFile);
+      if (!targetPath.startsWith(publicRoot) || !fs.existsSync(targetPath)) {
+        return res.status(404).json({ error: "Requested render file not found on disk" });
+      }
+      const downloadFilename = (customName || path.basename(targetPath)).replace(/[^a-zA-Z0-9._-]/g, "_");
+      const ext = path.extname(targetPath).toLowerCase();
+      const mimeType =
+        ext === ".mp4"
+          ? "video/mp4"
+          : ext === ".wav"
+            ? "audio/wav"
+            : ext === ".jpg" || ext === ".jpeg"
+              ? "image/jpeg"
+              : "application/octet-stream";
+
+      res.setHeader("Content-Type", mimeType);
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="${downloadFilename}"`,
+      );
+      res.setHeader("Cache-Control", "no-store");
+      return res.sendFile(targetPath);
+    } catch (err) {
+      return res.status(500).json({
+        error: err instanceof Error ? err.message : "Download failed",
+      });
+    }
   });
 
   if (process.env.NODE_ENV !== "production") {

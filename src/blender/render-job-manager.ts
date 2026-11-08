@@ -344,23 +344,22 @@ async function runBlenderJobPipeline(
       await ensureLocalVoiceStudioService();
       const durSec = Number((manifest.totalFrames / manifest.fps).toFixed(2));
       const padPath = path.join(job.workDir, "score_pad.wav");
-      const fadeOutStart = Math.max(0.5, durSec - 0.85).toFixed(2);
 
-      // 1. Generate subtle warm ambient bed so neural dialogue is crystal clear
+      // 1. Generate clean silent studio bed of exact timeline duration so dialogue is 100% pure
       await execFileAsync("ffmpeg", [
         "-y",
         "-f",
         "lavfi",
         "-i",
-        `aevalsrc='0.014*sin(2*PI*220*t)+0.011*sin(2*PI*277.18*t)+0.011*sin(2*PI*329.63*t)':s=24000:d=${durSec}`,
-        "-af",
-        `afade=t=in:st=0:d=0.6,afade=t=out:st=${fadeOutStart}:d=0.85`,
+        "anullsrc=r=24000:cl=mono",
+        "-t",
+        String(durSec),
         padPath,
       ]);
 
       // 2. Synthesize character dialogue per shot via VoiceStudio / OmniVoice
       const inputArgs: string[] = ["-i", padPath];
-      const filterParts: string[] = ["[0:a]volume=0.45[bg]"];
+      const filterParts: string[] = ["[0:a]volume=0.0[bg]"];
       const mixLabels: string[] = ["[bg]"];
       let inputIdx = 1;
 
@@ -380,7 +379,7 @@ async function runBlenderJobPipeline(
             text: shot.narrationText,
             voiceId,
             language: "en",
-            speed: 1.15,
+            speed: 1.0,
             instruct:
               voiceId === "leo"
                 ? "male, young adult, moderate pitch, american accent"
@@ -390,16 +389,16 @@ async function runBlenderJobPipeline(
           if (fs.existsSync(localVoPath)) {
             const delayMs = Math.max(
               0,
-              Math.round(((shot.startFrame - 1) / manifest.fps + 0.12) * 1000),
+              Math.round(((shot.startFrame - 1) / manifest.fps + 0.08) * 1000),
             );
             const maxShotDur = Math.max(
               0.5,
-              (shot.endFrame - shot.startFrame) / manifest.fps - 0.15,
+              (shot.endFrame - shot.startFrame) / manifest.fps - 0.08,
             ).toFixed(2);
             inputArgs.push("-i", localVoPath);
             const lbl = `[vo${inputIdx}]`;
             filterParts.push(
-              `[${inputIdx}:a]atrim=0:${maxShotDur},asetpts=PTS-STARTPTS,volume=1.55,adelay=${delayMs}|${delayMs}${lbl}`,
+              `[${inputIdx}:a]atrim=0:${maxShotDur},asetpts=PTS-STARTPTS,volume=1.05,adelay=${delayMs}|${delayMs}${lbl}`,
             );
             mixLabels.push(lbl);
             inputIdx++;
@@ -413,7 +412,7 @@ async function runBlenderJobPipeline(
 
       if (mixLabels.length > 1) {
         filterParts.push(
-          `${mixLabels.join("")}amix=inputs=${mixLabels.length}:duration=first:dropout_transition=0,alimiter=limit=0.95[outa]`,
+          `${mixLabels.join("")}amix=inputs=${mixLabels.length}:duration=first:normalize=0,alimiter=limit=0.94[outa]`,
         );
         await execFileAsync("ffmpeg", [
           "-y",

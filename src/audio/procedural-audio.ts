@@ -153,9 +153,11 @@ export function generateProjectWavBytes(
     sceneDialoguePcmMap && sceneDialoguePcmMap.size > 0,
   );
 
-  const bgmGain = isTrackAudible(bgmTrack)
-    ? bgmTrack!.volume * (hasAnyRealDialogue ? 0.032 : 0.12)
-    : 0;
+  // When real neural character dialogue is present, never overlay raw synthesized sine-wave hum or noise sweeps
+  const bgmGain =
+    isTrackAudible(bgmTrack) && !hasAnyRealDialogue
+      ? bgmTrack!.volume * 0.12
+      : 0;
   const voGain = isTrackAudible(voTrack) ? voTrack!.volume * 1.0 : 0;
   const sfxGain =
     isTrackAudible(sfxTrack) && !hasAnyRealDialogue

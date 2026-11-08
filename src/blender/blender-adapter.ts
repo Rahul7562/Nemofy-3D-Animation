@@ -241,8 +241,8 @@ export async function renderBlenderSequenceFrames(params: {
   const totalFrames = Math.max(1, params.endFrame - params.startFrame + 1);
   const completedSet = new Set<number>();
 
-  // Use 2 parallel Blender worker slices when rendering >= 40 frames
-  const workerCount = totalFrames >= 40 ? 2 : 1;
+  // Use 3 parallel Blender worker slices when rendering >= 60 frames for rapid completion
+  const workerCount = totalFrames >= 60 ? 3 : totalFrames >= 30 ? 2 : 1;
   const sliceSize = Math.ceil(totalFrames / workerCount);
   const slices: Array<{ s: number; e: number }> = [];
   for (let i = 0; i < workerCount; i++) {

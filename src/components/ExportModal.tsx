@@ -129,6 +129,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   const [isPreviewing, setIsPreviewing] = useState(false);
   const [jobState, setJobState] = useState<BlenderJobResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [downloadingKind, setDownloadingKind] = useState<"mp4" | "blend" | null>(null);
   const pollIntervalRef = useRef<number | null>(null);
 
   const targetDims = getDimensionsForAspectRatio(aspectRatio);
@@ -151,13 +152,14 @@ export const ExportModal: React.FC<ExportModalProps> = ({
       .then((r) => (r.ok ? r.json() : null))
       .then((refData) => {
         if (refData && refData.mp4Url) {
+          const refFrames = refData.verification?.frameCount || 540;
           setJobState({
             jobId: refData.jobId || "reference-encounter",
-            projectName: refData.projectName || "Nemo and Leo — A Cinematic Encounter",
+            projectName: refData.projectName || "Nemo & Leo — @agentmorphy Viral AI Agent Skit",
             status: "completed",
             progressPercent: 100,
-            framesCompleted: 300,
-            totalFrames: 300,
+            framesCompleted: refFrames,
+            totalFrames: refFrames,
             fps: 30,
             width: 1080,
             height: 1920,
@@ -380,6 +382,40 @@ export const ExportModal: React.FC<ExportModalProps> = ({
       pollIntervalRef.current = null;
     }
     setIsRendering(false);
+  };
+
+  const handleDownloadAsset = async (
+    fileUrl: string,
+    filename: string,
+    kind: "mp4" | "blend",
+  ) => {
+    setDownloadingKind(kind);
+    setError(null);
+    try {
+      const downloadEndpoint = `/api/download?file=${encodeURIComponent(fileUrl)}&name=${encodeURIComponent(filename)}`;
+      const response = await fetch(downloadEndpoint);
+      if (!response.ok) {
+        throw new Error(`Download failed (${response.status})`);
+      }
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = blobUrl;
+      anchor.download = filename;
+      anchor.style.display = "none";
+      document.body.appendChild(anchor);
+      anchor.click();
+      document.body.removeChild(anchor);
+      window.setTimeout(() => URL.revokeObjectURL(blobUrl), 15000);
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Could not download file from server.",
+      );
+    } finally {
+      setDownloadingKind(null);
+    }
   };
 
   return (
@@ -647,27 +683,75 @@ export const ExportModal: React.FC<ExportModalProps> = ({
 
               <div className="flex flex-wrap items-center gap-2">
                 {jobState.blendFileUrl && (
-                  <a
-                    href={jobState.blendFileUrl}
-                    download="aetherframe-scene.blend"
-                    className="flex items-center gap-1.5 px-3.5 py-2 rounded bg-slate-900 hover:bg-slate-800 border border-slate-700 text-amber-300 text-xs font-semibold"
+                  <button
+                    type="button"
+                    disabled={downloadingKind === "blend"}
+                    onClick={() =>
+                      handleDownloadAsset(
+                        jobState.blendFileUrl!,
+                        "aetherframe-nemo-leo-scene.blend",
+                        "blend",
+                      )
+                    }
+                    className="flex items-center gap-1.5 px-3.5 py-2 rounded bg-slate-900 hover:bg-slate-800 disabled:opacity-50 border border-slate-700 text-amber-300 text-xs font-semibold cursor-pointer"
                   >
-                    <FileCode2 className="w-4 h-4" />
-                    <span>Download .BLEND Scene</span>
-                  </a>
+                    {downloadingKind === "blend" ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <FileCode2 className="w-4 h-4" />
+                    )}
+                    <span>
+                      {downloadingKind === "blend"
+                        ? "Downloading .BLEND..."
+                        : "Download .BLEND Scene"}
+                    </span>
+                  </button>
                 )}
                 {jobState.outputMp4Url && (
-                  <a
-                    href={jobState.outputMp4Url}
-                    download="nemo-and-leo-cinematic-encounter.mp4"
-                    className="flex items-center gap-2 px-4 py-2 rounded bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold"
+                  <button
+                    type="button"
+                    disabled={downloadingKind === "mp4"}
+                    onClick={() =>
+                      handleDownloadAsset(
+                        jobState.outputMp4Url!,
+                        "nemo-and-leo-agentmorphy-skit.mp4",
+                        "mp4",
+                      )
+                    }
+                    className="flex items-center gap-2 px-4 py-2 rounded bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white text-xs font-semibold cursor-pointer"
                   >
-                    <Download className="w-4 h-4" />
-                    <span>Download Verified .MP4</span>
-                  </a>
+                    {downloadingKind === "mp4" ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Download className="w-4 h-4" />
+                    )}
+                    <span>
+                      {downloadingKind === "mp4"
+                        ? "Preparing MP4 Download..."
+                        : "Download Verified .MP4"}
+                    </span>
+                  </button>
                 )}
               </div>
             </div>
+
+            {/* Playable MP4 Video Player — Placed at top for immediate playback & verification */}
+            {jobState.outputMp4Url && (
+              <div className="bg-black rounded-lg border border-slate-800 overflow-hidden flex flex-col items-center justify-center p-3 gap-2">
+                <video
+                  key={jobState.outputMp4Url}
+                  src={jobState.outputMp4Url}
+                  controls
+                  autoPlay
+                  loop
+                  playsInline
+                  className="max-h-[420px] w-auto rounded border border-slate-800/80 shadow-xl"
+                />
+                <span className="text-[11px] font-mono text-emerald-400">
+                  30 FPS Progressive H.264 + Warm Piper Neural OmniVoice Audio Ready
+                </span>
+              </div>
+            )}
 
             {/* Scene Inspection Report from scripts/blender/inspect_scene.py */}
             {jobState.sceneInspection && (
@@ -813,19 +897,6 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                     />
                   </div>
                 )}
-              </div>
-            )}
-
-            {/* Playable MP4 Video Player */}
-            {jobState.outputMp4Url && (
-              <div className="bg-black rounded border border-slate-800 overflow-hidden flex justify-center p-2">
-                <video
-                  src={jobState.outputMp4Url}
-                  controls
-                  autoPlay
-                  loop
-                  className="max-h-96 w-auto rounded"
-                />
               </div>
             )}
           </div>

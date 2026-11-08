@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Player, PlayerRef } from "@remotion/player";
 import { staticFile } from "remotion";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
@@ -100,19 +100,41 @@ export const StudioApp: React.FC = () => {
   const dims = getDimensionsForAspectRatio(project.brief.aspectRatio);
   const previewDims = getPreviewDimensionsForAspectRatio(
     project.brief.aspectRatio,
-    project.previewQuality || "high",
+    project.previewQuality || "medium",
   );
 
   const selectedScene =
     project.scenes.find((s) => s.id === selectedSceneId) ?? project.scenes[0];
 
+  const playerInputProps = useMemo(
+    () => ({
+      project,
+      activeSceneIdOverride: isolateSelectedScene ? selectedScene.id : null,
+      showSubtitles,
+      showHudOverlay: true,
+      selectedCharacterId,
+    }),
+    [
+      project,
+      isolateSelectedScene,
+      selectedScene.id,
+      showSubtitles,
+      selectedCharacterId,
+    ],
+  );
+
+  const lastPolledFrameRef = useRef<number>(0);
+
   useEffect(() => {
     const interval = window.setInterval(() => {
       if (playerRef.current) {
         const f = playerRef.current.getCurrentFrame();
-        setCurrentFrame(f);
+        if (f !== lastPolledFrameRef.current) {
+          lastPolledFrameRef.current = f;
+          setCurrentFrame(f);
+        }
       }
-    }, 60);
+    }, 120);
     return () => window.clearInterval(interval);
   }, []);
 
@@ -508,15 +530,7 @@ export const StudioApp: React.FC = () => {
                     <Player
                       ref={playerRef}
                       component={CinematicStoryComposition}
-                      inputProps={{
-                        project,
-                        activeSceneIdOverride: isolateSelectedScene
-                          ? selectedScene.id
-                          : null,
-                        showSubtitles,
-                        showHudOverlay: true,
-                        selectedCharacterId,
-                      }}
+                      inputProps={playerInputProps}
                       durationInFrames={Math.max(1, totalFrames)}
                       compositionWidth={previewDims.width}
                       compositionHeight={previewDims.height}

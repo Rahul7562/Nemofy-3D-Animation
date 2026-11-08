@@ -23,30 +23,34 @@ def render_full_sequence(frames_dir: str, start_frame: int = None, end_frame: in
 
     is_software_gl = os.environ.get("LIBGL_ALWAYS_SOFTWARE") == "1"
     if is_software_gl:
-        scene.render.resolution_percentage = 40 if quality_preset == "draft" else 50
+        scene.render.resolution_percentage = 35 if quality_preset == "draft" else 50
     else:
         scene.render.resolution_percentage = 100
     scene.render.image_settings.file_format = "JPEG"
-    scene.render.image_settings.quality = 94
+    scene.render.image_settings.quality = 92
 
     if hasattr(scene, "eevee"):
         if hasattr(scene.eevee, "taa_render_samples"):
             scene.eevee.taa_render_samples = 1 if is_software_gl else (2 if quality_preset == "draft" else 4)
-        if is_software_gl and quality_preset == "draft":
-            if hasattr(scene.eevee, "use_gtao"):
-                scene.eevee.use_gtao = False
+        if is_software_gl:
+            for flag in ("use_gtao", "use_ssr", "use_bloom", "use_volumetric_lights", "use_motion_blur"):
+                if hasattr(scene.eevee, flag):
+                    setattr(scene.eevee, flag, False)
             for obj in scene.objects:
                 if obj.type == "CAMERA" and hasattr(obj.data, "dof"):
                     obj.data.dof.use_dof = False
+                elif obj.type == "LIGHT" and obj.name != "Cinema_Key_Light":
+                    if hasattr(obj.data, "use_shadow"):
+                        obj.data.use_shadow = False
         if hasattr(scene.eevee, "shadow_cube_size"):
-            scene.eevee.shadow_cube_size = "256" if is_software_gl else "512"
+            scene.eevee.shadow_cube_size = "128" if is_software_gl else "512"
         if hasattr(scene.eevee, "shadow_cascade_size"):
-            scene.eevee.shadow_cascade_size = "256" if is_software_gl else "512"
+            scene.eevee.shadow_cascade_size = "128" if is_software_gl else "512"
 
     markers_sorted = sorted(scene.timeline_markers, key=lambda m: m.frame)
     marker_cut_frames = {m.frame for m in markers_sorted}
 
-    # In software-GL draft mode, step by 2 on non-cut frames so 300-frame sequences complete in ~35s on CPU
+    # In software-GL draft mode, step by 2 on non-cut frames so full sequences complete rapidly on CPU
     use_frame_step = is_software_gl and quality_preset == "draft"
     frame = f_start
     while frame <= f_end:

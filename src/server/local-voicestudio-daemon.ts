@@ -39,6 +39,7 @@ function synthesizeWithPiperOnnx(params: {
   outputWavPath: string;
   lengthScale: number;
   noiseScale?: number;
+  noiseW?: number;
 }): Promise<void> {
   return new Promise((resolve, reject) => {
     const args = [
@@ -49,9 +50,11 @@ function synthesizeWithPiperOnnx(params: {
       "--length_scale",
       params.lengthScale.toFixed(3),
       "--noise_scale",
-      (params.noiseScale ?? 0.667).toFixed(3),
+      (params.noiseScale ?? 0.45).toFixed(3),
+      "--noise_w",
+      (params.noiseW ?? 0.6).toFixed(3),
       "--sentence_silence",
-      "0.18",
+      "0.22",
     ];
     const child = spawn("piper", args, {
       stdio: ["pipe", "pipe", "pipe"],
@@ -112,15 +115,10 @@ function selectVoiceConfig(
     }
   }
 
+  // Keep native ONNX neural formant pitch (0 semitone shift) for Leo and Nemo so voices never sound pitchy or cranky
   let pitchShiftSemitones = 0;
-  if (v.includes("nemo")) {
-    pitchShiftSemitones = 0.8; // Crisp, bright AI agent companion tone
-  } else if (v.includes("leo")) {
-    pitchShiftSemitones = 0.0; // Natural young adult male developer voice
-  } else if (v.includes("kaelen") || inst.includes("low pitch")) {
-    pitchShiftSemitones = -1.8;
-  } else if (inst.includes("high pitch")) {
-    pitchShiftSemitones = 1.2;
+  if (v.includes("kaelen") || inst.includes("low pitch")) {
+    pitchShiftSemitones = -1.2;
   }
 
   const fliteVoice: "slt" | "rms" | "kal16" | "awb" = isNemoOrAria
@@ -201,20 +199,22 @@ export async function ensureLocalVoiceStudioService(
         String(language),
         String(instruct),
       );
-      const numericSpeed = Math.max(0.65, Math.min(1.6, Number(speed) || 1.0));
+      const numericSpeed = Math.max(0.75, Math.min(1.25, Number(speed) || 1.0));
 
       let synthesizedWithNeural = false;
       let sourceSampleRate = 22050;
 
       if (cfg.onnxModelPath) {
         try {
-          const lengthScale = 1.0 / numericSpeed;
+          // Slightly relaxed lengthScale (1.02 / speed) prevents rushed/cranky cadence
+          const lengthScale = Math.max(0.92, Math.min(1.18, 1.02 / numericSpeed));
           await synthesizeWithPiperOnnx({
             text,
             modelPath: cfg.onnxModelPath,
             outputWavPath: rawWav,
             lengthScale,
-            noiseScale: 0.68,
+            noiseScale: 0.45,
+            noiseW: 0.6,
           });
           synthesizedWithNeural = true;
           sourceSampleRate = 22050;
@@ -227,7 +227,7 @@ export async function ensureLocalVoiceStudioService(
         sourceSampleRate = 16000;
         const lang = String(language || "en").toLowerCase();
         if (lang === "en" || lang === "auto" || lang.startsWith("en-")) {
-          const stretch = (1.0 / (numericSpeed * 1.12)).toFixed(2);
+          const stretch = (1.0 / numericSpeed).toFixed(2);
           await execFileAsync("flite", [
             "-voice",
             cfg.fliteVoice,
@@ -239,7 +239,7 @@ export async function ensureLocalVoiceStudioService(
             rawWav,
           ]);
         } else {
-          const wpm = Math.round(165 * numericSpeed);
+          const wpm = Math.round(155 * numericSpeed);
           await execFileAsync("espeak-ng", [
             "-v",
             cfg.espeakVoice,
@@ -252,16 +252,22 @@ export async function ensureLocalVoiceStudioService(
         }
       }
 
-      // Broadcast studio mastering + subtle pitch contour + 24kHz 16-bit mono PCM normalization
-      const pitchFactor = Math.pow(2, cfg.pitchShiftSemitones / 12).toFixed(4);
-      const afChain = [
-        `asetrate=${sourceSampleRate}*${pitchFactor}`,
+      // Warm studio mastering: gentle chest warmth at 180Hz, smooth de-harsh cut at 3.8kHz, soft lowpass at 8.2kHz
+      const afParts: string[] = [];
+      if (Math.abs(cfg.pitchShiftSemitones) > 0.05) {
+        const pitchFactor = Math.pow(2, cfg.pitchShiftSemitones / 12).toFixed(4);
+        afParts.push(`asetrate=${sourceSampleRate}*${pitchFactor}`);
+      }
+      afParts.push(
         "aresample=24000",
-        "highpass=f=75",
-        "lowpass=f=10500",
-        "acompressor=threshold=-18dB:ratio=2.5:attack=5:release=50:makeup=2",
-        "apad=pad_dur=0.10",
-      ].join(",");
+        "highpass=f=80",
+        "equalizer=f=180:t=q:w=1.2:g=2.0",
+        "equalizer=f=3800:t=q:w=1.8:g=-3.2",
+        "lowpass=f=8200",
+        "alimiter=limit=0.92",
+        "apad=pad_dur=0.12",
+      );
+      const afChain = afParts.join(",");
 
       await execFileAsync("ffmpeg", [
         "-y",
