@@ -3,10 +3,14 @@ import { Sparkles, Upload, Loader2, ArrowRight } from "lucide-react";
 import {
   AspectRatioPreset,
   BgmMood,
+  CameraMovementType,
   CreativeBrief,
+  EnvironmentType,
   FpsPreset,
+  LightingPreset,
   StoryboardScene,
   StudioProject,
+  TransitionType,
   VisualStyle,
 } from "../utils/types";
 import { VISUAL_STYLE_PRESETS } from "../assets/preset-library";
@@ -45,6 +49,11 @@ export const CreativeBriefModal: React.FC<CreativeBriefModalProps> = ({
     setIsGenerating(true);
     onUpdateBrief(form);
 
+    const deterministicBase = buildDeterministicStoryboardFromBrief(
+      form,
+      project.characters,
+    );
+
     try {
       const response = await fetch("/api/storyboard/generate", {
         method: "POST",
@@ -59,22 +68,51 @@ export const CreativeBriefModal: React.FC<CreativeBriefModalProps> = ({
         throw new Error(`Server returned ${response.status}`);
       }
 
-      const data = await response.json();
-      if (Array.isArray(data.scenes) && data.scenes.length > 0) {
-        onApplyGeneratedStoryboard(form, data.scenes);
-      } else {
-        const fallback = buildDeterministicStoryboardFromBrief(
-          form,
-          project.characters,
+      const payload = await response.json();
+      const rawScenes = payload?.data?.scenes || payload?.scenes;
+
+      if (Array.isArray(rawScenes) && rawScenes.length > 0) {
+        const mergedScenes: StoryboardScene[] = rawScenes.map(
+          (aiScene: Record<string, unknown>, idx: number) => {
+            const base =
+              deterministicBase[idx % deterministicBase.length] ??
+              deterministicBase[0];
+            return {
+              ...base,
+              id: `scene-ai-${idx + 1}`,
+              index: idx,
+              title: String(aiScene.title || base.title),
+              durationInSeconds: Math.max(
+                2,
+                Math.min(
+                  20,
+                  Number(aiScene.durationInSeconds) || base.durationInSeconds,
+                ),
+              ),
+              environment: (aiScene.environment ||
+                base.environment) as EnvironmentType,
+              cameraMovement: (aiScene.cameraMovement ||
+                base.cameraMovement) as CameraMovementType,
+              lightingPreset: (aiScene.lightingPreset ||
+                base.lightingPreset) as LightingPreset,
+              narrationText: String(aiScene.narrationText || base.narrationText),
+              dialogueSpeaker: String(
+                aiScene.dialogueSpeaker || base.dialogueSpeaker,
+              ),
+              dialogueVoiceId: String(
+                aiScene.dialogueVoiceId || base.dialogueVoiceId || "nemo",
+              ),
+              transitionToNext: (aiScene.transitionToNext ||
+                base.transitionToNext) as TransitionType,
+            };
+          },
         );
-        onApplyGeneratedStoryboard(form, fallback);
+        onApplyGeneratedStoryboard(form, mergedScenes);
+      } else {
+        onApplyGeneratedStoryboard(form, deterministicBase);
       }
     } catch {
-      const fallback = buildDeterministicStoryboardFromBrief(
-        form,
-        project.characters,
-      );
-      onApplyGeneratedStoryboard(form, fallback);
+      onApplyGeneratedStoryboard(form, deterministicBase);
     } finally {
       setIsGenerating(false);
     }
@@ -105,7 +143,7 @@ export const CreativeBriefModal: React.FC<CreativeBriefModalProps> = ({
               onUpdateBrief(form);
               onProceedToStoryboard();
             }}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold"
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold cursor-pointer"
           >
             <span>Skip to Storyboard</span>
             <ArrowRight className="w-3.5 h-3.5" />
@@ -280,7 +318,7 @@ export const CreativeBriefModal: React.FC<CreativeBriefModalProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-slate-200">
-              Background Music Mood (Procedural WAV Synthesizer)
+              Background Music Mood (Procedural Score Track)
             </label>
             <select
               value={form.bgmMood}

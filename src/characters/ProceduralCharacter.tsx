@@ -70,8 +70,8 @@ export const ProceduralCharacter: React.FC<ProceduralCharacterProps> = ({
   }, []);
 
   const eyeScaleY = Math.max(0.08, 1 - pose.eyeBlink * 0.92);
-  const mouthOpenHeight = 0.02 + pose.mouthOpenness * 0.095;
-  const mouthActualWidth = 0.08 + pose.mouthWidth * 0.08;
+  const mouthOpenHeight = 0.022 + pose.mouthOpenness * 0.105;
+  const mouthActualWidth = 0.085 + pose.mouthWidth * 0.085;
 
   if (config.archetype === "avian-drone") {
     const wingFlap = Math.sin(pose.hipBobY * 45) * 0.55;
@@ -193,9 +193,28 @@ export const ProceduralCharacter: React.FC<ProceduralCharacterProps> = ({
             />
           </mesh>
 
+          {/* Scholar scarf / collar for Nemo & Leo */}
+          {config.archetype === "scholar-humanoid" && (
+            <mesh
+              position={[0, 0.49, 0.02]}
+              rotation={[Math.PI / 2, 0, 0]}
+              castShadow
+            >
+              <torusGeometry args={[0.16, 0.042, 8, segs]} />
+              <meshStandardMaterial
+                color={config.secondaryColor}
+                roughness={0.45}
+                metalness={0.2}
+                flatShading={secondaryMat.flatShading}
+              />
+            </mesh>
+          )}
+
           <mesh position={[0, 0.32, 0.17]} castShadow>
             {config.archetype === "guardian-bot" ? (
               <octahedronGeometry args={[0.09, 0]} />
+            ) : config.archetype === "scholar-humanoid" ? (
+              <dodecahedronGeometry args={[0.065, 0]} />
             ) : (
               <torusGeometry args={[0.065, 0.02, 8, segs]} />
             )}
@@ -203,7 +222,7 @@ export const ProceduralCharacter: React.FC<ProceduralCharacterProps> = ({
               color={config.accentColor}
               emissive={config.accentColor}
               emissiveIntensity={
-                config.archetype === "guardian-bot" ? 1.2 : 0.45
+                config.archetype === "guardian-bot" ? 1.2 : 0.65
               }
               roughness={0.25}
               metalness={0.6}
@@ -274,6 +293,27 @@ export const ProceduralCharacter: React.FC<ProceduralCharacterProps> = ({
                   flatShading={primaryMat.flatShading}
                 />
               </mesh>
+            ) : config.archetype === "scholar-humanoid" ? (
+              <group position={[0, 0.35, -0.01]}>
+                <mesh castShadow>
+                  <cylinderGeometry args={[0.19, 0.21, 0.09, segs]} />
+                  <meshStandardMaterial
+                    color={config.primaryColor}
+                    roughness={primaryMat.roughness}
+                    metalness={primaryMat.metalness}
+                    flatShading={primaryMat.flatShading}
+                  />
+                </mesh>
+                <mesh position={[0, 0.05, 0.04]} castShadow>
+                  <boxGeometry args={[0.22, 0.04, 0.12]} />
+                  <meshStandardMaterial
+                    color={config.accentColor}
+                    emissive={config.accentColor}
+                    emissiveIntensity={0.4}
+                    roughness={0.25}
+                  />
+                </mesh>
+              </group>
             ) : (
               <mesh
                 position={[0, 0.31, -0.02]}
@@ -290,6 +330,7 @@ export const ProceduralCharacter: React.FC<ProceduralCharacterProps> = ({
               </mesh>
             )}
 
+            {/* Eyes */}
             <mesh position={[-0.07, 0.24, 0.175]} scale={[1, eyeScaleY, 1]}>
               <sphereGeometry args={[0.032, 10, 10]} />
               <meshStandardMaterial
@@ -329,8 +370,33 @@ export const ProceduralCharacter: React.FC<ProceduralCharacterProps> = ({
               />
             </mesh>
 
-            <mesh position={[0, 0.14 - pose.mouthOpenness * 0.02, 0.182]}>
-              <boxGeometry args={[mouthActualWidth, mouthOpenHeight, 0.03]} />
+            {/* Expressive Brow */}
+            <mesh
+              position={[
+                -0.07,
+                0.285 + (pose.browRaise ?? 0) * 0.02,
+                0.178,
+              ]}
+              rotation={[0, 0, (pose.browRaise ?? 0) * 0.25]}
+            >
+              <boxGeometry args={[0.055, 0.012, 0.015]} />
+              <meshStandardMaterial color={config.primaryColor} roughness={0.5} />
+            </mesh>
+            <mesh
+              position={[
+                0.07,
+                0.285 + (pose.browRaise ?? 0) * 0.02,
+                0.178,
+              ]}
+              rotation={[0, 0, -(pose.browRaise ?? 0) * 0.25]}
+            >
+              <boxGeometry args={[0.055, 0.012, 0.015]} />
+              <meshStandardMaterial color={config.primaryColor} roughness={0.5} />
+            </mesh>
+
+            {/* Articulated Mouth / Jaw Cavity */}
+            <mesh position={[0, 0.14 - pose.mouthOpenness * 0.022, 0.182]}>
+              <boxGeometry args={[mouthActualWidth, mouthOpenHeight, 0.032]} />
               <meshStandardMaterial
                 color={
                   config.archetype === "guardian-bot"
@@ -339,12 +405,16 @@ export const ProceduralCharacter: React.FC<ProceduralCharacterProps> = ({
                 }
                 emissive={
                   config.archetype === "guardian-bot" &&
-                  pose.mouthOpenness > 0.1
+                  pose.mouthOpenness > 0.08
                     ? config.accentColor
-                    : "#000000"
+                    : pose.mouthOpenness > 0.2
+                      ? "#f43f5e"
+                      : "#000000"
                 }
-                emissiveIntensity={1.2}
-                roughness={0.4}
+                emissiveIntensity={
+                  config.archetype === "guardian-bot" ? 1.3 : 0.35
+                }
+                roughness={0.35}
               />
             </mesh>
           </group>

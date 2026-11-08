@@ -1,0 +1,8 @@
+{
+  "name": "AetherFrame 3D — Cinematic Remotion & OmniVoice Animation Studio",
+  "description": "Production-grade programmatic 3D animation, VoiceStudio OmniVoice multilingual dialogue synthesis, and deterministic Remotion + FFmpeg MP4 video studio.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

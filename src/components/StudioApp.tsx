@@ -1,17 +1,23 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Player, PlayerRef } from "@remotion/player";
 import { staticFile } from "remotion";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import {
   AspectRatioPreset,
   CharacterConfig,
   CreativeBrief,
   FpsPreset,
+  PreviewQualityProfile,
   StoryboardScene,
   StudioProject,
   VisualStyle,
+  VoiceProfileConfig,
   WorkflowStage,
 } from "../utils/types";
-import { DEFAULT_STUDIO_PROJECT } from "../utils/default-project";
+import {
+  DEFAULT_STUDIO_PROJECT,
+  VERTICAL_SHOWCASE_PROJECT,
+} from "../utils/default-project";
 import {
   computeSceneTimeline,
   getDimensionsForAspectRatio,
@@ -20,13 +26,15 @@ import {
 import { CinematicStoryComposition } from "../compositions/CinematicStoryComposition";
 import { Scene } from "../Scene";
 import { getMediaMetadata } from "../helpers/get-media-metadata";
-import { createProjectAudioBlobUrl } from "../audio/procedural-audio";
+import { createProjectAudioBlobUrlAsync } from "../audio/procedural-audio";
+import { inspectAndValidateGLTF } from "../characters/GLTFCharacterLoader";
 import { TopBar } from "./TopBar";
 import { LeftSidebar } from "./LeftSidebar";
 import { RightInspector } from "./RightInspector";
 import { TimelinePanel } from "../timeline/TimelinePanel";
 import { CreativeBriefModal } from "./CreativeBriefModal";
 import { StoryboardEditor } from "./StoryboardEditor";
+import { VoiceStudioPanel } from "./VoiceStudioPanel";
 import { ExportModal } from "./ExportModal";
 
 type PhoneMediaMetadata = Awaited<ReturnType<typeof getMediaMetadata>>;
@@ -66,10 +74,23 @@ export const StudioApp: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    const url = createProjectAudioBlobUrl(project);
-    setAudioBlobUrl(url);
+    let active = true;
+    let createdUrl: string | null = null;
+    createProjectAudioBlobUrlAsync(project)
+      .then((url) => {
+        if (!active) {
+          URL.revokeObjectURL(url);
+          return;
+        }
+        createdUrl = url;
+        setAudioBlobUrl(url);
+      })
+      .catch(() => {});
     return () => {
-      URL.revokeObjectURL(url);
+      active = false;
+      if (createdUrl) {
+        URL.revokeObjectURL(createdUrl);
+      }
     };
   }, [project]);
 
@@ -78,6 +99,7 @@ export const StudioApp: React.FC = () => {
   const dims = getDimensionsForAspectRatio(project.brief.aspectRatio);
   const previewDims = getPreviewDimensionsForAspectRatio(
     project.brief.aspectRatio,
+    project.previewQuality || "high",
   );
 
   const selectedScene =
@@ -142,6 +164,22 @@ export const StudioApp: React.FC = () => {
     }));
   };
 
+  const handleReorderScene = (sceneId: string, direction: "left" | "right") => {
+    setProject((prev) => {
+      const idx = prev.scenes.findIndex((s) => s.id === sceneId);
+      if (idx < 0) return prev;
+      const targetIdx = direction === "left" ? idx - 1 : idx + 1;
+      if (targetIdx < 0 || targetIdx >= prev.scenes.length) return prev;
+      const next = [...prev.scenes];
+      const [moved] = next.splice(idx, 1);
+      next.splice(targetIdx, 0, moved);
+      return {
+        ...prev,
+        scenes: next.map((s, i) => ({ ...s, index: i })),
+      };
+    });
+  };
+
   const handleAddScene = () => {
     const newId = `scene-${project.scenes.length + 1}-${Date.now().toString().slice(-3)}`;
     const template = project.scenes[project.scenes.length - 1];
@@ -197,14 +235,55 @@ export const StudioApp: React.FC = () => {
 
   const handleUploadCharacterGlb = (charId: string, file: File) => {
     const objectUrl = URL.createObjectURL(file);
-    setProject((prev) => ({
-      ...prev,
-      characters: prev.characters.map((c) =>
-        c.id === charId
-          ? { ...c, glbUrl: objectUrl, glbFileName: file.name }
-          : c,
-      ),
-    }));
+    const loader = new GLTFLoader();
+    loader.load(
+      objectUrl,
+      (gltf) => {
+        const validation = inspectAndValidateGLTF(gltf, file.name, file.size);
+        setProject((prev) => ({
+          ...prev,
+          characters: prev.characters.map((c) =>
+            c.id === charId
+              ? {
+                  ...c,
+                  glbUrl: objectUrl,
+                  glbFileName: file.name,
+                  glbValidation: validation,
+                }
+              : c,
+          ),
+        }));
+      },
+      undefined,
+      () => {
+        setProject((prev) => ({
+          ...prev,
+          characters: prev.characters.map((c) =>
+            c.id === charId
+              ? {
+                  ...c,
+                  glbUrl: null,
+                  glbFileName: file.name,
+                  glbValidation: {
+                    valid: false,
+                    fileName: file.name,
+                    fileSizeBytes: file.size,
+                    meshCount: 0,
+                    vertexCount: 0,
+                    hasSkeletalRig: false,
+                    boneCount: 0,
+                    animationClipNames: [],
+                    hasFacialMorphTargets: false,
+                    warnings: [
+                      "Invalid or corrupted GLB/GLTF binary; procedural 3D rig fallback remains active.",
+                    ],
+                  },
+                }
+              : c,
+          ),
+        }));
+      },
+    );
   };
 
   const handleUpdateCharacter = (updated: CharacterConfig) => {
@@ -216,21 +295,33 @@ export const StudioApp: React.FC = () => {
     }));
   };
 
+  const handleAssignCharacterVoice = (
+    characterId: string,
+    profile: VoiceProfileConfig,
+  ) => {
+    setProject((prev) => ({
+      ...prev,
+      characters: prev.characters.map((c) =>
+        c.id === characterId ? { ...c, voiceProfile: profile } : c,
+      ),
+    }));
+  };
+
   const handleAddCharacter = () => {
     const id = `char-${project.characters.length + 1}`;
     const newChar: CharacterConfig = {
       id,
       name: `Unit-0${project.characters.length + 1}`,
       role: "Support Specialist",
-      archetype: "guardian-bot",
-      description: "Articulated 3D character rig with glowing visor.",
+      archetype: "scholar-humanoid",
+      description: "Articulated 3D character rig with expressive face.",
       primaryColor: "#10B981",
       secondaryColor: "#1E293B",
       accentColor: "#38BDF8",
-      skinOrChassisColor: "#94A3B8",
+      skinOrChassisColor: "#ecc1a1",
       scale: 1,
       roughness: 0.35,
-      metalness: 0.65,
+      metalness: 0.25,
       glbUrl: null,
       glbFileName: null,
     };
@@ -250,6 +341,28 @@ export const StudioApp: React.FC = () => {
     }));
   };
 
+  const handleToggleTrackSolo = (trackId: string) => {
+    setProject((prev) => ({
+      ...prev,
+      audioTracks: prev.audioTracks.map((t) =>
+        t.id === trackId ? { ...t, solo: !t.solo } : t,
+      ),
+    }));
+  };
+
+  const handleChangeTrackVolume = (trackId: string, volume: number) => {
+    setProject((prev) => ({
+      ...prev,
+      audioTracks: prev.audioTracks.map((t) =>
+        t.id === trackId ? { ...t, volume } : t,
+      ),
+    }));
+  };
+
+  const handleChangePreviewQuality = (previewQuality: PreviewQualityProfile) => {
+    setProject((prev) => ({ ...prev, previewQuality }));
+  };
+
   return (
     <div className="h-screen w-screen overflow-hidden flex flex-col bg-[#090D16] text-slate-100">
       {audioBlobUrl && <audio ref={audioRef} src={audioBlobUrl} hidden />}
@@ -259,6 +372,17 @@ export const StudioApp: React.FC = () => {
         activeStage={activeStage}
         onSelectStage={setActiveStage}
         onOpenExport={() => setActiveStage("export")}
+        activeProjectId={project.id}
+        onLoadVerticalShowcase={() => {
+          setProject(VERTICAL_SHOWCASE_PROJECT);
+          setSelectedSceneId(VERTICAL_SHOWCASE_PROJECT.scenes[0].id);
+          handleSeekFrame(0);
+        }}
+        onLoadDefaultProject={() => {
+          setProject(DEFAULT_STUDIO_PROJECT);
+          setSelectedSceneId(DEFAULT_STUDIO_PROJECT.scenes[0].id);
+          handleSeekFrame(0);
+        }}
       />
 
       {activeStage === "brief" && (
@@ -281,6 +405,14 @@ export const StudioApp: React.FC = () => {
           onAddScene={handleAddScene}
           onDeleteScene={handleDeleteScene}
           onApproveStoryboard={() => setActiveStage("stage3d")}
+        />
+      )}
+
+      {activeStage === "voicestudio" && (
+        <VoiceStudioPanel
+          project={project}
+          onUpdateScene={handleUpdateScene}
+          onAssignCharacterVoice={handleAssignCharacterVoice}
         />
       )}
 
@@ -324,7 +456,7 @@ export const StudioApp: React.FC = () => {
                 <div className="flex items-center gap-3">
                   <span className="font-mono text-[11px] text-indigo-400 font-semibold">
                     {activeCompositionMode === "cinematic"
-                      ? `REMOTION THREECANVAS // ${dims.width}×${dims.height} @ ${fps}FPS`
+                      ? `REMOTION THREECANVAS // ${dims.width}×${dims.height} @ ${fps}FPS (${totalFrames}f)`
                       : "ORIGINAL STARTER // SCENE (PHONE VIDEO TEXTURE)"}
                   </span>
                   <span className="text-slate-500">•</span>
@@ -341,7 +473,7 @@ export const StudioApp: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => setIsolateSelectedScene((v) => !v)}
-                      className={`px-2.5 py-0.5 rounded text-[11px] font-medium border ${
+                      className={`px-2.5 py-0.5 rounded text-[11px] font-medium border cursor-pointer ${
                         isolateSelectedScene
                           ? "bg-amber-950/70 border-amber-500/50 text-amber-300"
                           : "bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200"
@@ -425,6 +557,7 @@ export const StudioApp: React.FC = () => {
               project={project}
               selectedScene={selectedScene}
               onUpdateScene={handleUpdateScene}
+              onOpenVoiceStudio={() => setActiveStage("voicestudio")}
             />
           </div>
 
@@ -441,7 +574,11 @@ export const StudioApp: React.FC = () => {
             onSeekFrame={handleSeekFrame}
             onTogglePlay={handleTogglePlay}
             onAdjustSceneDuration={handleAdjustSceneDuration}
+            onReorderScene={handleReorderScene}
             onToggleTrackMute={handleToggleTrackMute}
+            onToggleTrackSolo={handleToggleTrackSolo}
+            onChangeTrackVolume={handleChangeTrackVolume}
+            onChangePreviewQuality={handleChangePreviewQuality}
             onToggleSubtitles={() => setShowSubtitles((s) => !s)}
             onAddScene={handleAddScene}
           />

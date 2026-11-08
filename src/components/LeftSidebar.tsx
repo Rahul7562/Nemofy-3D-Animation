@@ -8,6 +8,9 @@ import {
   Trash2,
   Smartphone,
   Sparkles,
+  CheckCircle2,
+  AlertTriangle,
+  Mic,
 } from "lucide-react";
 import {
   AspectRatioPreset,
@@ -60,7 +63,7 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
         <button
           type="button"
           onClick={() => setTab("scenes")}
-          className={`flex items-center justify-center gap-1.5 py-1.5 rounded text-xs font-semibold ${
+          className={`flex items-center justify-center gap-1.5 py-1.5 rounded text-xs font-semibold cursor-pointer ${
             tab === "scenes"
               ? "bg-slate-800 text-white"
               : "text-slate-400 hover:text-slate-200"
@@ -72,7 +75,7 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
         <button
           type="button"
           onClick={() => setTab("characters")}
-          className={`flex items-center justify-center gap-1.5 py-1.5 rounded text-xs font-semibold ${
+          className={`flex items-center justify-center gap-1.5 py-1.5 rounded text-xs font-semibold cursor-pointer ${
             tab === "characters"
               ? "bg-slate-800 text-white"
               : "text-slate-400 hover:text-slate-200"
@@ -84,7 +87,7 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
         <button
           type="button"
           onClick={() => setTab("style")}
-          className={`flex items-center justify-center gap-1.5 py-1.5 rounded text-xs font-semibold ${
+          className={`flex items-center justify-center gap-1.5 py-1.5 rounded text-xs font-semibold cursor-pointer ${
             tab === "style"
               ? "bg-slate-800 text-white"
               : "text-slate-400 hover:text-slate-200"
@@ -107,7 +110,7 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
                 <button
                   type="button"
                   onClick={() => onSelectCompositionMode("cinematic")}
-                  className={`flex items-center justify-between p-2.5 rounded border text-left ${
+                  className={`flex items-center justify-between p-2.5 rounded border text-left cursor-pointer ${
                     activeCompositionMode === "cinematic"
                       ? "bg-indigo-950/60 border-indigo-500 text-white"
                       : "bg-slate-900/70 border-slate-800 text-slate-300 hover:border-slate-700"
@@ -129,7 +132,7 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
                 <button
                   type="button"
                   onClick={() => onSelectCompositionMode("phone-demo")}
-                  className={`flex items-center justify-between p-2.5 rounded border text-left ${
+                  className={`flex items-center justify-between p-2.5 rounded border text-left cursor-pointer ${
                     activeCompositionMode === "phone-demo"
                       ? "bg-indigo-950/60 border-indigo-500 text-white"
                       : "bg-slate-900/70 border-slate-800 text-slate-300 hover:border-slate-700"
@@ -219,7 +222,7 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
               <button
                 type="button"
                 onClick={onAddCharacter}
-                className="flex items-center gap-1 px-2 py-1 rounded bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-semibold"
+                className="flex items-center gap-1 px-2 py-1 rounded bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-semibold cursor-pointer"
               >
                 <Plus className="w-3 h-3" /> Add Rig
               </button>
@@ -257,6 +260,16 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
                       className="w-4 h-4 rounded-xs border border-white/20"
                     />
                   </div>
+
+                  {char.voiceProfile && (
+                    <div className="flex items-center gap-1.5 px-2 py-1 rounded bg-slate-950 border border-slate-800 text-[10px] font-mono text-cyan-300">
+                      <Mic className="w-3 h-3 text-indigo-400 shrink-0" />
+                      <span className="truncate">
+                        Voice: {char.voiceProfile.name} (
+                        {char.voiceProfile.voiceId})
+                      </span>
+                    </div>
+                  )}
 
                   {/* Color Swatches */}
                   <div className="grid grid-cols-3 gap-2 pt-1">
@@ -304,13 +317,13 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
                     </label>
                   </div>
 
-                  {/* GLB/GLTF Upload */}
-                  <div className="pt-1">
+                  {/* GLB/GLTF Upload + Validation Report */}
+                  <div className="pt-1 space-y-1.5">
                     <label className="flex items-center justify-center gap-1.5 w-full py-1.5 px-2 rounded bg-slate-950 hover:bg-slate-800 border border-slate-700 text-[11px] text-slate-300 cursor-pointer">
                       <Upload className="w-3 h-3 text-cyan-400" />
                       <span>
                         {char.glbUrl
-                          ? "Replace .GLB / .GLTF Model"
+                          ? `Replace ${char.glbFileName || ".GLB"}`
                           : "Upload .GLB / .GLTF Model"}
                       </span>
                       <input
@@ -325,6 +338,34 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
                         }}
                       />
                     </label>
+
+                    {char.glbValidation && (
+                      <div className="p-2 rounded bg-slate-950 border border-slate-800 text-[10px] font-mono space-y-1">
+                        <div className="flex items-center gap-1 text-emerald-400 font-semibold">
+                          {char.glbValidation.valid ? (
+                            <CheckCircle2 className="w-3 h-3" />
+                          ) : (
+                            <AlertTriangle className="w-3 h-3 text-amber-400" />
+                          )}
+                          <span>
+                            {char.glbValidation.meshCount} meshes •{" "}
+                            {char.glbValidation.vertexCount} verts •{" "}
+                            {char.glbValidation.boneCount} bones
+                          </span>
+                        </div>
+                        {char.glbValidation.animationClipNames.length > 0 && (
+                          <div className="text-cyan-400 truncate">
+                            Clips:{" "}
+                            {char.glbValidation.animationClipNames.join(", ")}
+                          </div>
+                        )}
+                        {char.glbValidation.warnings.map((w, wi) => (
+                          <div key={wi} className="text-amber-300">
+                            • {w}
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
               );
@@ -346,7 +387,7 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
                       key={ratio}
                       type="button"
                       onClick={() => onUpdateAspectRatio(ratio)}
-                      className={`py-1.5 px-2 rounded border font-mono text-xs font-semibold ${
+                      className={`py-1.5 px-2 rounded border font-mono text-xs font-semibold cursor-pointer ${
                         project.brief.aspectRatio === ratio
                           ? "bg-indigo-600 border-indigo-400 text-white"
                           : "bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200"
@@ -369,7 +410,7 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
                     key={fpsVal}
                     type="button"
                     onClick={() => onUpdateFps(fpsVal)}
-                    className={`py-1.5 px-2 rounded border font-mono text-xs font-semibold ${
+                    className={`py-1.5 px-2 rounded border font-mono text-xs font-semibold cursor-pointer ${
                       project.brief.fps === fpsVal
                         ? "bg-indigo-600 border-indigo-400 text-white"
                         : "bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200"
@@ -394,7 +435,7 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
                       key={style.id}
                       type="button"
                       onClick={() => onUpdateStyle(style.id)}
-                      className={`w-full text-left p-2.5 rounded border ${
+                      className={`w-full text-left p-2.5 rounded border cursor-pointer ${
                         active
                           ? "bg-indigo-950/75 border-indigo-500 text-white"
                           : "bg-slate-900/75 border-slate-800 text-slate-300 hover:border-slate-700"

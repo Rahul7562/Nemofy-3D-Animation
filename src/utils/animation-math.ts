@@ -3,6 +3,9 @@ import {
   CameraTransformState,
   CharacterJointPose,
   ComputedSceneTiming,
+  LipSyncEnvelopePoint,
+  LipSyncWordTiming,
+  PreviewQualityProfile,
   SceneCharacterPlacement,
   StoryboardScene,
   TransitionType,
@@ -57,15 +60,26 @@ export function getDimensionsForAspectRatio(
 
 export function getPreviewDimensionsForAspectRatio(
   aspectRatio: AspectRatioPreset,
+  quality: PreviewQualityProfile = "high",
 ): { width: number; height: number } {
+  const mult = quality === "draft" ? 0.5 : quality === "medium" ? 0.75 : 1;
   switch (aspectRatio) {
     case "9:16":
-      return { width: 360, height: 640 };
+      return {
+        width: Math.round((360 * mult) / 2) * 2,
+        height: Math.round((640 * mult) / 2) * 2,
+      };
     case "1:1":
-      return { width: 480, height: 480 };
+      return {
+        width: Math.round((480 * mult) / 2) * 2,
+        height: Math.round((480 * mult) / 2) * 2,
+      };
     case "16:9":
     default:
-      return { width: 640, height: 360 };
+      return {
+        width: Math.round((640 * mult) / 2) * 2,
+        height: Math.round((360 * mult) / 2) * 2,
+      };
   }
 }
 
@@ -230,7 +244,8 @@ export function computeCameraTransformAtFrame(
       break;
     }
     case "close-up": {
-      const focusChar = scene.characters[0];
+      const focusChar =
+        scene.characters.find((c) => c.speaking) ?? scene.characters[0];
       if (focusChar) {
         const cx = lerp(
           focusChar.startPosition[0],
@@ -269,69 +284,390 @@ export function computeCameraTransformAtFrame(
   };
 }
 
+/**
+ * OmniVoice valid voice-design instruct categories from debpalash/VoiceStudio
+ * (`omnivoice/utils/voice_design.py`).
+ */
+export const OMNIVOICE_INSTRUCT_CATEGORIES: string[][] = [
+  ["male", "female", "男", "女"],
+  [
+    "child",
+    "teenager",
+    "young adult",
+    "middle-aged",
+    "elderly",
+    "儿童",
+    "少年",
+    "青年",
+    "中年",
+    "老年",
+  ],
+  [
+    "very low pitch",
+    "low pitch",
+    "moderate pitch",
+    "high pitch",
+    "very high pitch",
+    "极低音调",
+    "低音调",
+    "中音调",
+    "高音调",
+    "极高音调",
+  ],
+  ["whisper", "耳语"],
+  [
+    "american accent",
+    "british accent",
+    "australian accent",
+    "chinese accent",
+    "canadian accent",
+    "indian accent",
+    "korean accent",
+    "portuguese accent",
+    "russian accent",
+    "japanese accent",
+  ],
+  [
+    "河南话",
+    "陕西话",
+    "四川话",
+    "贵州话",
+    "云南话",
+    "桂林话",
+    "济南话",
+    "石家庄话",
+    "甘肃话",
+    "宁夏话",
+    "青岛话",
+    "东北话",
+  ],
+];
+
+export function sanitizeOmniVoiceInstruct(
+  raw: string | undefined | null,
+): string {
+  if (!raw || typeof raw !== "string") return "";
+  const parts = raw
+    .split(/[,;]+/)
+    .map((s) => s.trim().toLowerCase())
+    .filter(Boolean);
+  const seenCategories = new Set<number>();
+  const validOut: string[] = [];
+
+  for (const token of parts) {
+    let catIdx = -1;
+    for (let i = 0; i < OMNIVOICE_INSTRUCT_CATEGORIES.length; i++) {
+      if (OMNIVOICE_INSTRUCT_CATEGORIES[i].includes(token)) {
+        catIdx = i;
+        break;
+      }
+    }
+    if (catIdx >= 0 && !seenCategories.has(catIdx)) {
+      seenCategories.add(catIdx);
+      validOut.push(token);
+    }
+  }
+  return validOut.join(", ");
+}
+
+/**
+ * Computes a deterministic cache hash for dialogue audio synthesis so that
+ * changing lighting or camera never invalidates cached speech, whereas
+ * changing dialogue text, voiceId, language, speed, or instruct does.
+ */
+export function computeDialogueAudioCacheKey(params: {
+  text: string;
+  voiceId: string;
+  language: string;
+  speed: number;
+  instruct: string;
+}): string {
+  const normalized = [
+    (params.text || "").trim(),
+    (params.voiceId || "nemo").trim().toLowerCase(),
+    (params.language || "en").trim().toLowerCase(),
+    Number(params.speed || 1.0).toFixed(2),
+    sanitizeOmniVoiceInstruct(params.instruct || ""),
+  ].join("|");
+
+  let h1 = 0xdeadbeef ^ normalized.length;
+  let h2 = 0x41c6ce57 ^ normalized.length;
+  for (let i = 0, ch; i < normalized.length; i++) {
+    ch = normalized.charCodeAt(i);
+    h1 = Math.imul(h1 ^ ch, 2654435761);
+    h2 = Math.imul(h2 ^ ch, 1597334677);
+  }
+  h1 =
+    Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^
+    Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 =
+    Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^
+    Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  return (
+    (h2 >>> 0).toString(16).padStart(8, "0") +
+    (h1 >>> 0).toString(16).padStart(8, "0")
+  );
+}
+
+/**
+ * Extracts a 30Hz normalized RMS amplitude + zero-crossing viseme envelope
+ * and estimated word timings from raw 16-bit PCM WAV bytes.
+ */
+export function extractLipSyncFromWavBytes(
+  wavBytes: Uint8Array,
+  dialogueText = "",
+): {
+  envelope: LipSyncEnvelopePoint[];
+  wordTimings: LipSyncWordTiming[];
+  durationSeconds: number;
+} {
+  let sampleRate = 24000;
+  let numChannels = 1;
+  let bitsPerSample = 16;
+  let dataOffset = 44;
+  let dataLength = Math.max(0, wavBytes.byteLength - 44);
+
+  if (wavBytes.byteLength >= 44) {
+    const view = new DataView(
+      wavBytes.buffer,
+      wavBytes.byteOffset,
+      wavBytes.byteLength,
+    );
+    const riff =
+      String.fromCharCode(view.getUint8(0)) +
+      String.fromCharCode(view.getUint8(1)) +
+      String.fromCharCode(view.getUint8(2)) +
+      String.fromCharCode(view.getUint8(3));
+    if (riff === "RIFF") {
+      numChannels = Math.max(1, view.getUint16(22, true));
+      sampleRate = Math.max(8000, view.getUint32(24, true));
+      bitsPerSample = view.getUint16(34, true) || 16;
+
+      let offset = 12;
+      while (offset + 8 <= wavBytes.byteLength) {
+        const chunkId =
+          String.fromCharCode(view.getUint8(offset)) +
+          String.fromCharCode(view.getUint8(offset + 1)) +
+          String.fromCharCode(view.getUint8(offset + 2)) +
+          String.fromCharCode(view.getUint8(offset + 3));
+        const chunkSize = view.getUint32(offset + 4, true);
+        if (chunkId === "data") {
+          dataOffset = offset + 8;
+          dataLength = Math.min(chunkSize, wavBytes.byteLength - dataOffset);
+          break;
+        }
+        offset += 8 + chunkSize + (chunkSize % 2);
+      }
+    }
+  }
+
+  const bytesPerSample = Math.max(1, (bitsPerSample >> 3) * numChannels);
+  const totalSamples = Math.floor(dataLength / bytesPerSample);
+  const durationSec = Math.max(0.1, totalSamples / sampleRate);
+  const envRate = 30;
+  const totalEnvFrames = Math.max(3, Math.ceil(durationSec * envRate));
+  const samplesPerEnvFrame = Math.max(1, Math.floor(sampleRate / envRate));
+
+  const view = new DataView(
+    wavBytes.buffer,
+    wavBytes.byteOffset,
+    wavBytes.byteLength,
+  );
+  const rawRms: number[] = [];
+  const rawZcr: number[] = [];
+  let peakRms = 0.01;
+
+  for (let f = 0; f < totalEnvFrames; f++) {
+    const startSample = f * samplesPerEnvFrame;
+    const endSample = Math.min(totalSamples, startSample + samplesPerEnvFrame);
+    let sumSq = 0;
+    let count = 0;
+    let zeroCrossings = 0;
+    let prevSign = 0;
+
+    for (let s = startSample; s < endSample; s += 2) {
+      const bytePos = dataOffset + s * bytesPerSample;
+      if (bytePos + 2 <= wavBytes.byteLength) {
+        const val =
+          bitsPerSample === 16
+            ? view.getInt16(bytePos, true) / 32768
+            : (view.getUint8(bytePos) - 128) / 128;
+        sumSq += val * val;
+        const sign = val >= 0 ? 1 : -1;
+        if (prevSign !== 0 && sign !== prevSign) {
+          zeroCrossings++;
+        }
+        prevSign = sign;
+        count++;
+      }
+    }
+    const rms = count > 0 ? Math.sqrt(sumSq / count) : 0;
+    const zcr = count > 1 ? zeroCrossings / count : 0;
+    if (rms > peakRms) peakRms = rms;
+    rawRms.push(rms);
+    rawZcr.push(zcr);
+  }
+
+  const envelope: LipSyncEnvelopePoint[] = rawRms.map((rms, idx) => {
+    const normRms = clamp(Math.pow(rms / peakRms, 0.78), 0, 1);
+    const zcr = rawZcr[idx] ?? 0;
+    const mouthOpenness =
+      normRms < 0.05 ? 0.02 : Number(clamp(normRms * 0.92, 0.04, 0.96).toFixed(3));
+    const mouthWidth = Number(
+      clamp(0.45 + zcr * 0.45 - normRms * 0.15, 0.32, 0.85).toFixed(3),
+    );
+    return {
+      timeSec: Number((idx / envRate).toFixed(3)),
+      mouthOpenness,
+      mouthWidth,
+      energy: Number(normRms.toFixed(3)),
+    };
+  });
+
+  const rawWords = dialogueText
+    .trim()
+    .split(/\s+/)
+    .filter((w) => w.length > 0);
+  const wordTimings: LipSyncWordTiming[] = [];
+  if (rawWords.length > 0) {
+    const totalWeight = rawWords.reduce(
+      (acc, w) => acc + Math.max(2, w.length),
+      0,
+    );
+    let cursorSec = Math.min(0.12, durationSec * 0.05);
+    const usableSpan = Math.max(0.2, durationSec - cursorSec * 2);
+
+    for (const word of rawWords) {
+      const weight = Math.max(2, word.length) / totalWeight;
+      const wordDur = usableSpan * weight;
+      wordTimings.push({
+        word,
+        startSec: Number(cursorSec.toFixed(3)),
+        endSec: Number((cursorSec + wordDur * 0.92).toFixed(3)),
+        viseme: word.length > 5 ? "open-vowel" : "consonant-close",
+      });
+      cursorSec += wordDur;
+    }
+  }
+
+  return {
+    envelope,
+    wordTimings,
+    durationSeconds: Number(durationSec.toFixed(3)),
+  };
+}
+
+/**
+ * Generates an approximate word-syllable cadence LipSyncEnvelopePoint[] fallback
+ * when VoiceStudio audio has not yet been synthesized. Never indexes raw string characters.
+ */
+export function buildApproximateWordCadenceLipSync(
+  dialogueText: string,
+  durationSec: number,
+): LipSyncEnvelopePoint[] {
+  const safeDur = Math.max(0.5, durationSec);
+  const envRate = 30;
+  const totalEnvFrames = Math.max(5, Math.ceil(safeDur * envRate));
+  const rawWords = dialogueText
+    .trim()
+    .split(/\s+/)
+    .filter((w) => w.length > 0);
+
+  const words: Array<{ word: string; startSec: number; endSec: number }> = [];
+  if (rawWords.length > 0) {
+    const startPad = Math.min(0.25, safeDur * 0.08);
+    const usableSpan = Math.max(0.2, safeDur - startPad * 2);
+    const totalSyl = rawWords.reduce(
+      (acc, w) => acc + Math.max(1, Math.ceil(w.length / 3)),
+      0,
+    );
+    let cursor = startPad;
+    for (const w of rawWords) {
+      const syl = Math.max(1, Math.ceil(w.length / 3));
+      const span = (syl / totalSyl) * usableSpan;
+      words.push({
+        word: w,
+        startSec: Number(cursor.toFixed(3)),
+        endSec: Number((cursor + span * 0.86).toFixed(3)),
+      });
+      cursor += span;
+    }
+  }
+
+  const points: LipSyncEnvelopePoint[] = [];
+  for (let f = 0; f < totalEnvFrames; f++) {
+    const t = f / envRate;
+    const activeWord = words.find((w) => t >= w.startSec && t <= w.endSec);
+    if (!activeWord) {
+      points.push({
+        timeSec: Number(t.toFixed(3)),
+        mouthOpenness: 0.03,
+        mouthWidth: 0.5,
+        energy: 0.02,
+      });
+    } else {
+      const wordSpan = Math.max(0.08, activeWord.endSec - activeWord.startSec);
+      const localT = (t - activeWord.startSec) / wordSpan;
+      const sylCount = Math.max(1, Math.ceil(activeWord.word.length / 3));
+      const sylWave = Math.abs(Math.sin(localT * Math.PI * sylCount));
+      const windowEnv = Math.sin(localT * Math.PI);
+      const openness = Number(
+        clamp(0.15 + sylWave * windowEnv * 0.78, 0.05, 0.95).toFixed(3),
+      );
+      points.push({
+        timeSec: Number(t.toFixed(3)),
+        mouthOpenness: openness,
+        mouthWidth: Number(clamp(0.45 + (1 - openness) * 0.25, 0.35, 0.8).toFixed(3)),
+        energy: openness,
+      });
+    }
+  }
+
+  return points;
+}
+
 export function computeLipSyncAtFrame(
   dialogueLine: string,
   speaking: boolean,
   localFrame: number,
   durationInFrames: number,
   fps: number,
-): { mouthOpenness: number; mouthWidth: number } {
-  if (!speaking || !dialogueLine || dialogueLine.trim().length === 0) {
-    return { mouthOpenness: 0.04, mouthWidth: 0.5 };
+  lipSyncData?: LipSyncEnvelopePoint[] | null,
+): { mouthOpenness: number; mouthWidth: number; energy: number } {
+  if (
+    !speaking ||
+    (!dialogueLine?.trim() && (!lipSyncData || lipSyncData.length === 0))
+  ) {
+    return { mouthOpenness: 0.04, mouthWidth: 0.5, energy: 0 };
   }
-
-  const startSpeak = Math.floor(durationInFrames * 0.08);
-  const endSpeak = Math.ceil(durationInFrames * 0.9);
-  if (localFrame < startSpeak || localFrame > endSpeak) {
-    return { mouthOpenness: 0.04, mouthWidth: 0.5 };
-  }
-
-  const speakSpan = Math.max(1, endSpeak - startSpeak);
-  const progress = clamp((localFrame - startSpeak) / speakSpan, 0, 1);
-  const cleanText = dialogueLine.trim();
-  const charIdx = Math.min(
-    cleanText.length - 1,
-    Math.floor(progress * cleanText.length),
-  );
-  const ch = cleanText[charIdx]?.toLowerCase() ?? " ";
 
   const timeSec = localFrame / Math.max(1, fps);
-  const syllableWave = (Math.sin(timeSec * 40) + 1) * 0.5;
+  const sceneDurSec = durationInFrames / Math.max(1, fps);
 
-  if ("aou".includes(ch)) {
-    return {
-      mouthOpenness: clamp(0.45 + syllableWave * 0.5, 0.15, 0.95),
-      mouthWidth: 0.42,
-    };
+  const points: LipSyncEnvelopePoint[] =
+    lipSyncData && lipSyncData.length > 0
+      ? lipSyncData
+      : buildApproximateWordCadenceLipSync(dialogueLine, sceneDurSec);
+
+  const exactIdx = timeSec * 30;
+  const idx0 = Math.max(0, Math.min(points.length - 1, Math.floor(exactIdx)));
+  const idx1 = Math.max(0, Math.min(points.length - 1, Math.ceil(exactIdx)));
+  const frac = exactIdx - idx0;
+
+  const p0 = points[idx0];
+  const p1 = points[idx1];
+  if (!p0 || !p1) {
+    return { mouthOpenness: 0.04, mouthWidth: 0.5, energy: 0 };
   }
-  if ("ei".includes(ch)) {
-    return {
-      mouthOpenness: clamp(0.3 + syllableWave * 0.38, 0.12, 0.78),
-      mouthWidth: 0.78,
-    };
-  }
-  if ("bmp".includes(ch)) {
-    return {
-      mouthOpenness: 0.05,
-      mouthWidth: 0.48,
-    };
-  }
-  if ("fvsz".includes(ch)) {
-    return {
-      mouthOpenness: 0.18 + syllableWave * 0.15,
-      mouthWidth: 0.65,
-    };
-  }
-  if (ch === " " || ".,!?;:".includes(ch)) {
-    return {
-      mouthOpenness: 0.06,
-      mouthWidth: 0.5,
-    };
-  }
+
+  const mouthOpenness = lerp(p0.mouthOpenness, p1.mouthOpenness, frac);
+  const mouthWidth = lerp(p0.mouthWidth, p1.mouthWidth, frac);
+  const energy = lerp(p0.energy, p1.energy, frac);
 
   return {
-    mouthOpenness: clamp(0.22 + syllableWave * 0.35, 0.08, 0.7),
-    mouthWidth: 0.55,
+    mouthOpenness,
+    mouthWidth,
+    energy,
   };
 }
 
@@ -341,6 +677,7 @@ export function computeCharacterPoseAtFrame(
   durationInFrames: number,
   fps: number,
   seedKey: string,
+  sceneLipSyncData?: LipSyncEnvelopePoint[] | null,
 ): CharacterJointPose {
   const total = Math.max(1, durationInFrames - 1);
   const rawT = clamp(localFrame / total, 0, 1);
@@ -358,6 +695,16 @@ export function computeCharacterPoseAtFrame(
 
   const worldRotationY =
     travelDist > 0.25 ? Math.atan2(dx, dz) : placement.rotationY;
+
+  const { mouthOpenness, mouthWidth, energy: speechEnergy } =
+    computeLipSyncAtFrame(
+      placement.dialogueLine,
+      placement.speaking,
+      localFrame,
+      durationInFrames,
+      fps,
+      sceneLipSyncData,
+    );
 
   let hipBobY = Math.sin(timeSec * 2.2 + phaseOffset) * 0.025;
   let torsoLeanX = 0;
@@ -413,8 +760,8 @@ export function computeCharacterPoseAtFrame(
       rightThighX = -1.35;
       leftShinX = 1.38;
       rightShinX = 1.38;
-      leftUpperArmX = -0.35;
-      rightUpperArmX = -0.35;
+      leftUpperArmX = -0.35 - speechEnergy * 0.18;
+      rightUpperArmX = -0.35 - speechEnergy * 0.22;
       leftForearmX = -0.55;
       rightForearmX = -0.55;
       break;
@@ -423,8 +770,10 @@ export function computeCharacterPoseAtFrame(
       const cycle = timeSec * 3.4 + phaseOffset;
       hipBobY = Math.sin(cycle) * 0.03;
       torsoTwistY = Math.sin(cycle * 0.7) * 0.14;
-      leftUpperArmX = -0.35 + Math.sin(cycle * 1.2) * 0.28;
-      rightUpperArmX = -0.45 + Math.cos(cycle * 1.1) * 0.34;
+      leftUpperArmX =
+        -0.35 + Math.sin(cycle * 1.2) * (0.22 + speechEnergy * 0.18);
+      rightUpperArmX =
+        -0.45 + Math.cos(cycle * 1.1) * (0.26 + speechEnergy * 0.22);
       leftUpperArmZ = 0.22 + Math.sin(cycle) * 0.08;
       rightUpperArmZ = -0.24 - Math.cos(cycle) * 0.1;
       leftForearmX = -0.65 + Math.sin(cycle * 1.5) * 0.25;
@@ -435,7 +784,8 @@ export function computeCharacterPoseAtFrame(
       const cycle = timeSec * 4.0 + phaseOffset;
       hipBobY = Math.sin(cycle) * 0.04;
       torsoTwistY = Math.sin(cycle * 0.8) * 0.2;
-      rightUpperArmX = -1.15 + Math.sin(cycle) * 0.35;
+      rightUpperArmX =
+        -1.15 + Math.sin(cycle) * (0.32 + speechEnergy * 0.15);
       rightUpperArmZ = -0.45 + Math.cos(cycle) * 0.2;
       rightForearmX = -0.45 + Math.sin(cycle * 1.5) * 0.35;
       leftUpperArmX = -0.28 + Math.cos(cycle * 0.9) * 0.2;
@@ -446,8 +796,8 @@ export function computeCharacterPoseAtFrame(
     default: {
       const cycle = timeSec * 2.0 + phaseOffset;
       hipBobY = Math.sin(cycle) * 0.025;
-      leftUpperArmX = Math.sin(cycle) * 0.06;
-      rightUpperArmX = -Math.sin(cycle) * 0.06;
+      leftUpperArmX = Math.sin(cycle) * 0.06 - speechEnergy * 0.15;
+      rightUpperArmX = -Math.sin(cycle) * 0.06 - speechEnergy * 0.18;
       break;
     }
   }
@@ -461,19 +811,22 @@ export function computeCharacterPoseAtFrame(
     Math.sin(timeSec * 1.7 + phaseOffset) * 0.08;
   const headPitchX =
     clamp((wx - placement.headLookAt[1]) * -0.05, -0.3, 0.3) +
-    (placement.speaking ? Math.sin(timeSec * 5.2) * 0.06 : 0);
+    (placement.speaking
+      ? Math.sin(timeSec * 5.2) * 0.04 + speechEnergy * 0.07
+      : 0);
 
   const blinkCycle = (timeSec + seededRandom(seedKey + "-blink") * 3.2) % 3.2;
   const eyeBlink =
     blinkCycle > 3.04 ? Math.sin(((blinkCycle - 3.04) / 0.16) * Math.PI) : 0;
 
-  const { mouthOpenness, mouthWidth } = computeLipSyncAtFrame(
-    placement.dialogueLine,
-    placement.speaking,
-    localFrame,
-    durationInFrames,
-    fps,
-  );
+  const browRaise =
+    placement.expression === "surprised"
+      ? 0.65
+      : placement.expression === "happy"
+        ? 0.35
+        : placement.speaking
+          ? speechEnergy * 0.4
+          : 0.1;
 
   return {
     worldPosition: [wx, wy, wz],
@@ -496,6 +849,7 @@ export function computeCharacterPoseAtFrame(
     mouthOpenness,
     mouthWidth,
     eyeBlink: clamp(eyeBlink, 0, 1),
+    browRaise: clamp(browRaise, 0, 1),
   };
 }
 

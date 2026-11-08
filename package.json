@@ -1,11 +1,11 @@
 {
-  "name": "template-three",
-  "version": "1.0.0",
-  "description": "A React Three Fiber Project",
+  "name": "aetherframe-3d-studio",
+  "version": "2.0.0",
+  "description": "Production-grade programmatic 3D animation, VoiceStudio OmniVoice multilingual dialogue synthesis, and deterministic Remotion + FFmpeg MP4 video studio.",
   "scripts": {
     "dev": "tsx server.ts",
     "build": "vite build",
-    "start": "tsx server.ts",
+    "start": "node --import tsx server.ts",
     "remotion:studio": "remotion studio",
     "remotion:bundle": "remotion bundle",
     "upgrade": "remotion upgrade",

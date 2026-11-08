@@ -88,6 +88,7 @@ export const StageScene3D: React.FC<StageScene3DProps> = ({
             localFrame={localFrame}
             durationInFrames={durationInFrames}
             fps={fps}
+            lipSyncData={scene.dialogueLipSync ?? null}
             isSelected={selectedCharacterId === placement.characterId}
             showDirectorGizmos={interactiveDirectorMode}
           />

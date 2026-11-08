@@ -6,6 +6,8 @@ import {
   Film,
   Download,
   Sliders,
+  Mic,
+  Smartphone,
 } from "lucide-react";
 import { WorkflowStage } from "../utils/types";
 
@@ -14,6 +16,9 @@ interface TopBarProps {
   activeStage: WorkflowStage;
   onSelectStage: (stage: WorkflowStage) => void;
   onOpenExport: () => void;
+  onLoadVerticalShowcase?: () => void;
+  onLoadDefaultProject?: () => void;
+  activeProjectId?: string;
 }
 
 const STAGE_ITEMS: Array<{
@@ -23,6 +28,7 @@ const STAGE_ITEMS: Array<{
 }> = [
   { id: "brief", label: "Creative Brief", icon: FileText },
   { id: "storyboard", label: "Storyboard", icon: Layers },
+  { id: "voicestudio", label: "Voice Studio", icon: Mic },
   { id: "stage3d", label: "3D Stage", icon: Clapperboard },
   { id: "timeline", label: "Timeline", icon: Sliders },
   { id: "export", label: "Export MP4", icon: Film },
@@ -33,27 +39,30 @@ export const TopBar: React.FC<TopBarProps> = ({
   activeStage,
   onSelectStage,
   onOpenExport,
+  onLoadVerticalShowcase,
+  onLoadDefaultProject,
+  activeProjectId,
 }) => {
   return (
-    <header className="h-14 px-5 bg-[#0B0F17] border-b border-slate-800/80 flex items-center justify-between shrink-0 select-none">
+    <header className="h-14 px-4 bg-[#0B0F17] border-b border-slate-800/80 flex items-center justify-between shrink-0 select-none gap-2">
       {/* Zone 1: Brand Identity */}
-      <div className="flex items-center gap-3">
-        <div className="w-8 h-8 rounded-md bg-indigo-600 flex items-center justify-center text-white font-bold text-sm shadow-inner">
+      <div className="flex items-center gap-3 min-w-0">
+        <div className="w-8 h-8 rounded-md bg-indigo-600 flex items-center justify-center text-white font-bold text-sm shadow-inner shrink-0">
           3D
         </div>
-        <div>
+        <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <span className="font-bold text-sm tracking-tight text-slate-100">
+            <span className="font-bold text-sm tracking-tight text-slate-100 shrink-0">
               AetherFrame 3D
             </span>
-            <span className="text-xs text-slate-400 font-mono">
+            <span className="text-xs text-slate-400 font-mono truncate hidden xl:inline">
               // {projectTitle}
             </span>
           </div>
         </div>
       </div>
 
-      {/* Zone 2: 5-Stage Production Pipeline Switcher */}
+      {/* Zone 2: 6-Stage Production Pipeline Switcher */}
       <nav
         aria-label="Production Workflow Stages"
         className="flex items-center gap-1 bg-slate-950 p-1 rounded-md border border-slate-800/90"
@@ -66,7 +75,7 @@ export const TopBar: React.FC<TopBarProps> = ({
               key={item.id}
               type="button"
               onClick={() => onSelectStage(item.id)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-semibold ${
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs font-semibold cursor-pointer ${
                 isActive
                   ? "bg-indigo-600 text-white"
                   : "text-slate-400 hover:text-slate-200 hover:bg-slate-900"
@@ -82,8 +91,28 @@ export const TopBar: React.FC<TopBarProps> = ({
         })}
       </nav>
 
-      {/* Zone 3: Primary Action CTA */}
-      <div className="flex items-center gap-2">
+      {/* Zone 3: Preset Switcher & Primary Action CTA */}
+      <div className="flex items-center gap-2 shrink-0">
+        {onLoadVerticalShowcase && onLoadDefaultProject && (
+          <button
+            type="button"
+            onClick={() =>
+              activeProjectId === "nemo-leo-vertical-showcase"
+                ? onLoadDefaultProject()
+                : onLoadVerticalShowcase()
+            }
+            title="Switch between 16s 16:9 Observatory Project and 10s 9:16 Vertical Nemo & Leo Showcase"
+            className="hidden lg:flex items-center gap-1.5 px-2.5 py-1.5 rounded bg-slate-900 hover:bg-slate-800 border border-slate-700 text-cyan-300 text-xs font-mono cursor-pointer"
+          >
+            <Smartphone className="w-3.5 h-3.5" />
+            <span>
+              {activeProjectId === "nemo-leo-vertical-showcase"
+                ? "16:9 Observatory (16s)"
+                : "9:16 Nemo & Leo (10s)"}
+            </span>
+          </button>
+        )}
+
         <button
           type="button"
           onClick={onOpenExport}

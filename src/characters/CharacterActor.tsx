@@ -1,6 +1,7 @@
 import React from "react";
 import {
   CharacterConfig,
+  LipSyncEnvelopePoint,
   SceneCharacterPlacement,
   VisualStyle,
 } from "../utils/types";
@@ -14,6 +15,7 @@ interface CharacterActorProps {
   localFrame: number;
   durationInFrames: number;
   fps: number;
+  lipSyncData?: LipSyncEnvelopePoint[] | null;
   isSelected?: boolean;
   showDirectorGizmos?: boolean;
 }
@@ -25,6 +27,7 @@ export const CharacterActor: React.FC<CharacterActorProps> = ({
   localFrame,
   durationInFrames,
   fps,
+  lipSyncData = null,
   isSelected = false,
   showDirectorGizmos = false,
 }) => {
@@ -34,6 +37,7 @@ export const CharacterActor: React.FC<CharacterActorProps> = ({
     durationInFrames,
     fps,
     `${config.id}-${placement.action}`,
+    lipSyncData,
   );
 
   return (

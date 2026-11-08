@@ -1,0 +1,20 @@
+services:
+  voicestudio:
+    image: ghcr.io/debpalash/voicestudio:latest
+    container_name: aetherframe-voicestudio
+    ports:
+      - "3900:3900"
+    environment:
+      - PORT=3900
+      - OMNIVOICE_DATA_DIR=/data/omnivoice
+      - OMNIVOICE_CACHE_DIR=/data/omnivoice/cache
+      - HF_HOME=/data/omnivoice/hf_cache
+      - OMNIVOICE_TORCH_VARIANT=${OMNIVOICE_TORCH_VARIANT:-cpu}
+      - DEFAULT_ENGINE=omnivoice
+    volumes:
+      - omnivoice-data:/data
+    restart: unless-stopped
+
+volumes:
+  omnivoice-data:
+    name: aetherframe-omnivoice-data

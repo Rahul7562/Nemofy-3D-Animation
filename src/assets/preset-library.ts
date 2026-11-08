@@ -5,6 +5,7 @@ import {
   LightingPreset,
   TransitionType,
   VisualStyle,
+  VoiceProfileConfig,
   WeatherEffect,
 } from "../utils/types";
 
@@ -146,4 +147,142 @@ export const TRANSITION_PRESETS: Array<{
   { id: "whip-pan", label: "Kinetic Whip Pan" },
   { id: "iris-wipe", label: "Aperture Iris" },
   { id: "cut", label: "Direct Cut" },
+];
+
+export const OMNIVOICE_SUPPORTED_LANGUAGES: Array<{
+  code: string;
+  label: string;
+  region: string;
+}> = [
+  { code: "auto", label: "Auto-Detect (600+ Languages)", region: "Global" },
+  { code: "en", label: "English (en)", region: "Global" },
+  { code: "zh", label: "Mandarin Chinese (zh)", region: "East Asia" },
+  { code: "yue", label: "Cantonese (yue)", region: "East Asia" },
+  { code: "ja", label: "Japanese (ja)", region: "East Asia" },
+  { code: "ko", label: "Korean (ko)", region: "East Asia" },
+  { code: "hi", label: "Hindi (hi)", region: "South Asia" },
+  { code: "bn", label: "Bengali (bn)", region: "South Asia" },
+  { code: "ta", label: "Tamil (ta)", region: "South Asia" },
+  { code: "te", label: "Telugu (te)", region: "South Asia" },
+  { code: "mr", label: "Marathi (mr)", region: "South Asia" },
+  { code: "ur", label: "Urdu (ur)", region: "South Asia" },
+  { code: "es", label: "Spanish (es)", region: "Europe / Americas" },
+  { code: "fr", label: "French (fr)", region: "Europe / Global" },
+  { code: "de", label: "German (de)", region: "Europe" },
+  { code: "pt", label: "Portuguese (pt)", region: "Europe / Americas" },
+  { code: "it", label: "Italian (it)", region: "Europe" },
+  { code: "ru", label: "Russian (ru)", region: "Eurasia" },
+  { code: "ar", label: "Arabic (ar)", region: "MENA" },
+  { code: "tr", label: "Turkish (tr)", region: "Eurasia" },
+  { code: "id", label: "Indonesian (id)", region: "Southeast Asia" },
+  { code: "vi", label: "Vietnamese (vi)", region: "Southeast Asia" },
+];
+
+export const OMNIVOICE_INSTRUCT_PRESETS: Array<{
+  id: string;
+  label: string;
+  instruct: string;
+  description: string;
+}> = [
+  {
+    id: "nemo-conversational",
+    label: "Nemo — Warm Conversational Female",
+    instruct: "female, young adult, moderate pitch, american accent",
+    description: "Clear, expressive female-presenting young adult voice",
+  },
+  {
+    id: "leo-student",
+    label: "Leo — Curious Student Male",
+    instruct: "male, young adult, moderate pitch, american accent",
+    description: "Natural, articulate student-like male-presenting voice",
+  },
+  {
+    id: "aria-explorer",
+    label: "Aria — Heroic Lead Explorer",
+    instruct: "female, young adult, high pitch, british accent",
+    description: "Bright, energetic expedition leader voice design",
+  },
+  {
+    id: "kaelen-sentinel",
+    label: "Kaelen — Deep Guardian Resonance",
+    instruct: "male, middle-aged, very low pitch, british accent",
+    description: "Resonant, authoritative baritone voice design",
+  },
+  {
+    id: "elder-narrator",
+    label: "Chronicle Narrator — Wise Elder",
+    instruct: "male, elderly, low pitch, british accent",
+    description: "Measured cinematic storyteller timbre",
+  },
+  {
+    id: "whisper-mystic",
+    label: "Mystic Whisper — Soft Ethereal",
+    instruct: "female, young adult, moderate pitch, whisper",
+    description: "Hushed atmospheric whisper using OmniVoice style token",
+  },
+];
+
+export const BUILT_IN_VOICE_PROFILES: VoiceProfileConfig[] = [
+  {
+    voiceId: "nemo",
+    name: "Nemo",
+    engine: "omnivoice",
+    gender: "female",
+    age: "young adult",
+    pitch: "moderate pitch",
+    style: "none",
+    accent: "american accent",
+    language: "auto",
+    speed: 1.0,
+    instruct: "female, young adult, moderate pitch, american accent",
+    description:
+      "Clear, natural, expressive female-presenting conversational voice profile for Nemo.",
+    isCustomProfile: false,
+  },
+  {
+    voiceId: "leo",
+    name: "Leo",
+    engine: "omnivoice",
+    gender: "male",
+    age: "young adult",
+    pitch: "moderate pitch",
+    style: "none",
+    accent: "american accent",
+    language: "auto",
+    speed: 1.0,
+    instruct: "male, young adult, moderate pitch, american accent",
+    description:
+      "Clear, natural, conversational student-like male-presenting voice profile for Leo.",
+    isCustomProfile: false,
+  },
+  {
+    voiceId: "aria",
+    name: "Aria Vance",
+    engine: "omnivoice",
+    gender: "female",
+    age: "young adult",
+    pitch: "high pitch",
+    style: "none",
+    accent: "british accent",
+    language: "en",
+    speed: 1.0,
+    instruct: "female, young adult, high pitch, british accent",
+    description: "Astrolabe Explorer bright expedition voice design.",
+    isCustomProfile: false,
+  },
+  {
+    voiceId: "kaelen",
+    name: "Kaelen-IX",
+    engine: "omnivoice",
+    gender: "male",
+    age: "middle-aged",
+    pitch: "very low pitch",
+    style: "none",
+    accent: "british accent",
+    language: "en",
+    speed: 0.96,
+    instruct: "male, middle-aged, very low pitch, british accent",
+    description: "Deep brass guardian sentinel voice design.",
+    isCustomProfile: false,
+  },
 ];

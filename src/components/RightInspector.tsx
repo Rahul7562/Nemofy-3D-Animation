@@ -1,5 +1,12 @@
 import React from "react";
-import { Camera, Sun, CloudRain, UserCheck, MessageSquare } from "lucide-react";
+import {
+  Camera,
+  Sun,
+  CloudRain,
+  UserCheck,
+  MessageSquare,
+  Mic,
+} from "lucide-react";
 import {
   CameraMovementType,
   CharacterAction,
@@ -11,10 +18,12 @@ import {
   WeatherEffect,
 } from "../utils/types";
 import {
+  BUILT_IN_VOICE_PROFILES,
   CAMERA_MOVEMENT_PRESETS,
   CHARACTER_ACTIONS,
   ENVIRONMENT_PRESETS,
   LIGHTING_PRESETS,
+  OMNIVOICE_SUPPORTED_LANGUAGES,
   TRANSITION_PRESETS,
   WEATHER_PRESETS,
 } from "../assets/preset-library";
@@ -23,12 +32,14 @@ interface RightInspectorProps {
   project: StudioProject;
   selectedScene: StoryboardScene;
   onUpdateScene: (updated: StoryboardScene) => void;
+  onOpenVoiceStudio?: () => void;
 }
 
 export const RightInspector: React.FC<RightInspectorProps> = ({
   project,
   selectedScene,
   onUpdateScene,
+  onOpenVoiceStudio,
 }) => {
   const updateVec3 = (
     current: [number, number, number],
@@ -98,7 +109,7 @@ export const RightInspector: React.FC<RightInspectorProps> = ({
               type="number"
               min={2}
               max={20}
-              step={1}
+              step={0.5}
               value={selectedScene.durationInSeconds}
               onChange={(e) =>
                 onUpdateScene({
@@ -394,12 +405,78 @@ export const RightInspector: React.FC<RightInspectorProps> = ({
         })}
       </div>
 
-      {/* Dialogue & Voice-Over Lip-Sync Script */}
-      <div className="space-y-2">
-        <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-indigo-400">
-          <MessageSquare className="w-3.5 h-3.5" />
-          <span>Dialogue & Lip-Sync Script</span>
+      {/* Dialogue & VoiceStudio OmniVoice Script */}
+      <div className="space-y-2.5">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-indigo-400">
+            <MessageSquare className="w-3.5 h-3.5" />
+            <span>Dialogue & OmniVoice</span>
+          </div>
+          {onOpenVoiceStudio && (
+            <button
+              type="button"
+              onClick={onOpenVoiceStudio}
+              className="flex items-center gap-1 px-2 py-0.5 rounded bg-indigo-950 hover:bg-indigo-900 border border-indigo-500/40 text-[10px] font-semibold text-indigo-300 cursor-pointer"
+            >
+              <Mic className="w-3 h-3" />
+              <span>Voice Studio</span>
+            </button>
+          )}
         </div>
+
+        <div className="grid grid-cols-2 gap-1.5 text-xs">
+          <div>
+            <label className="text-[10px] text-slate-400 block mb-0.5">
+              OmniVoice Profile
+            </label>
+            <select
+              value={selectedScene.dialogueVoiceId || "nemo"}
+              onChange={(e) => {
+                const profile = BUILT_IN_VOICE_PROFILES.find(
+                  (p) => p.voiceId === e.target.value,
+                );
+                onUpdateScene({
+                  ...selectedScene,
+                  dialogueVoiceId: e.target.value,
+                  dialogueSpeaker:
+                    profile?.name || selectedScene.dialogueSpeaker,
+                  dialogueInstruct:
+                    profile?.instruct || selectedScene.dialogueInstruct,
+                });
+              }}
+              className="w-full px-2 py-1 rounded bg-slate-950 border border-slate-800 text-xs text-slate-100"
+            >
+              {BUILT_IN_VOICE_PROFILES.map((vp) => (
+                <option key={vp.voiceId} value={vp.voiceId}>
+                  {vp.name} ({vp.voiceId})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="text-[10px] text-slate-400 block mb-0.5">
+              Language
+            </label>
+            <select
+              value={selectedScene.dialogueLanguage || "en"}
+              onChange={(e) =>
+                onUpdateScene({
+                  ...selectedScene,
+                  dialogueLanguage: e.target.value,
+                })
+              }
+              className="w-full px-2 py-1 rounded bg-slate-950 border border-slate-800 text-xs text-slate-100"
+            >
+              {OMNIVOICE_SUPPORTED_LANGUAGES.map((l) => (
+                <option key={l.code} value={l.code}>
+                  {l.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
         <textarea
           rows={3}
           value={selectedScene.narrationText}

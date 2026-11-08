@@ -1,5 +1,6 @@
 import { StudioProject, StoryboardScene, CreativeBrief } from "./types";
 import { seededRandom } from "./animation-math";
+import { BUILT_IN_VOICE_PROFILES } from "../assets/preset-library";
 
 export const DEFAULT_STUDIO_PROJECT: StudioProject = {
   id: "chronicles-sunlit-observatory",
@@ -7,23 +8,60 @@ export const DEFAULT_STUDIO_PROJECT: StudioProject = {
   activeComposition: "CinematicStory",
   subtitlesEnabled: true,
   approvedStoryboard: true,
+  previewQuality: "high",
   brief: {
     topic: "Sci-Fi Fantasy Discovery at a Celestial Mountain Observatory",
     title: "Chronicles of the Sunlit Observatory",
     storyConcept:
-      "Aria, an astrolabe explorer, and Kaelen, an ancient brass guardian automaton, ascend the Sunlit Observatory Citadel to awaken the dormant Celestial Armillary before the eclipse.",
+      "Nemo, an astrolabe scholar, and Leo, an academy field researcher, join Aria and Kaelen at the Sunlit Observatory Citadel to awaken the dormant Celestial Armillary before the eclipse.",
     targetDurationSeconds: 16,
     aspectRatio: "16:9",
     fps: 30,
     visualStyle: "low-poly",
     narrationScript:
-      "Above the cloud sea, Aria reaches the Sunlit Observatory. Beside her, Kaelen calibrates the ancient brass rings. Together they channel the prism beam, awakening the gateway across the stars.",
+      "Above the cloud sea, Nemo and Aria reach the Sunlit Observatory. In the glowing grove, Leo and Kaelen calibrate the ancient brass rings. At the solar monolith, they lock the meridian beam. Finally, the sky sanctuary bridge awakens across the stars.",
     bgmMood: "orchestral-wonder",
     characterDescriptions:
-      "Aria: nimble explorer with cobalt cloak, brass astrolabe pack, and warm expressive eyes. Kaelen: towering articulated bronze automaton with glowing cyan ocular lens. Lumen: hovering reconnaissance owl-drone.",
+      "Nemo: expressive scholar with teal expedition coat and astrolabe. Leo: curious student researcher with amber scarf and field journal. Aria: nimble explorer with cobalt cloak. Kaelen: towering articulated bronze automaton.",
     referenceImages: [],
   },
   characters: [
+    {
+      id: "char-nemo",
+      name: "Nemo",
+      role: "Lead Celestial Scholar",
+      archetype: "scholar-humanoid",
+      primaryColor: "#0d9488",
+      secondaryColor: "#f59e0b",
+      accentColor: "#2dd4bf",
+      skinOrChassisColor: "#f4cbb2",
+      scale: 1.0,
+      roughness: 0.48,
+      metalness: 0.18,
+      glbUrl: null,
+      glbFileName: null,
+      voiceProfile: BUILT_IN_VOICE_PROFILES[0],
+      description:
+        "Expressive female-presenting celestial scholar with teal academy coat, brass astrolabe, and articulated facial rig.",
+    },
+    {
+      id: "char-leo",
+      name: "Leo",
+      role: "Academy Field Student",
+      archetype: "scholar-humanoid",
+      primaryColor: "#4f46e5",
+      secondaryColor: "#eab308",
+      accentColor: "#38bdf8",
+      skinOrChassisColor: "#ecc1a1",
+      scale: 1.04,
+      roughness: 0.52,
+      metalness: 0.15,
+      glbUrl: null,
+      glbFileName: null,
+      voiceProfile: BUILT_IN_VOICE_PROFILES[1],
+      description:
+        "Conversational student-like researcher with indigo field jacket, telemetry satchel, and expressive eyes.",
+    },
     {
       id: "char-aria",
       name: "Aria Vance",
@@ -38,6 +76,7 @@ export const DEFAULT_STUDIO_PROJECT: StudioProject = {
       metalness: 0.2,
       glbUrl: null,
       glbFileName: null,
+      voiceProfile: BUILT_IN_VOICE_PROFILES[2],
       description:
         "Articulated low-poly explorer with expedition satchel, brass visor, and cape trim.",
     },
@@ -55,6 +94,7 @@ export const DEFAULT_STUDIO_PROJECT: StudioProject = {
       metalness: 0.82,
       glbUrl: null,
       glbFileName: null,
+      voiceProfile: BUILT_IN_VOICE_PROFILES[3],
       description:
         "Heavy clockwork sentinel with layered shoulder pauldrons, glowing core, and articulated jaw.",
     },
@@ -96,27 +136,35 @@ export const DEFAULT_STUDIO_PROJECT: StudioProject = {
       weatherEffect: "dust-motes",
       characters: [
         {
-          characterId: "char-aria",
-          startPosition: [-2.6, 0, 2.8],
+          characterId: "char-nemo",
+          startPosition: [-2.4, 0, 2.4],
           endPosition: [-0.9, 0, 0.8],
-          rotationY: 0.65,
+          rotationY: 0.55,
           action: "walk",
           expression: "determined",
-          headLookAt: [0, 2.2, -1.5],
+          headLookAt: [0.9, 1.6, 0.5],
           speaking: true,
           dialogueLine:
-            "After three hundred cycles, the Sunlit Observatory finally stands before us.",
+            "Leo, look ahead! After three hundred cycles, the Sunlit Observatory finally stands before us.",
+          voiceId: "nemo",
+          dialogueLanguage: "en",
+          dialogueSpeed: 1.0,
+          dialogueInstruct: "female, young adult, moderate pitch, american accent",
         },
         {
-          characterId: "char-kaelen",
-          startPosition: [1.8, 0, 1.2],
-          endPosition: [1.3, 0, 0.5],
+          characterId: "char-leo",
+          startPosition: [1.6, 0, 1.3],
+          endPosition: [1.1, 0, 0.6],
           rotationY: -0.5,
           action: "idle",
           expression: "focused",
           headLookAt: [-0.9, 1.5, 0.8],
           speaking: false,
           dialogueLine: "",
+          voiceId: "leo",
+          dialogueLanguage: "en",
+          dialogueSpeed: 1.0,
+          dialogueInstruct: "male, young adult, moderate pitch, american accent",
         },
         {
           characterId: "char-lumen",
@@ -131,8 +179,12 @@ export const DEFAULT_STUDIO_PROJECT: StudioProject = {
         },
       ],
       narrationText:
-        "After three hundred cycles, the Sunlit Observatory finally stands before us.",
-      dialogueSpeaker: "Aria Vance",
+        "Leo, look ahead! After three hundred cycles, the Sunlit Observatory finally stands before us.",
+      dialogueSpeaker: "Nemo",
+      dialogueLanguage: "en",
+      dialogueVoiceId: "nemo",
+      dialogueInstruct: "female, young adult, moderate pitch, american accent",
+      dialogueSpeed: 1.0,
       soundEffects: ["Wind Ambience", "Stone Footsteps", "Clockwork Chime"],
       transitionToNext: "crossfade",
       transitionDurationFrames: 12,
@@ -156,32 +208,41 @@ export const DEFAULT_STUDIO_PROJECT: StudioProject = {
       weatherEffect: "fireflies",
       characters: [
         {
-          characterId: "char-aria",
+          characterId: "char-nemo",
           startPosition: [-1.2, 0, 0.5],
-          endPosition: [-0.4, 0, 0.2],
+          endPosition: [-0.5, 0, 0.2],
           rotationY: 0.45,
-          action: "talk",
+          action: "idle",
           expression: "surprised",
-          headLookAt: [1.1, 1.6, 0.2],
+          headLookAt: [1.0, 1.5, 0.2],
           speaking: false,
           dialogueLine: "",
+          voiceId: "nemo",
         },
         {
-          characterId: "char-kaelen",
+          characterId: "char-leo",
           startPosition: [1.1, 0, 0.2],
-          endPosition: [0.9, 0, 0.2],
+          endPosition: [0.85, 0, 0.2],
           rotationY: -0.6,
           action: "gesture",
           expression: "focused",
-          headLookAt: [-0.4, 1.4, 0.2],
+          headLookAt: [-0.5, 1.4, 0.2],
           speaking: true,
           dialogueLine:
             "The crystalline roots carry harmonic energy directly into the central astrolabe.",
+          voiceId: "leo",
+          dialogueLanguage: "en",
+          dialogueSpeed: 1.0,
+          dialogueInstruct: "male, young adult, moderate pitch, american accent",
         },
       ],
       narrationText:
         "The crystalline roots carry harmonic energy directly into the central astrolabe.",
-      dialogueSpeaker: "Kaelen-IX",
+      dialogueSpeaker: "Leo",
+      dialogueLanguage: "en",
+      dialogueVoiceId: "leo",
+      dialogueInstruct: "male, young adult, moderate pitch, american accent",
+      dialogueSpeed: 1.0,
       soundEffects: ["Forest Resonance", "Servo Gesture", "Crystal Hum"],
       transitionToNext: "dip-to-black",
       transitionDurationFrames: 12,
@@ -205,7 +266,7 @@ export const DEFAULT_STUDIO_PROJECT: StudioProject = {
       weatherEffect: "dust-motes",
       characters: [
         {
-          characterId: "char-aria",
+          characterId: "char-nemo",
           startPosition: [-0.2, 0, 0.3],
           endPosition: [-0.2, 0, 0.3],
           rotationY: 0.15,
@@ -215,6 +276,10 @@ export const DEFAULT_STUDIO_PROJECT: StudioProject = {
           speaking: true,
           dialogueLine:
             "Lock the azimuth rings now! The solar meridian is aligning with the zenith.",
+          voiceId: "nemo",
+          dialogueLanguage: "en",
+          dialogueSpeed: 1.0,
+          dialogueInstruct: "female, young adult, moderate pitch, american accent",
         },
         {
           characterId: "char-kaelen",
@@ -226,11 +291,16 @@ export const DEFAULT_STUDIO_PROJECT: StudioProject = {
           headLookAt: [-0.2, 1.5, 0.3],
           speaking: false,
           dialogueLine: "",
+          voiceId: "kaelen",
         },
       ],
       narrationText:
         "Lock the azimuth rings now! The solar meridian is aligning with the zenith.",
-      dialogueSpeaker: "Aria Vance",
+      dialogueSpeaker: "Nemo",
+      dialogueLanguage: "en",
+      dialogueVoiceId: "nemo",
+      dialogueInstruct: "female, young adult, moderate pitch, american accent",
+      dialogueSpeed: 1.0,
       soundEffects: ["Brass Gear Lock", "Solar Pulse", "Desert Gale"],
       transitionToNext: "crossfade",
       transitionDurationFrames: 12,
@@ -254,27 +324,32 @@ export const DEFAULT_STUDIO_PROJECT: StudioProject = {
       weatherEffect: "starfield",
       characters: [
         {
-          characterId: "char-aria",
+          characterId: "char-nemo",
           startPosition: [-1.1, 0, 0.6],
           endPosition: [-0.8, 0, 0.4],
           rotationY: 0.25,
           action: "gesture",
           expression: "happy",
           headLookAt: [0, 2.8, -1.0],
-          speaking: true,
-          dialogueLine:
-            "The starlight bridge is open. Our voyage across the upper realms begins tonight!",
+          speaking: false,
+          dialogueLine: "",
+          voiceId: "nemo",
         },
         {
-          characterId: "char-kaelen",
+          characterId: "char-leo",
           startPosition: [1.1, 0, 0.6],
           endPosition: [0.9, 0, 0.4],
           rotationY: -0.25,
           action: "gesture",
           expression: "happy",
           headLookAt: [0, 2.8, -1.0],
-          speaking: false,
-          dialogueLine: "",
+          speaking: true,
+          dialogueLine:
+            "The starlight bridge is open. Our voyage across the upper realms begins tonight!",
+          voiceId: "leo",
+          dialogueLanguage: "en",
+          dialogueSpeed: 1.0,
+          dialogueInstruct: "male, young adult, moderate pitch, american accent",
         },
         {
           characterId: "char-lumen",
@@ -290,7 +365,11 @@ export const DEFAULT_STUDIO_PROJECT: StudioProject = {
       ],
       narrationText:
         "The starlight bridge is open. Our voyage across the upper realms begins tonight!",
-      dialogueSpeaker: "Aria Vance",
+      dialogueSpeaker: "Leo",
+      dialogueLanguage: "en",
+      dialogueVoiceId: "leo",
+      dialogueInstruct: "male, young adult, moderate pitch, american accent",
+      dialogueSpeed: 1.0,
       soundEffects: ["Celestial Chord", "Portal Ignition", "Harmonic Echo"],
       transitionToNext: "dip-to-black",
       transitionDurationFrames: 15,
@@ -303,8 +382,11 @@ export const DEFAULT_STUDIO_PROJECT: StudioProject = {
       type: "voiceover",
       startFrame: 0,
       durationFrames: 480,
-      volume: 0.9,
+      volume: 0.95,
       muted: false,
+      solo: false,
+      fadeInFrames: 5,
+      fadeOutFrames: 8,
     },
     {
       id: "track-bgm",
@@ -312,8 +394,11 @@ export const DEFAULT_STUDIO_PROJECT: StudioProject = {
       type: "bgm",
       startFrame: 0,
       durationFrames: 480,
-      volume: 0.55,
+      volume: 0.45,
       muted: false,
+      solo: false,
+      fadeInFrames: 15,
+      fadeOutFrames: 25,
     },
     {
       id: "track-sfx",
@@ -321,8 +406,104 @@ export const DEFAULT_STUDIO_PROJECT: StudioProject = {
       type: "sfx",
       startFrame: 0,
       durationFrames: 480,
-      volume: 0.75,
+      volume: 0.65,
       muted: false,
+      solo: false,
+      fadeInFrames: 5,
+      fadeOutFrames: 10,
+    },
+  ],
+};
+
+/**
+ * 10-second vertical (9:16, 1080x1920 @ 30 FPS = 300 frames) demonstration project
+ * featuring Nemo & Leo across 3 environments, 3 camera movements, and 2 transitions.
+ */
+export const VERTICAL_SHOWCASE_PROJECT: StudioProject = {
+  ...DEFAULT_STUDIO_PROJECT,
+  id: "nemo-leo-vertical-showcase",
+  name: "Nemo & Leo: Celestial Convergence (10s Vertical)",
+  brief: {
+    ...DEFAULT_STUDIO_PROJECT.brief,
+    title: "Nemo & Leo: Celestial Convergence",
+    targetDurationSeconds: 10,
+    aspectRatio: "9:16",
+    fps: 30,
+    visualStyle: "pixar",
+    narrationScript:
+      "Nemo calibrates the observatory lens as golden dust motes swirl. In the bioluminescent grove, Leo traces the harmonic pulse through the roots. Above the floating sanctuary, they ignite the starlight portal together.",
+  },
+  scenes: [
+    {
+      ...DEFAULT_STUDIO_PROJECT.scenes[0],
+      id: "v-scene-1",
+      index: 0,
+      title: "Act I: The Observatory Lens",
+      durationInSeconds: 3.5,
+      environment: "observatory-citadel",
+      cameraMovement: "establishing-wide",
+      transitionToNext: "crossfade",
+      transitionDurationFrames: 10,
+    },
+    {
+      ...DEFAULT_STUDIO_PROJECT.scenes[1],
+      id: "v-scene-2",
+      index: 1,
+      title: "Act II: Harmonic Roots",
+      durationInSeconds: 3.5,
+      environment: "bioluminescent-forest",
+      cameraMovement: "tracking",
+      transitionToNext: "dip-to-black",
+      transitionDurationFrames: 10,
+    },
+    {
+      ...DEFAULT_STUDIO_PROJECT.scenes[3],
+      id: "v-scene-3",
+      index: 2,
+      title: "Act III: Starlight Portal",
+      durationInSeconds: 3.0,
+      environment: "floating-sanctuary",
+      cameraMovement: "orbit",
+      transitionToNext: "dip-to-black",
+      transitionDurationFrames: 12,
+    },
+  ],
+  audioTracks: [
+    {
+      id: "track-vo",
+      label: "Synchronized Dialogue & Lip-Sync Voiceover",
+      type: "voiceover",
+      startFrame: 0,
+      durationFrames: 300,
+      volume: 0.95,
+      muted: false,
+      solo: false,
+      fadeInFrames: 4,
+      fadeOutFrames: 6,
+    },
+    {
+      id: "track-bgm",
+      label: "Orchestral Wonder Procedural Score",
+      type: "bgm",
+      startFrame: 0,
+      durationFrames: 300,
+      volume: 0.45,
+      muted: false,
+      solo: false,
+      fadeInFrames: 12,
+      fadeOutFrames: 20,
+    },
+    {
+      id: "track-sfx",
+      label: "Environmental & Foley SFX Bus",
+      type: "sfx",
+      startFrame: 0,
+      durationFrames: 300,
+      volume: 0.65,
+      muted: false,
+      solo: false,
+      fadeInFrames: 4,
+      fadeOutFrames: 8,
     },
   ],
 };
@@ -338,8 +519,8 @@ export function buildDeterministicStoryboardFromBrief(
 
   const sceneCount = Math.max(3, Math.min(6, sentences.length || 4));
   const perSceneSec = Math.max(
-    3,
-    Math.round(brief.targetDurationSeconds / sceneCount),
+    2.5,
+     Number((brief.targetDurationSeconds / sceneCount).toFixed(1)),
   );
 
   const environments: StoryboardScene["environment"][] = [
@@ -372,8 +553,9 @@ export function buildDeterministicStoryboardFromBrief(
     "iris-wipe",
   ];
 
-  const leadChar = existingCharacters[0]?.id ?? "char-aria";
-  const secondChar = existingCharacters[1]?.id ?? "char-kaelen";
+  const leadChar = existingCharacters[0] ?? DEFAULT_STUDIO_PROJECT.characters[0];
+  const secondChar =
+    existingCharacters[1] ?? DEFAULT_STUDIO_PROJECT.characters[1];
 
   const generated: StoryboardScene[] = [];
   for (let i = 0; i < sceneCount; i++) {
@@ -387,6 +569,14 @@ export function buildDeterministicStoryboardFromBrief(
     const line =
       sentences[i] ??
       `Scene ${i + 1}: ${brief.title} unfolds in ${env.replace("-", " ")}.`;
+
+    const activeSpeaker = i % 2 === 0 ? leadChar : secondChar;
+    const voiceId = activeSpeaker.voiceProfile?.voiceId ?? (i % 2 === 0 ? "nemo" : "leo");
+    const instruct =
+      activeSpeaker.voiceProfile?.instruct ??
+      (i % 2 === 0
+        ? "female, young adult, moderate pitch, american accent"
+        : "male, young adult, moderate pitch, american accent");
 
     generated.push({
       id: `scene-gen-${i + 1}`,
@@ -420,7 +610,7 @@ export function buildDeterministicStoryboardFromBrief(
             : "dust-motes",
       characters: [
         {
-          characterId: leadChar,
+          characterId: leadChar.id,
           startPosition: [-1.4 + i * 0.2, 0, 1.2],
           endPosition: [-0.5, 0, 0.3],
           rotationY: 0.35,
@@ -428,10 +618,16 @@ export function buildDeterministicStoryboardFromBrief(
           expression: i === sceneCount - 1 ? "happy" : "determined",
           headLookAt: [0.8, 1.4, 0.3],
           speaking: i % 2 === 0,
-          dialogueLine: line,
+          dialogueLine: i % 2 === 0 ? line : "",
+          voiceId: leadChar.voiceProfile?.voiceId ?? "nemo",
+          dialogueLanguage: leadChar.voiceProfile?.language ?? "en",
+          dialogueSpeed: 1.0,
+          dialogueInstruct:
+            leadChar.voiceProfile?.instruct ??
+            "female, young adult, moderate pitch, american accent",
         },
         {
-          characterId: secondChar,
+          characterId: secondChar.id,
           startPosition: [1.3, 0, 0.5],
           endPosition: [0.9, 0, 0.2],
           rotationY: -0.45,
@@ -439,14 +635,21 @@ export function buildDeterministicStoryboardFromBrief(
           expression: "focused",
           headLookAt: [-0.5, 1.4, 0.3],
           speaking: i % 2 === 1,
-          dialogueLine: line,
+          dialogueLine: i % 2 === 1 ? line : "",
+          voiceId: secondChar.voiceProfile?.voiceId ?? "leo",
+          dialogueLanguage: secondChar.voiceProfile?.language ?? "en",
+          dialogueSpeed: 1.0,
+          dialogueInstruct:
+            secondChar.voiceProfile?.instruct ??
+            "male, young adult, moderate pitch, american accent",
         },
       ],
       narrationText: line,
-      dialogueSpeaker:
-        i % 2 === 0
-          ? (existingCharacters[0]?.name ?? "Aria Vance")
-          : (existingCharacters[1]?.name ?? "Kaelen-IX"),
+      dialogueSpeaker: activeSpeaker.name,
+      dialogueLanguage: activeSpeaker.voiceProfile?.language ?? "en",
+      dialogueVoiceId: voiceId,
+      dialogueInstruct: instruct,
+      dialogueSpeed: 1.0,
       soundEffects: ["Atmosphere Bed", "Footsteps", "Cinematic Accent"],
       transitionToNext: trans,
       transitionDurationFrames: 12,

@@ -1,74 +1,80 @@
 import express from "express";
-import fs from "node:fs";
-import path from "node:path";
-import os from "node:os";
-import { execFile } from "node:child_process";
-import { promisify } from "node:util";
-import { GoogleGenAI, Type } from "@google/genai";
 import { createServer as createViteServer } from "vite";
+import { GoogleGenAI, Type } from "@google/genai";
+import path from "node:path";
 import {
-  DEFAULT_STUDIO_PROJECT,
-  buildDeterministicStoryboardFromBrief,
-} from "./src/utils/default-project";
+  checkVoiceStudioStatus,
+  processUploadedDialogueAudio,
+  saveCustomVoiceProfile,
+  synthesizeSceneSpeechWithOmniVoice,
+} from "./src/server/voicestudio-adapter";
 import {
-  CameraMovementType,
-  CharacterAction,
-  CreativeBrief,
-  EnvironmentType,
-  LightingPreset,
-  StoryboardScene,
-  TransitionType,
-  WeatherEffect,
-} from "./src/utils/types";
-
-const execFileAsync = promisify(execFile);
+  appendRenderChunk,
+  cancelRenderJob,
+  finalizeRenderJob,
+  getRenderJobStatus,
+  startRenderJob,
+} from "./src/server/render-pipeline";
+import { sanitizeOmniVoiceInstruct } from "./src/utils/animation-math";
 
 async function startServer() {
   const app = express();
-  const PORT = 3000;
+  const PORT = Number(process.env.PORT) || 3000;
 
-  app.use(express.json({ limit: "80mb" }));
-  app.use(express.static(path.resolve(process.cwd(), "public")));
+  app.use(express.json({ limit: "250mb" }));
+  app.use(
+    "/generated-audio",
+    express.static(path.resolve("./public/generated-audio")),
+  );
+  app.use("/renders", express.static(path.resolve("./public/renders")));
 
+  // ---------------------------------------------------------------------------
+  // 1. AI Storyboard Generation (Gemini 3.8 Flash + deterministic fallback)
+  // ---------------------------------------------------------------------------
   app.post("/api/storyboard/generate", async (req, res) => {
     try {
-      const { brief, characters } = req.body as {
-        brief: CreativeBrief;
-        characters?: typeof DEFAULT_STUDIO_PROJECT.characters;
-      };
-
-      const charList =
-        Array.isArray(characters) && characters.length > 0
-          ? characters
-          : DEFAULT_STUDIO_PROJECT.characters;
-
+      const { brief, characters } = req.body;
       const apiKey = process.env.GEMINI_API_KEY;
-      if (apiKey && apiKey.trim().length > 0) {
-        try {
-          const ai = new GoogleGenAI({ apiKey });
-          const prompt = `You are a Senior 3D Animation Director creating a scene-by-scene 3D storyboard for a Remotion + Three.js production.
-Title: ${brief.title}
-Topic: ${brief.topic}
-Story Concept: ${brief.storyConcept}
-Target Duration: ${brief.targetDurationSeconds} seconds
-Visual Style: ${brief.visualStyle}
-Characters: ${brief.characterDescriptions || charList.map((c) => `${c.name} (${c.id})`).join(", ")}
-Narration: ${brief.narrationScript}
 
-Generate 4 cinematic 3D scenes whose durations sum to approximately ${brief.targetDurationSeconds} seconds.
-Available environments: observatory-citadel, bioluminescent-forest, cyber-harbor, desert-monolith, floating-sanctuary, minimal-studio.
-Available camera movements: establishing-wide, dolly-in, dolly-out, orbit, tracking, crane-up, close-up, static.
-Available lighting presets: golden-hour, moonlit-cobalt, studio-three-point, sunset-dramatic, emerald-mist.
-Available weather effects: dust-motes, fireflies, rain, snow, starfield, none.
-Available transitions: cut, crossfade, dip-to-black, whip-pan, iris-wipe.
-Available character actions: idle, walk, run, talk, gesture, sit.`;
+      if (!apiKey) {
+        return res.json({
+          usedAi: false,
+          reason: "No GEMINI_API_KEY configured; using deterministic generator",
+        });
+      }
 
-          const response = await ai.models.generateContent({
-            model: "gemini-3-flash-preview",
-            contents: prompt,
-            config: {
-              responseMimeType: "application/json",
-              responseSchema: {
+      const ai = new GoogleGenAI({
+        apiKey,
+        httpOptions: { headers: { "User-Agent": "aistudio-build" } },
+      });
+
+      const prompt = `You are a cinematic 3D animation director and VoiceStudio (k2-fsa/OmniVoice) dialogue supervisor. Generate a 4-scene 3D storyboard JSON for:
+Title: ${brief?.title}
+Topic: ${brief?.topic}
+Concept: ${brief?.storyConcept}
+Target Duration: ${brief?.targetDurationSeconds} seconds
+Visual Style: ${brief?.visualStyle}
+Narration Script: ${brief?.narrationScript}
+Available Character IDs: ${(characters || [])
+        .map((c: { id: string; name: string }) => `${c.id} (${c.name})`)
+        .join(", ")}
+
+Rules:
+- Choose environment from: observatory-citadel, bioluminescent-forest, cyber-harbor, desert-monolith, floating-sanctuary, minimal-studio
+- Choose cameraMovement from: establishing-wide, dolly-in, dolly-out, orbit, tracking, crane-up, close-up, static
+- Choose lightingPreset from: golden-hour, moonlit-cobalt, studio-three-point, sunset-dramatic, emerald-mist
+- Choose transitionToNext from: cut, crossfade, dip-to-black, whip-pan, iris-wipe
+- Assign expressive dialogueSpeaker ("Nemo", "Leo", "Aria Vance", or "Kaelen-IX") and dialogueVoiceId ("nemo", "leo", "aria", or "kaelen") for each scene.`;
+
+      const response = await ai.models.generateContent({
+        model: "gemini-3.8-flash",
+        contents: prompt,
+        config: {
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: Type.OBJECT,
+            properties: {
+              scenes: {
                 type: Type.ARRAY,
                 items: {
                   type: Type.OBJECT,
@@ -78,11 +84,10 @@ Available character actions: idle, walk, run, talk, gesture, sit.`;
                     environment: { type: Type.STRING },
                     cameraMovement: { type: Type.STRING },
                     lightingPreset: { type: Type.STRING },
-                    weatherEffect: { type: Type.STRING },
                     narrationText: { type: Type.STRING },
-                    soundEffect: { type: Type.STRING },
+                    dialogueSpeaker: { type: Type.STRING },
+                    dialogueVoiceId: { type: Type.STRING },
                     transitionToNext: { type: Type.STRING },
-                    primaryAction: { type: Type.STRING },
                   },
                   required: [
                     "title",
@@ -91,201 +96,286 @@ Available character actions: idle, walk, run, talk, gesture, sit.`;
                     "cameraMovement",
                     "lightingPreset",
                     "narrationText",
+                    "dialogueSpeaker",
+                    "transitionToNext",
                   ],
                 },
               },
             },
-          });
+            required: ["scenes"],
+          },
+        },
+      });
 
-          const rawText = response.text;
-          if (rawText) {
-            const parsed = JSON.parse(rawText) as Array<
-              Record<string, unknown>
-            >;
-            if (Array.isArray(parsed) && parsed.length > 0) {
-              const scenes: StoryboardScene[] = parsed.map((item, idx) => ({
-                id: `scene-ai-${idx + 1}`,
-                index: idx,
-                title: String(item.title || `Scene ${idx + 1}`),
-                durationInSeconds: Math.max(
-                  3,
-                  Math.min(12, Number(item.durationInSeconds) || 4),
-                ),
-                environment:
-                  (item.environment as EnvironmentType) ||
-                  "observatory-citadel",
-                visualStyleOverride: null,
-                cameraMovement:
-                  (item.cameraMovement as CameraMovementType) ||
-                  "establishing-wide",
-                cameraStartPos: [-4.5, 3.2, 8.5],
-                cameraEndPos: [-1.8, 2.6, 6.4],
-                cameraTarget: [0, 1.4, 0],
-                cameraFov: 44,
-                depthOfField: 0.3,
-                lightingPreset:
-                  (item.lightingPreset as LightingPreset) || "golden-hour",
-                lightIntensity: 1.35,
-                fogDensity: 0.018,
-                weatherEffect:
-                  (item.weatherEffect as WeatherEffect) || "dust-motes",
-                narrationText: String(
-                  item.narrationText ||
-                    "The deterministic 3D stage awakens in cinematic clarity.",
-                ),
-                dialogueSpeaker: charList[0]?.name || "Aria Vance",
-                soundEffects: [
-                  String(item.soundEffect || "Cinematic sub-bass pulse"),
-                ],
-                transitionToNext:
-                  (item.transitionToNext as TransitionType) || "crossfade",
-                transitionDurationFrames: 12,
-                characters: charList.slice(0, 2).map((c, cIdx) => ({
-                  characterId: c.id,
-                  startPosition: [
-                    cIdx === 0 ? -1.4 : 1.4,
-                    0,
-                    cIdx === 0 ? 1.2 : 0.6,
-                  ],
-                  endPosition: [
-                    cIdx === 0 ? -0.6 : 1.0,
-                    0,
-                    cIdx === 0 ? 0.5 : 0.3,
-                  ],
-                  rotationY: cIdx === 0 ? 0.35 : -0.45,
-                  action:
-                    ((cIdx === 0
-                      ? item.primaryAction
-                      : "talk") as CharacterAction) || "walk",
-                  expression: "determined",
-                  headLookAt: [0, 1.5, 0],
-                  speaking: cIdx === 0,
-                  dialogueLine: String(
-                    item.narrationText ||
-                      "The deterministic 3D stage awakens in cinematic clarity.",
-                  ),
-                })),
-              }));
-
-              res.json({ source: "gemini", scenes });
-              return;
-            }
-          }
-        } catch {
-          // Fall through to deterministic algorithmic synthesis if Gemini API call fails
-        }
-      }
-
-      const scenes = buildDeterministicStoryboardFromBrief(brief, charList);
-      res.json({ source: "deterministic-engine", scenes });
+      const parsed = JSON.parse(response.text || "{}");
+      return res.json({ usedAi: true, data: parsed });
     } catch (err) {
-      res.status(500).json({
-        error:
-          err instanceof Error ? err.message : "Storyboard generation failed",
+      return res.json({
+        usedAi: false,
+        reason: err instanceof Error ? err.message : "AI generation fallback",
       });
     }
   });
 
-  app.post("/api/render/encode-mp4", async (req, res) => {
-    const tmpDir = await fs.promises.mkdtemp(
-      path.join(os.tmpdir(), "aetherframe-render-"),
-    );
-
+  // ---------------------------------------------------------------------------
+  // 2. VoiceStudio & k2-fsa/OmniVoice Integration Endpoints
+  // ---------------------------------------------------------------------------
+  app.get("/api/voicestudio/status", async (_req, res) => {
     try {
-      const { fps, width, height, frames, wavBase64 } = req.body as {
-        fps: number;
-        width: number;
-        height: number;
-        frames: string[];
-        wavBase64?: string;
-      };
-
-      if (!Array.isArray(frames) || frames.length === 0) {
-        res.status(400).send("No frames provided for MP4 encoding.");
-        return;
-      }
-
-      for (let i = 0; i < frames.length; i++) {
-        const dataUrl = frames[i];
-        const base64Data = dataUrl.replace(/^data:image\/\w+;base64,/, "");
-        const framePath = path.join(
-          tmpDir,
-          `frame-${String(i).padStart(5, "0")}.jpg`,
-        );
-        await fs.promises.writeFile(
-          framePath,
-          Buffer.from(base64Data, "base64"),
-        );
-      }
-
-      const audioPath = path.join(tmpDir, "soundtrack.wav");
-      const hasAudio = Boolean(wavBase64 && wavBase64.length > 64);
-      if (hasAudio && wavBase64) {
-        await fs.promises.writeFile(
-          audioPath,
-          Buffer.from(wavBase64, "base64"),
-        );
-      }
-
-      const outMp4Path = path.join(tmpDir, "output.mp4");
-      const safeWidth = Math.max(320, Math.round((width || 1280) / 2) * 2);
-      const safeHeight = Math.max(320, Math.round((height || 720) / 2) * 2);
-      const safeFps = fps === 60 ? 60 : 30;
-
-      const ffmpegArgs: string[] = [
-        "-y",
-        "-framerate",
-        String(safeFps),
-        "-i",
-        path.join(tmpDir, "frame-%05d.jpg"),
-      ];
-
-      if (hasAudio) {
-        ffmpegArgs.push("-i", audioPath);
-      }
-
-      ffmpegArgs.push(
-        "-vf",
-        `scale=${safeWidth}:${safeHeight}:flags=lanczos`,
-        "-c:v",
-        "libx264",
-        "-preset",
-        "ultrafast",
-        "-crf",
-        "21",
-        "-pix_fmt",
-        "yuv420p",
-      );
-
-      if (hasAudio) {
-        ffmpegArgs.push("-c:a", "aac", "-b:a", "128k", "-shortest");
-      }
-
-      ffmpegArgs.push("-movflags", "+faststart", outMp4Path);
-
-      await execFileAsync("ffmpeg", ffmpegArgs);
-
-      const mp4Buffer = await fs.promises.readFile(outMp4Path);
-      res.setHeader("Content-Type", "video/mp4");
-      res.setHeader("Content-Length", String(mp4Buffer.length));
-      res.send(mp4Buffer);
+      const status = await checkVoiceStudioStatus();
+      return res.json(status);
     } catch (err) {
-      res.status(500).send(
-        err instanceof Error ? err.message : "FFmpeg MP4 encoding failed",
-      );
-    } finally {
-      fs.promises.rm(tmpDir, { recursive: true, force: true }).catch(() => {});
+      return res.status(500).json({
+        connected: false,
+        errorMessage:
+          err instanceof Error ? err.message : "VoiceStudio status error",
+      });
+    }
+  });
+
+  app.post("/api/voicestudio/speech", async (req, res) => {
+    try {
+      const { sceneId, text, voiceId, language, speed, instruct } = req.body;
+      const result = await synthesizeSceneSpeechWithOmniVoice({
+        sceneId: sceneId || "scene",
+        text: text || "",
+        voiceId: voiceId || "nemo",
+        language: language || "en",
+        speed: Number(speed) || 1.0,
+        instruct: instruct || "",
+      });
+      return res.json(result);
+    } catch (err) {
+      return res.status(503).json({
+        error:
+          err instanceof Error
+            ? err.message
+            : "OmniVoice speech generation failed",
+      });
+    }
+  });
+
+  app.post("/api/voicestudio/upload-dialogue", async (req, res) => {
+    try {
+      const { sceneId, text, voiceId, language, audioBase64, fileName } =
+        req.body;
+      if (!audioBase64) {
+        return res
+          .status(400)
+          .json({ error: "Missing audioBase64 payload for uploaded dialogue." });
+      }
+      const result = await processUploadedDialogueAudio({
+        sceneId: sceneId || "scene",
+        text: text || "",
+        voiceId: voiceId || "uploaded",
+        language: language || "en",
+        audioBase64,
+        fileName: fileName || "dialogue.wav",
+      });
+      return res.json(result);
+    } catch (err) {
+      return res.status(400).json({
+        error:
+          err instanceof Error
+            ? err.message
+            : "Failed to process uploaded dialogue audio.",
+      });
+    }
+  });
+
+  app.post("/api/voicestudio/profiles", async (req, res) => {
+    try {
+      const {
+        voiceId,
+        name,
+        gender,
+        age,
+        pitch,
+        style,
+        accent,
+        language,
+        speed,
+        description,
+        consentConfirmed,
+      } = req.body;
+
+      if (!name || !voiceId) {
+        return res
+          .status(400)
+          .json({ error: "Profile name and voiceId are required." });
+      }
+      if (consentConfirmed !== true) {
+        return res.status(400).json({
+          error:
+            "Speaker authorization & consent confirmation is required to register a custom voice profile.",
+        });
+      }
+
+      const rawTags = [
+        gender,
+        age,
+        pitch,
+        style !== "none" ? style : "",
+        accent !== "none" ? accent : "",
+      ]
+        .filter(Boolean)
+        .join(", ");
+
+      const instruct = sanitizeOmniVoiceInstruct(rawTags);
+      const updatedProfiles = saveCustomVoiceProfile({
+        voiceId: String(voiceId)
+          .toLowerCase()
+          .replace(/[^a-z0-9-_]/g, "-"),
+        name: String(name).trim(),
+        engine: "omnivoice",
+        gender: gender || "female",
+        age: age || "young adult",
+        pitch: pitch || "moderate pitch",
+        style: style || "none",
+        accent: accent || "american accent",
+        language: language || "auto",
+        speed: Number(speed) || 1.0,
+        instruct,
+        description: description || "Custom OmniVoice character profile",
+        isCustomProfile: true,
+        consentConfirmed: true,
+      });
+
+      return res.json({ profiles: updatedProfiles });
+    } catch (err) {
+      return res.status(500).json({
+        error:
+          err instanceof Error ? err.message : "Failed to save voice profile.",
+      });
+    }
+  });
+
+  // ---------------------------------------------------------------------------
+  // 3. Stateful Chunked Production MP4 Render Pipeline + Verification
+  // ---------------------------------------------------------------------------
+  app.post("/api/render/jobs/start", (req, res) => {
+    try {
+      const { projectName, fps, width, height, totalFrames, frameExtension } =
+        req.body;
+      const status = startRenderJob({
+        projectName: projectName || "AetherFrame-Render",
+        fps: Number(fps) || 30,
+        width: Number(width) || 1920,
+        height: Number(height) || 1080,
+        totalFrames: Number(totalFrames) || 300,
+        frameExtension: frameExtension === "png" ? "png" : "jpg",
+      });
+      return res.json(status);
+    } catch (err) {
+      return res.status(500).json({
+        error: err instanceof Error ? err.message : "Failed to start render job",
+      });
+    }
+  });
+
+  app.post("/api/render/jobs/:jobId/chunk", (req, res) => {
+    try {
+      const { jobId } = req.params;
+      const { startFrameIndex, frames } = req.body;
+      if (!Array.isArray(frames) || frames.length === 0) {
+        return res.status(400).json({ error: "No frames in chunk" });
+      }
+      const status = appendRenderChunk({
+        jobId,
+        startFrameIndex: Number(startFrameIndex) || 0,
+        frames,
+      });
+      return res.json(status);
+    } catch (err) {
+      return res.status(400).json({
+        error:
+          err instanceof Error ? err.message : "Failed to append frame chunk",
+      });
+    }
+  });
+
+  app.post("/api/render/jobs/:jobId/finalize", async (req, res) => {
+    try {
+      const { jobId } = req.params;
+      const { audioWavBase64 } = req.body;
+      if (!audioWavBase64) {
+        return res
+          .status(400)
+          .json({ error: "Missing audioWavBase64 for MP4 finalization" });
+      }
+      const status = await finalizeRenderJob({
+        jobId,
+        audioWavBase64,
+      });
+      return res.json(status);
+    } catch (err) {
+      return res.status(500).json({
+        error:
+          err instanceof Error ? err.message : "Failed to finalize MP4 render",
+      });
+    }
+  });
+
+  app.post("/api/render/jobs/:jobId/cancel", (req, res) => {
+    const status = cancelRenderJob(req.params.jobId);
+    if (!status) {
+      return res.status(404).json({ error: "Job not found" });
+    }
+    return res.json(status);
+  });
+
+  app.get("/api/render/jobs/:jobId/status", (req, res) => {
+    const status = getRenderJobStatus(req.params.jobId);
+    if (!status) {
+      return res.status(404).json({ error: "Job not found" });
+    }
+    return res.json(status);
+  });
+
+  // Legacy single-request MP4 endpoint preserved and upgraded to use the verified pipeline
+  app.post("/api/render/mp4", async (req, res) => {
+    try {
+      const { frames, audioWavBase64, fps = 30, width = 1920, height = 1080 } =
+        req.body;
+      if (!Array.isArray(frames) || frames.length === 0 || !audioWavBase64) {
+        return res
+          .status(400)
+          .json({ error: "Missing frames or audioWavBase64" });
+      }
+
+      const job = startRenderJob({
+        projectName: "Direct-MP4-Render",
+        fps: Number(fps),
+        width: Number(width),
+        height: Number(height),
+        totalFrames: frames.length,
+      });
+      appendRenderChunk({
+        jobId: job.jobId,
+        startFrameIndex: 0,
+        frames,
+      });
+      const finalized = await finalizeRenderJob({
+        jobId: job.jobId,
+        audioWavBase64,
+      });
+      return res.json(finalized);
+    } catch (err) {
+      return res.status(500).json({
+        error:
+          err instanceof Error ? err.message : "FFmpeg MP4 encoding failed",
+      });
     }
   });
 
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
-      server: { middlewareMode: true, hmr: false },
+      server: { middlewareMode: true },
       appType: "spa",
     });
     app.use(vite.middlewares);
   } else {
-    const distPath = path.resolve(process.cwd(), "dist");
+    const distPath = path.join(process.cwd(), "dist");
     app.use(express.static(distPath));
     app.get("*all", (_req, res) => {
       res.sendFile(path.join(distPath, "index.html"));
@@ -293,9 +383,7 @@ Available character actions: idle, walk, run, talk, gesture, sit.`;
   }
 
   app.listen(PORT, "0.0.0.0", () => {
-    console.log(
-      `AetherFrame 3D Studio Server running on http://0.0.0.0:${PORT}`,
-    );
+    console.log(`AetherFrame 3D Studio Server running on http://localhost:${PORT}`);
   });
 }
 

@@ -17,6 +17,7 @@
     "remotion.config.ts",
     "vite.config.ts",
     "server.ts",
+    "src/server/**",
     "src/**/*.test.ts",
     "dist",
     "node_modules"
