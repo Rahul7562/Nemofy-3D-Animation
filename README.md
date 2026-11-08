@@ -1,106 +1,86 @@
-# AetherFrame 3D — Cinematic 3D Animation & Deterministic Video Production Studio
+# AetherFrame 3D — Authoritative Blender (`bpy`) + VoiceStudio (`k2-fsa/OmniVoice`) Animation Production Studio
 
-**AetherFrame 3D** is an AI-assisted programmatic 3D animation and deterministic video-production studio built with **React 19**, **TypeScript**, **Three.js**, **React Three Fiber**, **Drei**, **Remotion 4**, **FFmpeg**, and **VoiceStudio (`k2-fsa/OmniVoice`)**.
+**AetherFrame 3D** is a programmatic 3D animation and cinematic video-production system powered by:
 
----
-
-## 1. Architecture Overview
-
-AetherFrame 3D unifies interactive 3D viewport preview and production MP4 video rendering under a single deterministic scene and animation architecture:
-
-1. **Unified 3D Scene Graph (`CinematicStoryComposition.tsx` & `SharedScene3DBuilder.ts`)**
-   - Uses identical mathematical functions (`computeSceneTimeline`, `computeCameraTransformAtFrame`, `computeCharacterPoseAtFrame`, `computeLipSyncAtFrame`, `computeTransitionState`) and shared 3D geometry/material builders across both the interactive `@remotion/three` `ThreeCanvas` preview and the deterministic offscreen WebGL frame exporter.
-   - Supports **6 3D Environments**:
-     - `observatory-citadel` (Rotating brass armillary rings, crystal core, perimeter mountain peaks)
-     - `bioluminescent-forest` (Tiered glowing flora, stepping stones, pulsing crystal clusters)
-     - `cyber-harbor` (Reflective water plane, hover-barge, neon signage pylons)
-     - `desert-monolith` (Sandstone dais, obsidian obelisk, rotating solar glyph ring)
-     - `floating-sanctuary` (Suspended sky island, portal arch, celestial starfield)
-     - `minimal-studio` (Infinite cyclorama stage with studio rim ring)
-   - Supports **7 Visual Styles**: `low-poly`, `pixar`, `voxel`, `claymation`, `isometric`, `realistic`, and `minimalist`.
-   - Supports **Multi-Part Procedural 3D Characters & Custom `.GLB` / `.GLTF` Rigs**:
-     - Includes built-in character cast: **Nemo** (Lead Celestial Scholar), **Leo** (Academy Field Student), **Aria Vance** (Astrolabe Explorer), **Kaelen-IX** (Citadel Brass Automaton), and **Lumen Wing** (Recon Drone).
-     - Uploads and validates `.glb` / `.gltf` files (`inspectAndValidateGLTF`), reporting mesh count, vertex count, bone count, embedded animation clips, and facial morph targets.
-
-2. **VoiceStudio & `k2-fsa/OmniVoice` Multilingual Speech Integration (`src/server/voicestudio-adapter.ts`)**
-   - Integrates with [debpalash/VoiceStudio](https://github.com/debpalash/VoiceStudio) (`http://localhost:3900`) using `model: "omnivoice"`.
-   - Inspects host hardware (CPU cores, RAM, NVIDIA GPU/VRAM, disk space) and configures persistent model storage (`OMNIVOICE_DATA_DIR`, `OMNIVOICE_CACHE_DIR`, `HF_HOME`) so OmniVoice weights download only once.
-   - Provides built-in **Nemo** (`female, young adult, moderate pitch, american accent`) and **Leo** (`male, young adult, moderate pitch, american accent`) voice profiles, custom voice profile creation with mandatory speaker consent verification, and 600+ language support.
-   - Caches synthesized scene WAVs on disk by `computeDialogueAudioCacheKey({ text, voiceId, language, speed, instruct })` so camera and lighting edits never trigger redundant speech synthesis.
-   - Extracts real 30Hz RMS amplitude + zero-crossing jaw/viseme lip-sync envelopes (`extractLipSyncFromWavBytes`) from generated or uploaded WAV/MP3 files to drive character mouth, jaw, brow, head, and gesture animations.
-
-3. **Production Video Rendering & `ffprobe` Verification (`src/server/render-pipeline.ts`)**
-   - Renders the **entire approved storyboard** without duration truncation (`300 frames` for 10s @ 30 FPS, `480 frames` for 16s @ 30 FPS, etc.).
-   - Renders at native **1080×1920** (9:16 vertical), **1920×1080** (16:9 landscape), or **1080×1080** (1:1 square) at **30 FPS** or **60 FPS**.
-   - Streams rendered frames in chunks (`/api/render/jobs/:jobId/chunk`) directly to disk, mixes dialogue WAVs with background score and SFX tracks, encodes H.264 (`libx264`, `yuv420p`) + AAC (`192k`) via FFmpeg, generates a 4-frame visual contact sheet, and verifies container, codecs, resolution, frame count, and audio stream via `ffprobe`.
+1. **Blender (`bpy`) Authoritative 3D Engine & Render Worker** (`src/blender/*` & `scripts/blender/*.py`):
+   - Builds complete `.blend` scenes with 31-bone articulated humanoid armatures (`Leo_Rig` & `Nemo_Rig`) or imports external `.blend`/`.glb` character rigs (Blender Studio Rain v3, Snow v4, Security Bot v1, Mixamo).
+   - Authors skeletal animation with `AUTO_CLAMPED` Bezier F-curves, overlapping spine/chest/head follow-through, weight shift, phoneme-to-viseme jaw/lip keyframing (`SIL`, `MBP`, `FV`, `TH`, `L_NT`, `EE`, `IH`, `AA`, `OH`, `OU`), eye saccades, 5-frame natural blinks, and mutual character acting (active speaker vs. nodding/reacting listener).
+   - Configures physical multi-camera lens choreography (`28mm–70mm`, `sensor_fit = "HORIZONTAL"`, Depth of Field `focus_distance`), 3-point Area lighting + frontal eye catchlights, World sky gradient shader, and Filmic Medium High Contrast colour management.
+   - Runs automated scene inspection (`scripts/blender/inspect_scene.py`) verifying bone counts, F-curve counts, ground contact (`minFootZ ≈ 0.0`), non-intersection, and safe camera frustum NDC bounds before rendering.
+2. **VoiceStudio (`k2-fsa/OmniVoice`) Speech Synthesis & Lip-Sync** (`src/server/voicestudio-adapter.ts` & `src/server/local-voicestudio-daemon.ts`):
+   - Synthesizes expressive character dialogue via the OpenAI-compatible `/v1/audio/speech` contract (`model: "omnivoice"`), normalizes audio to 24 kHz 16-bit PCM WAV, and extracts 30 Hz RMS amplitude envelopes + word boundary timings.
+3. **FFmpeg + `ffprobe` Post-Production Pipeline** (`src/blender/render-job-manager.ts`):
+   - Mixes character dialogue, harmonic ambient score pads, and transition chimes, burns in shot-timed subtitles, encodes H.264 (`yuv420p`) + AAC `.mp4` with `+faststart`, extracts a 4-panel visual contact sheet, and validates output streams with `ffprobe`.
 
 ---
 
-## 2. Environment Variables
+## 1. Local & Remote Blender Installation & Configuration
 
-Copy `.env.example` to `.env`:
+### Windows (via `winget`)
+
+```powershell
+winget install -e --id BlenderFoundation.Blender
+winget install -e --id Gyan.FFmpeg
+```
+
+### Ubuntu / Debian Linux (via `apt`)
 
 ```bash
-PORT=3000
-GEMINI_API_KEY=
+sudo apt-get update && sudo apt-get install -y --no-install-recommends \
+  blender xvfb libgl1-mesa-dri xauth ffmpeg flite espeak-ng
+```
+
+### Environment Variables (`.env`)
+
+```env
+# Path to local Blender binary (defaults to "blender" on system PATH)
+BLENDER_EXECUTABLE=blender
+
+# Optional remote Blender worker URL for distributed cloud deployments
+BLENDER_REMOTE_WORKER_URL=
+
+# VoiceStudio (k2-fsa/OmniVoice) endpoint
 VOICESTUDIO_API_URL=http://localhost:3900
-OMNIVOICE_API_KEY=
-OMNIVOICE_DATA_DIR=./data/voicestudio
-OMNIVOICE_CACHE_DIR=./data/voicestudio/cache
-OMNIVOICE_TORCH_VARIANT=cpu
 ```
 
 ---
 
-## 3. Starting VoiceStudio with `k2-fsa/OmniVoice`
+## 2. Project-Local Animation Skills (`skills/*/SKILL.md`)
 
-### Option A: Automated Hardware-Aware Script
-```bash
-chmod +x scripts/start-voicestudio.sh
-./scripts/start-voicestudio.sh
-```
-
-### Option B: Docker Compose with Persistent Model Volume
-```bash
-docker compose -f docker-compose.voicestudio.yml up -d
-curl http://localhost:3900/health
-```
-
-The `aetherframe-omnivoice-data` volume persists `/data/omnivoice` across container restarts so `k2-fsa/OmniVoice` model weights are downloaded only once.
+- `skills/animation-director/SKILL.md` — Narrative structure, staging, 180-degree rule, anticipation, follow-through, and mutual character acting.
+- `skills/character-artist/SKILL.md` — Appeal, silhouette readability, facial topology, Rigify/Armature bone hierarchies, and PBR shaders.
+- `skills/character-animation/SKILL.md` — Idle breathing, walk/run cycles, gesture arcs, phoneme-to-viseme lip-sync, eye darts, and blinks.
+- `skills/cinematography/SKILL.md` — Focal lengths (`24mm–85mm`), vertical `9:16` framing, OTS dialogue coverage, dolly/orbit camera rigs, and DOF.
+- `skills/environment-artist/SKILL.md` — Foreground/midground/background depth planes, architectural props, sky gradients, and scale validation.
+- `skills/lighting-lookdev/SKILL.md` — 3-point Key/Fill/Rim lighting, eye catchlights, atmospheric haze, and Filmic tone mapping.
+- `skills/audio-performance/SKILL.md` — VoiceStudio (`k2-fsa/OmniVoice`) synthesis, phoneme viseme lead timing, and dialogue-foregrounded mixing.
+- `skills/render-quality/SKILL.md` — `inspect_scene.py` pre-render checks, contact-sheet auditing, and `ffprobe` MP4 stream verification.
 
 ---
 
-## 4. Running AetherFrame 3D Studio
+## 3. Character & Environment Asset Catalogue
 
-```bash
-# Install dependencies
-npm install
-
-# Start full-stack Express + Vite studio server on port 3000
-npm run dev
-```
-
-### Generating Storyboards, Dialogue & Exporting MP4
-1. **Creative Brief**: Enter project title, concept, aspect ratio (`16:9`, `9:16`, or `1:1`), FPS (`30` or `60`), and visual style, then click **Generate AI 3D Storyboard & Scenes**.
-2. **Storyboard**: Customize environments, camera movements, lighting presets, transitions, and scene durations.
-3. **Voice Studio**: Inspect VoiceStudio (`k2-fsa/OmniVoice`) connection status, assign **Nemo** or **Leo** voice profiles, select dialogue language, and click **Synthesize with OmniVoice** or **Upload WAV / MP3 Dialogue** to extract real 30Hz lip-sync envelopes.
-4. **3D Stage & Timeline**: Scrub the deterministic timeline, adjust camera FOV/coordinates, reorder scenes, or adjust track gain/solo/mute.
-5. **Export MP4**: Click **Render MP4 Video** -> **Start Full Production MP4 Render** to render all storyboard frames at native 1080p resolution, inspect the `ffprobe` verification report and 4-panel contact sheet, and download the `.mp4`.
+| Asset ID | Name | Origin | License | Attribution |
+| :--- | :--- | :--- | :--- | :--- |
+| `blender-studio-rain` | Rain v3 Rig | `https://studio.blender.org/characters/rain/v3/` | `CC-BY-4.0` | Blender Studio / Cloud (CC-BY 4.0) — Rain Character Rig |
+| `blender-studio-snow` | Snow v4 Rig | `https://studio.blender.org/characters/snow/v4/` | `CC-BY-4.0` | Blender Studio (CC-BY 4.0) — Snow Character Rig |
+| `blender-studio-security-bot` | Security Bot v1 | `https://studio.blender.org/characters/security-bot/v1/` | `CC-BY-4.0` | Blender Studio (CC-BY 4.0) — Security Bot Rig |
+| `mixamo-ybot-humanoid` | Mixamo Standard Rig | `https://www.mixamo.com/` | `Royalty-Free` | Adobe Mixamo Standard Skeletal Rig & Motion Clips |
+| `polyhaven-courtyard-props` | Poly Haven Props & HDRI | `https://polyhaven.com/` | `CC0-1.0` | Poly Haven (CC0 Public Domain) |
+| `char-leo` | Leo (`Leo_Rig`, 31 bones) | `scripts/blender/import_character.py` | `CC-BY-4.0` | AetherFrame 3D Studio — Leo Character Rig |
+| `char-nemo` | Nemo (`Nemo_Rig`, 31 bones) | `scripts/blender/import_character.py` | `CC-BY-4.0` | AetherFrame 3D Studio — Nemo Digital Companion Rig |
 
 ---
 
-## 5. Testing & CLI Rendering
+## 4. Running & Rendering the Reference Film ("Nemo and Leo — A Cinematic Encounter")
 
 ```bash
-# Run deterministic unit & render verification tests
+# 1. Run unit tests (timeline math, VoiceStudio lip-sync, Blender serializer, diagnostics):
 npx tsx --test src/utils/animation-math.test.ts
 
-# Typecheck & Lint
-npm run lint
+# 2. Build & render the 10-second (1080x1920 @ 30 FPS, 300 frames) reference film via Blender:
+npx tsx scripts/render-reference-encounter.ts
 
-# Build production bundle
-npm run build
-
-# Render via Remotion CLI
-npx remotion render src/index.ts CinematicStory out/cinematic-story.mp4 --gl=angle
+# 3. Start the full-stack AetherFrame 3D studio server on http://localhost:3000:
+npm run dev
 ```

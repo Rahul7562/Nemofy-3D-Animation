@@ -1,0 +1,114 @@
+{
+  "jobId": "blender-job-1794135141967-2cee4e42",
+  "projectName": "Nemo and Leo — A Cinematic Encounter",
+  "mp4Url": "/renders/reference-encounter/nemo-and-leo-cinematic-encounter.mp4",
+  "blendUrl": "/renders/reference-encounter/encounter.blend",
+  "contactSheetUrl": "/renders/reference-encounter/contact-sheet.jpg",
+  "sceneInspection": {
+    "valid": true,
+    "blenderVersion": "3.4.1",
+    "frameStart": 1,
+    "frameEnd": 300,
+    "fps": 30,
+    "resolution": [
+      1080,
+      1920
+    ],
+    "armatureCount": 2,
+    "meshCount": 146,
+    "lightCount": 5,
+    "cameraCount": 3,
+    "missingMaterialCount": 0,
+    "charactersNonIntersecting": true,
+    "characters": [
+      {
+        "rigName": "Nemo_Rig",
+        "boneCount": 31,
+        "fcurveCount": 75,
+        "childMeshCount": 36,
+        "minFootZ": 0,
+        "maxHeadZ": 1.7246,
+        "groundContactValid": true,
+        "hasFacialRig": true
+      },
+      {
+        "rigName": "Leo_Rig",
+        "boneCount": 31,
+        "fcurveCount": 75,
+        "childMeshCount": 47,
+        "minFootZ": -0.0031,
+        "maxHeadZ": 1.7974,
+        "groundContactValid": true,
+        "hasFacialRig": true
+      }
+    ],
+    "framingChecks": [
+      {
+        "frame": 1,
+        "camera": "ShotCam_01",
+        "allSubjectsInSafeFrustum": true,
+        "subjectNdcCoords": {
+          "Nemo_Rig": [
+            0.563,
+            0.52,
+            5.606
+          ],
+          "Leo_Rig": [
+            0.437,
+            0.52,
+            5.534
+          ]
+        }
+      },
+      {
+        "frame": 150,
+        "camera": "ShotCam_02",
+        "allSubjectsInSafeFrustum": true,
+        "subjectNdcCoords": {
+          "Nemo_Rig": [
+            0.808,
+            0.524,
+            3.594
+          ],
+          "Leo_Rig": [
+            0.318,
+            0.524,
+            3.585
+          ]
+        }
+      },
+      {
+        "frame": 300,
+        "camera": "ShotCam_03",
+        "allSubjectsInSafeFrustum": true,
+        "subjectNdcCoords": {
+          "Nemo_Rig": [
+            0.606,
+            0.518,
+            4.422
+          ],
+          "Leo_Rig": [
+            0.388,
+            0.517,
+            4.193
+          ]
+        }
+      }
+    ],
+    "savedBlendPath": "/app/applet/public/renders/blender-job-1794135141967-2cee4e42/project.blend"
+  },
+  "verification": {
+    "valid": true,
+    "containerFormat": "mov,mp4,m4a,3gp,3g2,mj2",
+    "videoCodec": "h264",
+    "audioCodec": "aac",
+    "width": 1080,
+    "height": 1920,
+    "fps": 30,
+    "durationSeconds": 10,
+    "frameCount": 300,
+    "fileSizeBytes": 8464581,
+    "hasAudioStream": true,
+    "contactSheetUrl": "/renders/blender-job-1794135141967-2cee4e42/contact-sheet.jpg"
+  }
+}

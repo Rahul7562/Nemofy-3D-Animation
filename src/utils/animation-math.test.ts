@@ -21,6 +21,9 @@ import {
   inspectSystemHardware,
   processUploadedDialogueAudio,
 } from "../server/voicestudio-adapter";
+import { serializeProjectToBlenderManifest } from "../blender/project-serializer";
+import { getAssetCatalogueSummary, resolveCharacterAsset } from "../blender/asset-manager";
+import { getBlenderDiagnostics } from "../blender/blender-diagnostics";
 
 test("seededRandom is 100% deterministic for identical seeds", () => {
   const a1 = seededRandom("aetherframe-seed-101");
@@ -69,19 +72,23 @@ test("computeSceneTimeline preserves full storyboard duration without 3s truncat
   assert.equal(fortyTimeline.totalFrames, 1200);
 });
 
-test("VERTICAL_SHOWCASE_PROJECT has 300 frames (10s @ 30fps), 9:16 aspect ratio, Nemo & Leo, 3 environments, 3 camera movements", () => {
+test("VERTICAL_SHOWCASE_PROJECT ('Nemo and Leo — A Cinematic Encounter') has 300 frames (10s @ 30fps), 9:16 aspect ratio, Nemo & Leo, and 3 distinct camera setups", () => {
   const { timings, totalFrames } = computeSceneTimeline(
     VERTICAL_SHOWCASE_PROJECT.scenes,
     VERTICAL_SHOWCASE_PROJECT.brief.fps,
+  );
+  assert.equal(
+    VERTICAL_SHOWCASE_PROJECT.brief.title,
+    "Nemo and Leo — A Cinematic Encounter",
   );
   assert.equal(VERTICAL_SHOWCASE_PROJECT.brief.aspectRatio, "9:16");
   assert.equal(VERTICAL_SHOWCASE_PROJECT.brief.fps, 30);
   assert.equal(totalFrames, 300);
   assert.equal(timings.length, 3);
 
-  const envs = new Set(VERTICAL_SHOWCASE_PROJECT.scenes.map((s) => s.environment));
-  const cams = new Set(VERTICAL_SHOWCASE_PROJECT.scenes.map((s) => s.cameraMovement));
-  assert.equal(envs.size, 3);
+  const cams = new Set(
+    VERTICAL_SHOWCASE_PROJECT.scenes.map((s) => s.cameraMovement),
+  );
   assert.equal(cams.size, 3);
 
   const hasNemo = VERTICAL_SHOWCASE_PROJECT.characters.some(
@@ -238,3 +245,44 @@ test("inspectSystemHardware and processUploadedDialogueAudio validate real audio
   assert.ok(uploaded.lipSync.length >= 250);
   assert.ok(uploaded.wordTimings.length >= 8);
 });
+
+test("serializeProjectToBlenderManifest produces native 1080x1920 300-frame Blender manifest for Nemo and Leo", () => {
+  const manifest = serializeProjectToBlenderManifest({
+    project: VERTICAL_SHOWCASE_PROJECT,
+    aspectRatio: "9:16",
+    fps: 30,
+    renderPreset: "draft",
+    renderEngine: "EEVEE",
+  });
+
+  assert.equal(manifest.width, 1080);
+  assert.equal(manifest.height, 1920);
+  assert.equal(manifest.fps, 30);
+  assert.equal(manifest.totalFrames, 300);
+  assert.equal(manifest.shots.length, 3);
+  assert.equal(manifest.shots[0].startFrame, 1);
+  assert.equal(manifest.shots[2].endFrame, 300);
+});
+
+test("Blender asset catalogue and diagnostics verify Rain, Snow, Security Bot, Mixamo, Poly Haven, Nemo & Leo rigs", async () => {
+  const catalogue = getAssetCatalogueSummary();
+  assert.ok(catalogue.length >= 7);
+  const rain = catalogue.find((a) => a.id.includes("rain"));
+  assert.ok(rain);
+  assert.ok(rain.license.includes("CC-BY"));
+  assert.ok(rain.originUrl.includes("studio.blender.org/characters/rain"));
+
+  const nemo = resolveCharacterAsset("char-nemo");
+  const leo = resolveCharacterAsset("char-leo");
+  assert.equal(nemo.boneCount, 31);
+  assert.equal(leo.boneCount, 31);
+  assert.ok(nemo.hasPhonemeVisemes);
+  assert.ok(leo.hasPhonemeVisemes);
+
+  const diag = await getBlenderDiagnostics();
+  assert.equal(diag.available, true);
+  assert.ok(diag.version && diag.version.startsWith("3."));
+  assert.equal(diag.ffmpegAvailable, true);
+  assert.equal(diag.ffprobeAvailable, true);
+});
+

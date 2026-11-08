@@ -97,16 +97,16 @@ export const TopBar: React.FC<TopBarProps> = ({
           <button
             type="button"
             onClick={() =>
-              activeProjectId === "nemo-leo-vertical-showcase"
+              activeProjectId === "nemo-and-leo-cinematic-encounter"
                 ? onLoadDefaultProject()
                 : onLoadVerticalShowcase()
             }
-            title="Switch between 16s 16:9 Observatory Project and 10s 9:16 Vertical Nemo & Leo Showcase"
+            title="Switch between 16s 16:9 Observatory Project and 10s 9:16 Nemo and Leo — A Cinematic Encounter"
             className="hidden lg:flex items-center gap-1.5 px-2.5 py-1.5 rounded bg-slate-900 hover:bg-slate-800 border border-slate-700 text-cyan-300 text-xs font-mono cursor-pointer"
           >
             <Smartphone className="w-3.5 h-3.5" />
             <span>
-              {activeProjectId === "nemo-leo-vertical-showcase"
+              {activeProjectId === "nemo-and-leo-cinematic-encounter"
                 ? "16:9 Observatory (16s)"
                 : "9:16 Nemo & Leo (10s)"}
             </span>
@@ -119,7 +119,7 @@ export const TopBar: React.FC<TopBarProps> = ({
           className="flex items-center gap-2 px-4 py-2 rounded-md bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-sm cursor-pointer"
         >
           <Download className="w-3.5 h-3.5" />
-          <span>Render MP4 Video</span>
+          <span>Blender Render MP4</span>
         </button>
       </div>
     </header>

@@ -40,16 +40,16 @@ import { ExportModal } from "./ExportModal";
 type PhoneMediaMetadata = Awaited<ReturnType<typeof getMediaMetadata>>;
 
 export const StudioApp: React.FC = () => {
-  const [project, setProject] = useState<StudioProject>(DEFAULT_STUDIO_PROJECT);
+  const [project, setProject] = useState<StudioProject>(VERTICAL_SHOWCASE_PROJECT);
   const [activeStage, setActiveStage] = useState<WorkflowStage>("stage3d");
   const [activeCompositionMode, setActiveCompositionMode] = useState<
     "cinematic" | "phone-demo"
   >("cinematic");
   const [selectedSceneId, setSelectedSceneId] = useState<string>(
-    DEFAULT_STUDIO_PROJECT.scenes[0].id,
+    VERTICAL_SHOWCASE_PROJECT.scenes[0].id,
   );
   const [selectedCharacterId, setSelectedCharacterId] = useState<string>(
-    DEFAULT_STUDIO_PROJECT.characters[0].id,
+    VERTICAL_SHOWCASE_PROJECT.characters[0].id,
   );
   const [isolateSelectedScene, setIsolateSelectedScene] =
     useState<boolean>(false);

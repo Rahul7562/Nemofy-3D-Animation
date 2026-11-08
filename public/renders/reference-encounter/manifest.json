@@ -1,0 +1,67 @@
+{
+  "projectId": "nemo-leo-cinematic-encounter",
+  "projectName": "Nemo and Leo — A Cinematic Encounter",
+  "aspectRatio": "9:16",
+  "width": 1080,
+  "height": 1920,
+  "fps": 30,
+  "totalFrames": 300,
+  "totalDurationSeconds": 10,
+  "renderPreset": "final",
+  "renderEngine": "EEVEE",
+  "subtitlesEnabled": true,
+  "characters": [
+    {"id": "char-leo", "name": "Leo", "archetype": "scholar-humanoid", "primaryColor": "#2563EB", "secondaryColor": "#F59E0B"},
+    {"id": "char-nemo", "name": "Nemo", "archetype": "robot-companion", "primaryColor": "#06B6D4", "secondaryColor": "#F59E0B"}
+  ],
+  "shots": [
+    {
+      "shotId": "shot-1",
+      "shotIndex": 0,
+      "title": "Opening Establishing — The Sunlit Astrolabe",
+      "durationSeconds": 3.5,
+      "startFrame": 1,
+      "endFrame": 106,
+      "environment": "observatory-citadel",
+      "cameraMovement": "establishing-wide",
+      "cameraFov": 42,
+      "lightingPreset": "golden-hour",
+      "narrationText": "Nemo, look at the central astrolabe! The harmonic rings are aligning with the sanctuary arch.",
+      "dialogueSpeaker": "Leo",
+      "emotion": "curious",
+      "transitionToNext": "cut"
+    },
+    {
+      "shotId": "shot-2",
+      "shotIndex": 1,
+      "title": "Close-Up Response — Nemo's Ocular Resonance",
+      "durationSeconds": 3.5,
+      "startFrame": 106,
+      "endFrame": 211,
+      "environment": "observatory-citadel",
+      "cameraMovement": "close-up",
+      "cameraFov": 35,
+      "lightingPreset": "golden-hour",
+      "narrationText": "I see it, Leo. My sensors confirm a pure celestial frequency pulsing through the ancient courtyard.",
+      "dialogueSpeaker": "Nemo",
+      "emotion": "excited",
+      "transitionToNext": "cut"
+    },
+    {
+      "shotId": "shot-3",
+      "shotIndex": 2,
+      "title": "Interactive Two-Shot — Shared Discovery",
+      "durationSeconds": 3.0,
+      "startFrame": 211,
+      "endFrame": 301,
+      "environment": "observatory-citadel",
+      "cameraMovement": "orbit",
+      "cameraFov": 40,
+      "lightingPreset": "golden-hour",
+      "narrationText": "Then let us step through together before the starlight bridge closes!",
+      "dialogueSpeaker": "Leo",
+      "emotion": "warm-smile",
+      "transitionToNext": "fade-to-black"
+    }
+  ]
+}

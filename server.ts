@@ -16,8 +16,18 @@ import {
   startRenderJob,
 } from "./src/server/render-pipeline";
 import { sanitizeOmniVoiceInstruct } from "./src/utils/animation-math";
+import { ensureLocalVoiceStudioService } from "./src/server/local-voicestudio-daemon";
+import { getBlenderDiagnostics } from "./src/blender/blender-diagnostics";
+import { getAssetCatalogueSummary } from "./src/blender/asset-manager";
+import {
+  cancelBlenderRenderJob,
+  generateBlenderPreviewForProject,
+  getBlenderRenderJobStatus,
+  startFullBlenderRenderJob,
+} from "./src/blender/render-job-manager";
 
 async function startServer() {
+  await ensureLocalVoiceStudioService();
   const app = express();
   const PORT = Number(process.env.PORT) || 3000;
 
@@ -366,6 +376,103 @@ Rules:
           err instanceof Error ? err.message : "FFmpeg MP4 encoding failed",
       });
     }
+  });
+
+  // ---------------------------------------------------------------------------
+  // 4. Authoritative Blender 3D Engine & Render Worker Endpoints
+  // ---------------------------------------------------------------------------
+  app.get("/api/blender/diagnostics", async (_req, res) => {
+    try {
+      const diagnostics = await getBlenderDiagnostics();
+      const assets = getAssetCatalogueSummary();
+      return res.json({ diagnostics, assets });
+    } catch (err) {
+      return res.status(500).json({
+        error:
+          err instanceof Error
+            ? err.message
+            : "Failed to inspect Blender engine diagnostics",
+      });
+    }
+  });
+
+  app.get("/api/blender/assets", (_req, res) => {
+    return res.json({ assets: getAssetCatalogueSummary() });
+  });
+
+  app.post("/api/blender/preview", async (req, res) => {
+    try {
+      const { project, aspectRatio, fps, renderPreset } = req.body || {};
+      if (!project) {
+        return res
+          .status(400)
+          .json({ error: "Missing project payload for Blender preview" });
+      }
+      const result = await generateBlenderPreviewForProject({
+        project,
+        aspectRatio,
+        fps,
+        renderPreset,
+      });
+      return res.json(result);
+    } catch (err) {
+      return res.status(500).json({
+        error:
+          err instanceof Error
+            ? err.message
+            : "Blender preview generation failed",
+      });
+    }
+  });
+
+  app.post("/api/blender/jobs/start", (req, res) => {
+    try {
+      const {
+        project,
+        aspectRatio,
+        fps,
+        renderPreset,
+        renderEngine,
+        audioWavBase64,
+      } = req.body || {};
+      if (!project) {
+        return res
+          .status(400)
+          .json({ error: "Missing project payload for Blender render job" });
+      }
+      const jobState = startFullBlenderRenderJob({
+        project,
+        aspectRatio,
+        fps,
+        renderPreset,
+        renderEngine,
+        audioWavBase64,
+      });
+      return res.json(jobState);
+    } catch (err) {
+      return res.status(500).json({
+        error:
+          err instanceof Error
+            ? err.message
+            : "Failed to start Blender render job",
+      });
+    }
+  });
+
+  app.get("/api/blender/jobs/:jobId", (req, res) => {
+    const job = getBlenderRenderJobStatus(req.params.jobId);
+    if (!job) {
+      return res.status(404).json({ error: "Blender render job not found" });
+    }
+    return res.json(job);
+  });
+
+  app.post("/api/blender/jobs/:jobId/cancel", (req, res) => {
+    const job = cancelBlenderRenderJob(req.params.jobId);
+    if (!job) {
+      return res.status(404).json({ error: "Blender render job not found" });
+    }
+    return res.json(job);
   });
 
   if (process.env.NODE_ENV !== "production") {
