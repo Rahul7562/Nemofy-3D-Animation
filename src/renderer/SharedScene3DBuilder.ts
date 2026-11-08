@@ -915,9 +915,10 @@ export function buildSharedCharacterActor3D(
   if (isNemoAgent) {
     const nemoRoot = new THREE.Group();
     nemoRoot.scale.setScalar(config.scale);
-    nemoRoot.position.set(0, 0.42 + pose.hipBobY * 1.2, 0);
+    nemoRoot.position.set(0, 0.42, 0);
 
     const cubeHead = new THREE.Group();
+    cubeHead.position.set(0, pose.hipBobY * 0.45, 0);
     cubeHead.rotation.set(
       pose.headPitchX * 0.65 + pose.torsoLeanX * 0.45,
       pose.headYawY * 0.8 + pose.torsoTwistY * 0.45,
@@ -1013,7 +1014,7 @@ export function buildSharedCharacterActor3D(
   rigRoot.scale.setScalar(config.scale);
 
   const pelvisGroup = new THREE.Group();
-  pelvisGroup.position.set(0, 0.54 + pose.hipBobY, 0);
+  pelvisGroup.position.set(0, 0.54, 0);
 
   const pelvisMesh = new THREE.Mesh(
     new THREE.BoxGeometry(0.42, 0.14, 0.28),
@@ -1022,7 +1023,7 @@ export function buildSharedCharacterActor3D(
   pelvisGroup.add(pelvisMesh);
 
   const torsoGroup = new THREE.Group();
-  torsoGroup.position.set(0, 0.06, 0);
+  torsoGroup.position.set(0, 0.06 + pose.hipBobY * 0.45, 0);
   torsoGroup.rotation.set(pose.torsoLeanX, pose.torsoTwistY, 0);
 
   const torsoMesh = new THREE.Mesh(

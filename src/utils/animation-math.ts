@@ -853,78 +853,78 @@ export function computeCharacterPoseAtFrame(
       break;
     }
     case "talk": {
-      const cycle = timeSec * 3.4 + phaseOffset;
-      hipBobY = Math.sin(cycle) * 0.03;
-      torsoTwistY = Math.sin(cycle * 0.7) * 0.14;
+      const cycle = timeSec * 2.4 + phaseOffset;
+      hipBobY = Math.sin(cycle) * 0.015;
+      torsoTwistY = Math.sin(cycle * 0.65) * 0.06;
       leftUpperArmX =
-        -0.35 + Math.sin(cycle * 1.2) * (0.22 + speechEnergy * 0.18);
+        -0.32 + Math.sin(cycle * 0.9) * (0.14 + speechEnergy * 0.12);
       rightUpperArmX =
-        -0.45 + Math.cos(cycle * 1.1) * (0.26 + speechEnergy * 0.22);
-      leftUpperArmZ = 0.22 + Math.sin(cycle) * 0.08;
-      rightUpperArmZ = -0.24 - Math.cos(cycle) * 0.1;
-      leftForearmX = -0.65 + Math.sin(cycle * 1.5) * 0.25;
-      rightForearmX = -0.72 + Math.cos(cycle * 1.4) * 0.28;
+        -0.38 + Math.cos(cycle * 0.85) * (0.16 + speechEnergy * 0.14);
+      leftUpperArmZ = 0.18 + Math.sin(cycle) * 0.05;
+      rightUpperArmZ = -0.20 - Math.cos(cycle) * 0.06;
+      leftForearmX = -0.55 + Math.sin(cycle * 1.1) * 0.16;
+      rightForearmX = -0.60 + Math.cos(cycle * 1.0) * 0.18;
       break;
     }
     case "gesture": {
-      const cycle = timeSec * 4.0 + phaseOffset;
-      hipBobY = Math.sin(cycle) * 0.04;
-      torsoTwistY = Math.sin(cycle * 0.8) * 0.2;
+      const cycle = timeSec * 2.6 + phaseOffset;
+      hipBobY = Math.sin(cycle) * 0.018;
+      torsoTwistY = Math.sin(cycle * 0.7) * 0.08;
       rightUpperArmX =
-        -1.15 + Math.sin(cycle) * (0.32 + speechEnergy * 0.15);
-      rightUpperArmZ = -0.45 + Math.cos(cycle) * 0.2;
-      rightForearmX = -0.45 + Math.sin(cycle * 1.5) * 0.35;
-      leftUpperArmX = -0.28 + Math.cos(cycle * 0.9) * 0.2;
-      leftForearmX = -0.5;
+        -0.85 + Math.sin(cycle) * (0.20 + speechEnergy * 0.12);
+      rightUpperArmZ = -0.32 + Math.cos(cycle) * 0.12;
+      rightForearmX = -0.45 + Math.sin(cycle * 1.1) * 0.22;
+      leftUpperArmX = -0.24 + Math.cos(cycle * 0.8) * 0.12;
+      leftForearmX = -0.45;
       break;
     }
     case "type-code": {
-      const cycle = timeSec * 14.0 + phaseOffset;
-      hipBobY = Math.sin(timeSec * 4.5) * 0.02;
-      torsoLeanX = 0.14;
-      torsoTwistY = Math.sin(timeSec * 2.8) * 0.06;
-      leftUpperArmX = -0.68 + Math.sin(cycle) * 0.08;
-      rightUpperArmX = -0.68 + Math.cos(cycle * 1.15) * 0.08;
+      const cycle = timeSec * 8.0 + phaseOffset;
+      hipBobY = Math.sin(timeSec * 2.5) * 0.012;
+      torsoLeanX = 0.10;
+      torsoTwistY = Math.sin(timeSec * 1.8) * 0.04;
+      leftUpperArmX = -0.62 + Math.sin(cycle) * 0.06;
+      rightUpperArmX = -0.62 + Math.cos(cycle * 1.1) * 0.06;
       leftUpperArmZ = 0.14;
       rightUpperArmZ = -0.14;
-      leftForearmX = -0.88 + Math.sin(cycle * 1.8) * 0.16;
-      rightForearmX = -0.88 + Math.cos(cycle * 1.9) * 0.16;
+      leftForearmX = -0.82 + Math.sin(cycle * 1.4) * 0.12;
+      rightForearmX = -0.82 + Math.cos(cycle * 1.5) * 0.12;
       break;
     }
     case "panic-react": {
-      const cycle = timeSec * 8.5 + phaseOffset;
-      hipBobY = Math.abs(Math.sin(cycle * 0.8)) * 0.06;
-      torsoLeanX = -0.14 + Math.sin(cycle * 0.5) * 0.05;
-      torsoTwistY = Math.sin(cycle) * 0.22;
-      leftUpperArmX = -2.15 + Math.sin(cycle) * 0.22;
-      rightUpperArmX = -2.15 + Math.cos(cycle) * 0.22;
-      leftUpperArmZ = 0.45;
-      rightUpperArmZ = -0.45;
-      leftForearmX = -0.95;
-      rightForearmX = -0.95;
+      const cycle = timeSec * 3.4 + phaseOffset;
+      hipBobY = Math.abs(Math.sin(cycle * 0.7)) * 0.022;
+      torsoLeanX = -0.06 + Math.sin(cycle * 0.5) * 0.03;
+      torsoTwistY = Math.sin(cycle * 0.7) * 0.08;
+      leftUpperArmX = -1.35 + Math.sin(cycle) * 0.16;
+      rightUpperArmX = -1.35 + Math.cos(cycle) * 0.16;
+      leftUpperArmZ = 0.32;
+      rightUpperArmZ = -0.32;
+      leftForearmX = -0.78;
+      rightForearmX = -0.78;
       break;
     }
     case "celebrate": {
-      const cycle = timeSec * 6.5 + phaseOffset;
-      hipBobY = Math.abs(Math.sin(cycle)) * 0.11;
-      torsoLeanX = -0.08;
-      torsoTwistY = Math.sin(cycle * 0.5) * 0.18;
-      leftUpperArmX = -2.45 + Math.sin(cycle) * 0.28;
-      rightUpperArmX = -2.45 - Math.sin(cycle) * 0.28;
-      leftUpperArmZ = 0.35;
-      rightUpperArmZ = -0.35;
+      const cycle = timeSec * 3.2 + phaseOffset;
+      hipBobY = Math.abs(Math.sin(cycle)) * 0.03;
+      torsoLeanX = -0.05;
+      torsoTwistY = Math.sin(cycle * 0.5) * 0.08;
+      leftUpperArmX = -1.85 + Math.sin(cycle) * 0.18;
+      rightUpperArmX = -1.85 - Math.sin(cycle) * 0.18;
+      leftUpperArmZ = 0.28;
+      rightUpperArmZ = -0.28;
       leftForearmX = -0.35;
       rightForearmX = -0.35;
-      leftThighX = Math.max(0, Math.sin(cycle)) * 0.25;
-      rightThighX = Math.max(0, -Math.sin(cycle)) * 0.25;
+      leftThighX = 0;
+      rightThighX = 0;
       break;
     }
     case "idle":
     default: {
-      const cycle = timeSec * 2.0 + phaseOffset;
-      hipBobY = Math.sin(cycle) * 0.025;
-      leftUpperArmX = Math.sin(cycle) * 0.06 - speechEnergy * 0.15;
-      rightUpperArmX = -Math.sin(cycle) * 0.06 - speechEnergy * 0.18;
+      const cycle = timeSec * 1.8 + phaseOffset;
+      hipBobY = Math.sin(cycle) * 0.015;
+      leftUpperArmX = Math.sin(cycle) * 0.04 - speechEnergy * 0.12;
+      rightUpperArmX = -Math.sin(cycle) * 0.04 - speechEnergy * 0.14;
       break;
     }
   }

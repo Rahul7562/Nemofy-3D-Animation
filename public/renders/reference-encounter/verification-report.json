@@ -1,6 +1,6 @@
 {
-  "jobId": "blender-morphy-skit-verified",
-  "projectName": "Nemo & Leo — @agentmorphy Viral AI Agent Skit",
+  "jobId": "blender-job-1794161741657-6083140e",
+  "projectName": "Nemo & Leo — 98% Usage Limit Panic",
   "mp4Url": "/renders/reference-encounter/nemo-and-leo-cinematic-encounter.mp4",
   "blendUrl": "/renders/reference-encounter/encounter.blend",
   "contactSheetUrl": "/renders/reference-encounter/contact-sheet.jpg",
@@ -8,15 +8,15 @@
     "valid": true,
     "blenderVersion": "3.4.1",
     "frameStart": 1,
-    "frameEnd": 504,
+    "frameEnd": 564,
     "fps": 30,
     "resolution": [
       1080,
       1920
     ],
     "armatureCount": 2,
-    "meshCount": 134,
-    "lightCount": 6,
+    "meshCount": 130,
+    "lightCount": 5,
     "cameraCount": 4,
     "missingMaterialCount": 0,
     "charactersNonIntersecting": true,
@@ -24,20 +24,20 @@
       {
         "rigName": "Nemo_Rig",
         "boneCount": 31,
-        "fcurveCount": 75,
-        "childMeshCount": 22,
+        "fcurveCount": 96,
+        "childMeshCount": 24,
         "minFootZ": 0,
-        "maxHeadZ": 0.92,
+        "maxHeadZ": 0.7134,
         "groundContactValid": true,
         "hasFacialRig": true
       },
       {
         "rigName": "Leo_Rig",
         "boneCount": 31,
-        "fcurveCount": 75,
-        "childMeshCount": 32,
+        "fcurveCount": 96,
+        "childMeshCount": 41,
         "minFootZ": 0,
-        "maxHeadZ": 1.38,
+        "maxHeadZ": 1.547,
         "groundContactValid": true,
         "hasFacialRig": true
       }
@@ -49,70 +49,53 @@
         "allSubjectsInSafeFrustum": true,
         "subjectNdcCoords": {
           "Nemo_Rig": [
-            0.58,
-            0.48,
-            3.35
+            0.627,
+            0.646,
+            2.079
           ],
           "Leo_Rig": [
-            0.42,
-            0.52,
-            3.35
+            0.373,
+            0.646,
+            2.079
           ]
         }
       },
       {
-        "frame": 192,
+        "frame": 282,
         "camera": "ShotCam_02",
         "allSubjectsInSafeFrustum": true,
         "subjectNdcCoords": {
           "Nemo_Rig": [
-            0.62,
-            0.46,
-            2.15
+            0.641,
+            0.804,
+            1.752
           ],
           "Leo_Rig": [
-            0.22,
-            0.52,
-            2.15
+            0.151,
+            0.805,
+            1.745
           ]
         }
       },
       {
-        "frame": 363,
-        "camera": "ShotCam_03",
-        "allSubjectsInSafeFrustum": true,
-        "subjectNdcCoords": {
-          "Nemo_Rig": [
-            0.78,
-            0.46,
-            2.15
-          ],
-          "Leo_Rig": [
-            0.38,
-            0.52,
-            2.15
-          ]
-        }
-      },
-      {
-        "frame": 504,
+        "frame": 564,
         "camera": "ShotCam_04",
         "allSubjectsInSafeFrustum": true,
         "subjectNdcCoords": {
           "Nemo_Rig": [
-            0.60,
-            0.48,
-            2.55
+            0.636,
+            0.655,
+            2.057
           ],
           "Leo_Rig": [
-            0.40,
-            0.52,
-            2.55
+            0.365,
+            0.654,
+            2.068
           ]
         }
       }
     ],
-    "savedBlendPath": "/app/applet/public/renders/reference-encounter/encounter.blend"
+    "savedBlendPath": "/app/applet/public/renders/blender-job-1794161741657-6083140e/project.blend"
   },
   "verification": {
     "valid": true,
@@ -122,10 +105,10 @@
     "width": 1080,
     "height": 1920,
     "fps": 30,
-    "durationSeconds": 16.8,
-    "frameCount": 504,
-    "fileSizeBytes": 8727552,
+    "durationSeconds": 18.8,
+    "frameCount": 564,
+    "fileSizeBytes": 8875816,
     "hasAudioStream": true,
-    "contactSheetUrl": "/renders/reference-encounter/contact-sheet.jpg"
+    "contactSheetUrl": "/renders/blender-job-1794161741657-6083140e/contact-sheet.jpg"
   }
 }

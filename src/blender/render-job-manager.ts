@@ -106,30 +106,50 @@ function buildSubtitleFilterChain(manifest: BlenderProjectManifest): string {
   if (!manifest.subtitlesEnabled) return "";
   const filters: string[] = [];
   const isVertical = manifest.height > manifest.width;
-  const maxChars = isVertical ? 48 : 68;
+  const maxLineChars = isVertical ? 42 : 64;
   const fontSize = Math.max(
-    18,
-    Math.round(manifest.width * (isVertical ? 0.022 : 0.021)),
+    22,
+    Math.round(manifest.width * (isVertical ? 0.025 : 0.022)),
   );
-  const boxY = Math.round(manifest.height * (isVertical ? 0.17 : 0.84));
+  const boxY = Math.round(manifest.height * (isVertical ? 0.13 : 0.82));
 
   for (const shot of manifest.shots) {
     if (!shot.narrationText || !shot.narrationText.trim()) continue;
     const tStart = ((shot.startFrame - 1) / manifest.fps).toFixed(2);
     const tEnd = ((shot.endFrame - 1) / manifest.fps).toFixed(2);
     const speaker = (shot.dialogueSpeaker || "Narrator").toUpperCase();
-    const rawLine = shot.narrationText.trim();
-    const truncated =
-      rawLine.length > maxChars ? rawLine.slice(0, maxChars - 3) + "..." : rawLine;
-    const escapedText = `${speaker}: ${truncated}`
-      .replace(/\\/g, "\\\\")
-      .replace(/:/g, "\\:")
-      .replace(/'/g, "")
-      .replace(/"/g, "");
+    const fullText = `${speaker}: ${shot.narrationText.trim()}`;
 
-    filters.push(
-      `drawtext=text='${escapedText}':fontcolor=white:fontsize=${fontSize}:box=1:boxcolor=0x0B0F1D99:boxborderw=10:x=(w-text_w)/2:y=${boxY}:enable='between(t,${tStart},${tEnd})'`,
-    );
+    // Split into up to 2 balanced lines so no words are ever cut off with '...'
+    const words = fullText.split(/\s+/);
+    const lines: string[] = [];
+    let currentLine = "";
+    for (const w of words) {
+      if (!currentLine) {
+        currentLine = w;
+      } else if (
+        currentLine.length + 1 + w.length <= maxLineChars ||
+        lines.length >= 1
+      ) {
+        currentLine += " " + w;
+      } else {
+        lines.push(currentLine);
+        currentLine = w;
+      }
+    }
+    if (currentLine) lines.push(currentLine);
+
+    lines.forEach((lineText, lineIdx) => {
+      const escapedText = lineText
+        .replace(/\\/g, "\\\\")
+        .replace(/:/g, "\\:")
+        .replace(/'/g, "")
+        .replace(/"/g, "");
+      const lineY = boxY + lineIdx * Math.round(fontSize * 1.48);
+      filters.push(
+        `drawtext=text='${escapedText}':fontcolor=white:fontsize=${fontSize}:box=1:boxcolor=0x0B0F1Dbb:boxborderw=10:x=(w-text_w)/2:y=${lineY}:enable='between(t,${tStart},${tEnd})'`,
+      );
+    });
   }
 
   return filters.join(",");
@@ -379,7 +399,7 @@ async function runBlenderJobPipeline(
             text: shot.narrationText,
             voiceId,
             language: "en",
-            speed: 1.0,
+            speed: 1.08,
             instruct:
               voiceId === "leo"
                 ? "male, young adult, moderate pitch, american accent"
@@ -389,16 +409,16 @@ async function runBlenderJobPipeline(
           if (fs.existsSync(localVoPath)) {
             const delayMs = Math.max(
               0,
-              Math.round(((shot.startFrame - 1) / manifest.fps + 0.08) * 1000),
+              Math.round(((shot.startFrame - 1) / manifest.fps + 0.04) * 1000),
             );
             const maxShotDur = Math.max(
               0.5,
-              (shot.endFrame - shot.startFrame) / manifest.fps - 0.08,
+              (shot.endFrame - shot.startFrame) / manifest.fps + 0.15,
             ).toFixed(2);
             inputArgs.push("-i", localVoPath);
             const lbl = `[vo${inputIdx}]`;
             filterParts.push(
-              `[${inputIdx}:a]atrim=0:${maxShotDur},asetpts=PTS-STARTPTS,volume=1.05,adelay=${delayMs}|${delayMs}${lbl}`,
+              `[${inputIdx}:a]atrim=0:${maxShotDur},asetpts=PTS-STARTPTS,volume=1.08,adelay=${delayMs}|${delayMs}${lbl}`,
             );
             mixLabels.push(lbl);
             inputIdx++;

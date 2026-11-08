@@ -5,8 +5,9 @@ AetherFrame 3D — Character Performance, Acting & Phoneme-to-Viseme Lip-Sync En
 Authors keyframed Blender Actions with AUTO_CLAMPED Bezier F-curves for:
 1. Phoneme-to-Viseme Lip-Sync (Preston Blair / ARKit visemes: SIL, MBP, FV, TH, L_NT, EE, IH, AA, OH, OU)
    with 2-frame visual lead and mandatory bilabial closure on M/B/P.
-2. Mutual Character Acting & Reaction (Speaker vs. Listener gaze, head orientation, nods, and brow reactions).
-3. Phrased Gesture Choreography (Anticipation -> Arc -> Moving Hold -> Follow-Through) with staggered overlapping action.
+2. Mutual Character Acting & Reaction (Speaker vs. Listener gaze, 3/4 inward body angle, head turns, and nods).
+3. Grounded, Non-Shaky Phrased Gesture Choreography (Anticipation -> Arc -> Moving Hold -> Follow-Through)
+   with feet 100% planted on the window ledge (Z=0.0).
 4. Natural Asymmetric 5-Frame Eye Blinks.
 """
 
@@ -15,18 +16,18 @@ import math
 import bpy
 
 
-# Canonical Viseme Targets: (jaw_drop_z, lip_lower_z, mouth_wide_scale_x, brow_lift_z)
+# Canonical Viseme Targets: (jaw_drop_z, jaw_scale_vertical, mouth_wide_scale_x, brow_lift_z)
 VISEME_TARGETS = {
-    "SIL":  ( 0.000,  0.000, 1.00, 0.000),
-    "MBP":  ( 0.002,  0.004, 0.92, 0.003),  # Bilabial pressed closed (M, B, P)
-    "FV":   (-0.008, -0.006, 1.02, 0.005),  # Lower lip tucked under upper teeth
-    "TH":   (-0.014, -0.012, 1.05, 0.006),  # Dental slight open
-    "L_NT": (-0.018, -0.015, 1.08, 0.007),  # Alveolar medium narrow
-    "EE":   (-0.020, -0.016, 1.28, 0.010),  # Wide front vowel (corners pulled wide)
-    "IH":   (-0.026, -0.022, 1.15, 0.010),  # Relaxed mid vowel
-    "AA":   (-0.042, -0.036, 1.12, 0.016),  # Wide open jaw drop (A, AH)
-    "OH":   (-0.036, -0.030, 0.78, 0.014),  # Rounded open O
-    "OU":   (-0.018, -0.014, 0.68, 0.008),  # Tight pursed U/W
+    "SIL":  ( 0.000, 0.55, 0.95, 0.000),
+    "MBP":  ( 0.001, 0.45, 0.90, 0.002),  # Bilabial pressed closed (M, B, P)
+    "FV":   (-0.004, 0.75, 1.00, 0.004),  # Labiodental slight open
+    "TH":   (-0.006, 0.95, 1.04, 0.005),  # Dental slight open
+    "L_NT": (-0.008, 1.15, 1.06, 0.006),  # Alveolar medium open
+    "EE":   (-0.009, 1.25, 1.22, 0.008),  # Wide front vowel
+    "IH":   (-0.012, 1.45, 1.12, 0.009),  # Relaxed mid vowel
+    "AA":   (-0.018, 2.15, 1.14, 0.014),  # Wide open vowel (A, AH)
+    "OH":   (-0.016, 1.95, 0.82, 0.012),  # Rounded open O
+    "OU":   (-0.008, 1.10, 0.72, 0.007),  # Tight pursed U/W
 }
 
 
@@ -117,8 +118,8 @@ def generate_dialogue_viseme_timeline(
     if not words:
         return [(shot_start_frame, "SIL", 0.0), (shot_start_frame + shot_duration_frames, "SIL", 0.0)]
 
-    lead_in_frames = min(6, max(2, int(fps * 0.14)))
-    tail_out_frames = min(8, max(3, int(fps * 0.20)))
+    lead_in_frames = min(5, max(2, int(fps * 0.10)))
+    tail_out_frames = min(14, max(6, int(fps * 0.35)))
     active_span = max(10, shot_duration_frames - lead_in_frames - tail_out_frames)
 
     weights = []
@@ -143,13 +144,13 @@ def generate_dialogue_viseme_timeline(
 
         for idx, vis in enumerate(visemes):
             f = int(round(cursor + idx * step - 1.5))
-            f = max(shot_start_frame + 1, min(shot_start_frame + shot_duration_frames - 2, f))
-            energy = 1.20 if ("!" in w or "?" in w) else 1.0
+            f = max(shot_start_frame + 1, min(shot_start_frame + shot_duration_frames - 3, f))
+            energy = 1.15 if ("!" in w or "?" in w) else 1.0
             if lip_sync_envelope:
                 env_idx = min(len(lip_sync_envelope) - 1, max(0, f - shot_start_frame))
                 env_pt = lip_sync_envelope[env_idx]
                 if isinstance(env_pt, dict):
-                    energy *= 0.70 + 0.50 * float(env_pt.get("openness", 0.75))
+                    energy *= 0.70 + 0.45 * float(env_pt.get("openness", 0.75))
             events.append((f, vis, energy))
 
         end_word_f = int(round(cursor + speak_frames))
@@ -207,11 +208,12 @@ def author_character_timeline_performance(
     """
     Authors a complete, continuous, multi-shot skeletal & facial Action on arm_obj:
     - Places the character accurately on stage per shot with feet planted at Z=0.0.
-    - Orients body 3/4 toward camera & partner (staging rule).
-    - Authors phrase-driven arm/hand gestures, weight shifts, and contrapposto spine arcs when speaking.
-    - Authors active listening head-turns, eye gaze, brow reactions, and agreement nods when listening.
-    - Authors phoneme-to-viseme jaw & lip keyframes synchronized to dialogue.
-    - Schedules natural 5-frame asymmetric eye blinks.
+    - Orients body 3/4 INWARD toward partner & camera:
+      In Blender Z-up (character front at -Y):
+      +Z rotation (+0.28 rad) turns Leo (at X = -0.38) inward toward +X (Nemo);
+      -Z rotation (-0.28 rad) turns Nemo (at X = +0.38) inward toward -X (Leo).
+    - Keeps root, hips, and legs 100% grounded so there is zero tipping, rocking, or foot sliding.
+    - Authors clean, expressive chest/head/arm arcs and smooth phoneme-to-viseme mouth animation.
     """
     if not arm_obj.animation_data:
         arm_obj.animation_data_create()
@@ -226,14 +228,17 @@ def author_character_timeline_performance(
         dur = max(10, f_end - f_start)
 
         my_stage = shot.get("characterStaging", {}).get(char_id, {})
-        stage_x = float(my_stage.get("x", 0.56 if is_nemo else -0.56))
+        stage_x = float(my_stage.get("x", 0.38 if is_nemo else -0.38))
         stage_y = float(my_stage.get("y", 0.0))
         partner_x = float(partner_pos_by_shot[shot_idx].get("x", -stage_x))
 
-        # 3/4 Turn Angle: Leo (at X = -0.56) angles slightly right (-0.30 rad Z);
-        # Nemo (at X = +0.56) angles slightly left (+0.30 rad Z) so they face each other & camera.
+        # In Blender World Z-up (front facing -Y):
+        # Rotating (0, -1, 0) around +Z by +theta gives (+sin(theta), -cos(theta), 0).
+        # So when partner is to the right (dx_to_partner > 0, Leo looking at Nemo), base_yaw > 0 (+0.26 rad).
+        # When partner is to the left (dx_to_partner < 0, Nemo looking at Leo), base_yaw < 0 (-0.26 rad).
         dx_to_partner = partner_x - stage_x
-        base_yaw = -0.28 if dx_to_partner > 0 else 0.28
+        turn_dir = 1.0 if dx_to_partner > 0 else -1.0
+        base_yaw = 0.26 * turn_dir
 
         speaker_name = str(shot.get("dialogueSpeaker", "")).lower()
         is_speaking = ("nemo" in speaker_name and is_nemo) or ("leo" in speaker_name and not is_nemo)
@@ -246,75 +251,58 @@ def author_character_timeline_performance(
         arm_obj.keyframe_insert(data_path="location", frame=f_end - 1)
         arm_obj.keyframe_insert(data_path="rotation_euler", frame=f_end - 1)
 
-        f_ant = min(f_end - 2, f_start + 5)
-        f_b1 = f_start + int(dur * 0.30)
-        f_b2 = f_start + int(dur * 0.66)
-        f_settle = max(f_start + 2, f_end - 4)
+        # Lock hips & legs firmly so character never rocks or tips over
+        for f_lock in (f_start, f_end - 1):
+            _keyframe_bone_loc(arm_obj, "hips", f_lock, 0.0, 0.0, 0.0)
+            _keyframe_bone_rot(arm_obj, "hips", f_lock, 0.0, 0.0, 0.0)
+            _keyframe_bone_rot(arm_obj, "spine", f_lock, 0.0, 0.0, 0.0)
+            _keyframe_bone_rot(arm_obj, "chest", f_lock, 0.0, 0.0, 0.0)
+            _keyframe_bone_rot(arm_obj, "neck", f_lock, 0.0, 0.0, 0.0)
+            for side in ("L", "R"):
+                _keyframe_bone_rot(arm_obj, f"thigh.{side}", f_lock, 0.0, 0.0, 0.0)
+                _keyframe_bone_rot(arm_obj, f"shin.{side}", f_lock, 0.0, 0.0, 0.0)
+                _keyframe_bone_rot(arm_obj, f"foot.{side}", f_lock, 0.0, 0.0, 0.0)
 
-        # In Blender Z-up bone space for vertical spine/head bones:
-        # rx = pitch (nod), ry = Y-axis twist (head/chest turn left/right!), rz = side tilt
-        # In Blender downward-pointing arm bones (upper_arm, forearm):
-        # rx > 0 lifts the arm/forearm FORWARD toward -Y (camera)!
-        # rz flares the arm outward/inward!
-        turn_dir = -1.0 if dx_to_partner > 0 else 1.0
+        f_ant = min(f_end - 2, f_start + 7)
+        f_b1 = f_start + int(dur * 0.32)
+        f_b2 = f_start + int(dur * 0.68)
+        f_settle = max(f_start + 2, f_end - 5)
 
         if is_speaking:
-            # --- SPEAKER PERFORMANCE: Weight Transfer, Spine Arc, Expressive Forward Gestures ---
-            _keyframe_bone_loc(arm_obj, "hips", f_start, 0.0, 0.0, 0.0)
-            _keyframe_bone_rot(arm_obj, "hips", f_start, 0.0, 0.0, 0.0)
+            # --- SPEAKER PERFORMANCE: Grounded Lower Body, Smooth Head Gaze & Expressive Arm Arcs ---
+            if not is_nemo:
+                # Subtle chest breathing/twist for Leo (Nemo's cube body rotates purely from 'head' to prevent stacked wobble)
+                for f_c, c_pitch, c_twist_y, c_tilt_z in [
+                    (f_start, 0.01, 0.02 * turn_dir, 0.0),
+                    (f_ant, 0.025, 0.0, -0.015 * turn_dir),
+                    (f_b1, -0.02, 0.06 * turn_dir, 0.02 * turn_dir),
+                    (f_b2, -0.01, 0.04 * turn_dir, -0.015 * turn_dir),
+                    (f_settle, 0.01, 0.02 * turn_dir, 0.0),
+                ]:
+                    _keyframe_bone_rot(arm_obj, "chest", min(f_end - 1, f_c), c_pitch, c_twist_y, c_tilt_z)
 
-            _keyframe_bone_loc(arm_obj, "hips", f_ant, -0.015 * turn_dir, 0.01, -0.012)
-            _keyframe_bone_rot(arm_obj, "hips", f_ant, 0.03, -0.04 * turn_dir, 0.03 * turn_dir)
-
-            _keyframe_bone_loc(arm_obj, "hips", f_b1, 0.025 * turn_dir, -0.02, 0.008)
-            _keyframe_bone_rot(arm_obj, "hips", f_b1, -0.02, 0.08 * turn_dir, -0.04 * turn_dir)
-
-            _keyframe_bone_loc(arm_obj, "hips", f_b2, 0.018 * turn_dir, -0.015, 0.004)
-            _keyframe_bone_rot(arm_obj, "hips", f_b2, 0.01, 0.05 * turn_dir, -0.02 * turn_dir)
-
-            _keyframe_bone_loc(arm_obj, "hips", f_settle, 0.0, 0.0, 0.0)
-            _keyframe_bone_rot(arm_obj, "hips", f_settle, 0.0, 0.0, 0.0)
-
-            # Staggered Spine & Chest (+2f and +4f overlap; ry is axial twist toward partner)
-            for f_base, pitch, twist_y, tilt_z in [
-                (f_start, 0.02, 0.0, 0.0),
-                (f_ant + 2, 0.05, -0.05 * turn_dir, -0.03 * turn_dir),
-                (f_b1 + 2, -0.04, 0.14 * turn_dir, 0.04 * turn_dir),
-                (f_b2 + 2, -0.02, 0.09 * turn_dir, -0.03 * turn_dir),
-                (f_settle, 0.01, 0.03 * turn_dir, 0.0),
+            # Smooth, readable head phrasing (ry > 0 * turn_dir turns gaze toward partner)
+            h_scale = 0.65 if is_nemo else 1.0
+            for f_h, h_pitch, h_twist_y, h_tilt_z in [
+                (f_start, 0.0, 0.08 * turn_dir * h_scale, 0.0),
+                (f_ant, 0.035 * h_scale, 0.05 * turn_dir * h_scale, -0.025 * turn_dir * h_scale),
+                (f_b1, -0.035 * h_scale, 0.14 * turn_dir * h_scale, 0.035 * turn_dir * h_scale),
+                (f_b2, -0.015 * h_scale, 0.11 * turn_dir * h_scale, -0.030 * turn_dir * h_scale),
+                (f_settle, 0.0, 0.08 * turn_dir * h_scale, 0.0),
             ]:
-                fc_clamped = min(f_end - 1, f_base)
-                _keyframe_bone_rot(arm_obj, "spine", fc_clamped, pitch * 0.5, twist_y * 0.5, tilt_z * 0.5)
-                _keyframe_bone_rot(arm_obj, "chest", min(f_end - 1, fc_clamped + 2), pitch, twist_y, tilt_z)
+                _keyframe_bone_rot(arm_obj, "head", min(f_end - 1, f_h), h_pitch, h_twist_y, h_tilt_z)
 
-            # Head & Neck (ry twists head to look at partner; rx nods; rz tilts head expressively)
-            for f_base, h_pitch, h_twist_y, h_tilt_z in [
-                (f_start, 0.0, 0.12 * turn_dir, 0.0),
-                (f_ant + 3, 0.07, 0.08 * turn_dir, -0.05 * turn_dir),
-                (f_b1 + 4, -0.06, 0.26 * turn_dir, 0.08 * turn_dir),
-                (f_b2 + 4, -0.03, 0.18 * turn_dir, -0.07 * turn_dir),
-                (f_settle, 0.01, 0.15 * turn_dir, 0.02 * turn_dir),
-            ]:
-                fc_clamped = min(f_end - 1, f_base)
-                _keyframe_bone_rot(arm_obj, "neck", fc_clamped, h_pitch * 0.35, h_twist_y * 0.4, h_tilt_z * 0.35)
-                _keyframe_bone_rot(arm_obj, "head", min(f_end - 1, fc_clamped + 2), h_pitch, h_twist_y, h_tilt_z)
-
-            # Expressive Forward-Lifting Arm & Forearm Gestures (rx < 0 swings downward arm bone FORWARD toward camera -Y!)
+            # Expressive Forward-Lifting Conversational Arm Gestures (rx < 0 lifts arm forward toward camera -Y)
             for f_base, ua_l, fa_l, h_l, ua_r, fa_r, h_r in [
-                # Relaxed conversational ready pose (forearms bent slightly forward in front of torso)
-                (f_start, (-0.16, 0.0, -0.06), (-0.42, 0.0, 0.08), (-0.05, 0.0, 0.0), (-0.16, 0.0, 0.06), (-0.42, 0.0, -0.08), (-0.05, 0.0, 0.0)),
-                # Anticipation gather inward
-                (f_ant + 2, (-0.26, 0.0, -0.10), (-0.72, 0.0, 0.15), (-0.10, 0.0, 0.0), (-0.24, 0.0, 0.10), (-0.68, 0.0, -0.15), (-0.10, 0.0, 0.0)),
-                # Beat 1 Open Gesture Arc (Lead arm lifts forward & outward toward partner)
-                (f_b1 + 3, (-0.58, 0.18, -0.20), (-0.96, 0.20, 0.18), (-0.16, 0.12, 0.0), (-0.32, -0.08, 0.12), (-0.60, -0.12, -0.12), (-0.08, -0.08, 0.0)),
-                # Beat 2 Counter-Phrase Gesture (Opposite arm arcs up forward)
-                (f_b2 + 3, (-0.32, 0.10, -0.12), (-0.58, 0.10, 0.12), (-0.08, 0.06, 0.0), (-0.62, -0.20, 0.22), (-1.00, -0.20, -0.20), (-0.18, -0.14, 0.0)),
-                # Follow-through settle
-                (f_settle, (-0.18, 0.0, -0.06), (-0.45, 0.0, 0.08), (-0.05, 0.0, 0.0), (-0.18, 0.0, 0.06), (-0.45, 0.0, -0.08), (-0.05, 0.0, 0.0)),
+                (f_start, (-0.16, 0.0, -0.05), (-0.42, 0.0, 0.06), (-0.04, 0.0, 0.0), (-0.16, 0.0, 0.05), (-0.42, 0.0, -0.06), (-0.04, 0.0, 0.0)),
+                (f_ant, (-0.24, 0.0, -0.08), (-0.64, 0.0, 0.12), (-0.08, 0.0, 0.0), (-0.22, 0.0, 0.08), (-0.60, 0.0, -0.12), (-0.08, 0.0, 0.0)),
+                (f_b1, (-0.52, 0.14, -0.16), (-0.88, 0.15, 0.14), (-0.12, 0.08, 0.0), (-0.28, -0.06, 0.10), (-0.55, -0.08, -0.10), (-0.06, -0.05, 0.0)),
+                (f_b2, (-0.28, 0.08, -0.10), (-0.54, 0.08, 0.10), (-0.06, 0.04, 0.0), (-0.54, -0.15, 0.18), (-0.90, -0.15, -0.16), (-0.14, -0.10, 0.0)),
+                (f_settle, (-0.16, 0.0, -0.05), (-0.42, 0.0, 0.06), (-0.04, 0.0, 0.0), (-0.16, 0.0, 0.05), (-0.42, 0.0, -0.06), (-0.04, 0.0, 0.0)),
             ]:
                 fc_arm = min(f_end - 1, f_base)
                 fc_fore = min(f_end - 1, f_base + 2)
-                fc_hand = min(f_end - 1, f_base + 4)
+                fc_hand = min(f_end - 1, f_base + 3)
                 _keyframe_bone_rot(arm_obj, "upper_arm.L", fc_arm, *ua_l)
                 _keyframe_bone_rot(arm_obj, "forearm.L", fc_fore, *fa_l)
                 _keyframe_bone_rot(arm_obj, "hand.L", fc_hand, *h_l)
@@ -322,55 +310,55 @@ def author_character_timeline_performance(
                 _keyframe_bone_rot(arm_obj, "forearm.R", fc_fore, *fa_r)
                 _keyframe_bone_rot(arm_obj, "hand.R", fc_hand, *h_r)
 
+            # Phrase-level eyebrow expression (smooth, non-jittery)
+            brow_lift = 0.014 if ("excited" in emotion or "awe" in emotion or "Panic" in shot.get("title", "")) else 0.008
+            brow_tilt = 0.05 if ("excited" in emotion or "awe" in emotion) else -0.03
+            for f_br, b_mult in [(f_start, 0.4), (f_ant, 0.9), (f_b1, 1.0), (f_b2, 0.85), (f_settle, 0.3)]:
+                _keyframe_bone_loc(arm_obj, "brow.L", min(f_end - 1, f_br), 0.0, brow_lift * b_mult, 0.0)
+                _keyframe_bone_loc(arm_obj, "brow.R", min(f_end - 1, f_br), 0.0, brow_lift * b_mult, 0.0)
+                _keyframe_bone_rot(arm_obj, "brow.L", min(f_end - 1, f_br), 0.0, 0.0, brow_tilt * b_mult)
+                _keyframe_bone_rot(arm_obj, "brow.R", min(f_end - 1, f_br), 0.0, 0.0, -brow_tilt * b_mult)
+
         else:
-            # --- LISTENER PERFORMANCE: Active Head-Turn Gaze, Attentive Posture, Agreement Nods ---
-            _keyframe_bone_loc(arm_obj, "hips", f_start, 0.0, 0.0, 0.0)
-            _keyframe_bone_rot(arm_obj, "hips", f_start, 0.0, -0.04 * turn_dir, 0.02 * turn_dir)
-            _keyframe_bone_loc(arm_obj, "hips", f_b1 + 6, 0.012 * turn_dir, -0.005, 0.0)
-            _keyframe_bone_rot(arm_obj, "hips", f_b1 + 6, 0.0, -0.06 * turn_dir, 0.03 * turn_dir)
-            _keyframe_bone_loc(arm_obj, "hips", f_settle, 0.0, 0.0, 0.0)
-            _keyframe_bone_rot(arm_obj, "hips", f_settle, 0.0, -0.04 * turn_dir, 0.02 * turn_dir)
+            # --- LISTENER PERFORMANCE: Calm Attentive Gaze Toward Speaker & Subtle Agreement Nods ---
+            if not is_nemo:
+                _keyframe_bone_rot(arm_obj, "chest", f_start, 0.01, 0.04 * turn_dir, 0.0)
+                _keyframe_bone_rot(arm_obj, "chest", f_b1 + 6, -0.01, 0.06 * turn_dir, 0.01 * turn_dir)
+                _keyframe_bone_rot(arm_obj, "chest", f_settle, 0.01, 0.04 * turn_dir, 0.0)
 
-            _keyframe_bone_rot(arm_obj, "spine", f_start, 0.01, 0.05 * turn_dir, 0.0)
-            _keyframe_bone_rot(arm_obj, "chest", f_start, 0.02, 0.08 * turn_dir, 0.0)
-            _keyframe_bone_rot(arm_obj, "spine", f_b1 + 5, -0.02, 0.08 * turn_dir, 0.02 * turn_dir)
-            _keyframe_bone_rot(arm_obj, "chest", f_b1 + 7, -0.03, 0.11 * turn_dir, 0.02 * turn_dir)
-            _keyframe_bone_rot(arm_obj, "spine", f_settle, 0.01, 0.06 * turn_dir, 0.0)
-            _keyframe_bone_rot(arm_obj, "chest", f_settle, 0.01, 0.08 * turn_dir, 0.0)
-
-            # Listener Head: turns toward speaker (h_twist_y) within 8 frames, then nods at f_b1+10 & f_b2+8
+            h_scale = 0.65 if is_nemo else 1.0
             f_turn = min(f_end - 2, f_start + 8)
-            f_nod1 = min(f_end - 4, f_b1 + 10)
-            f_nod2 = min(f_end - 3, f_b2 + 8)
+            f_nod1 = min(f_end - 4, f_b1 + 8)
+            f_nod2 = min(f_end - 3, f_b2 + 6)
             for f_h, hp, h_twist_y, h_tilt_z in [
-                (f_start, 0.02, 0.10 * turn_dir, 0.0),
-                (f_turn, -0.02, 0.28 * turn_dir, 0.04 * turn_dir),
-                (f_nod1, 0.11, 0.28 * turn_dir, 0.05 * turn_dir),     # Reactive nod down
-                (min(f_end - 2, f_nod1 + 7), -0.03, 0.27 * turn_dir, 0.03 * turn_dir),  # Nod up
-                (f_nod2, 0.08, 0.25 * turn_dir, -0.04 * turn_dir),    # Second micro-nod
-                (f_settle, -0.01, 0.22 * turn_dir, 0.02 * turn_dir),
+                (f_start, 0.0, 0.08 * turn_dir * h_scale, 0.0),
+                (f_turn, -0.01 * h_scale, 0.16 * turn_dir * h_scale, 0.02 * turn_dir * h_scale),
+                (f_nod1, 0.055 * h_scale, 0.16 * turn_dir * h_scale, 0.025 * turn_dir * h_scale),
+                (min(f_end - 2, f_nod1 + 7), -0.015 * h_scale, 0.15 * turn_dir * h_scale, 0.015 * turn_dir * h_scale),
+                (f_nod2, 0.045 * h_scale, 0.15 * turn_dir * h_scale, -0.02 * turn_dir * h_scale),
+                (f_settle, 0.0, 0.12 * turn_dir * h_scale, 0.01 * turn_dir * h_scale),
             ]:
-                _keyframe_bone_rot(arm_obj, "neck", f_h, hp * 0.35, h_twist_y * 0.4, h_tilt_z * 0.35)
                 _keyframe_bone_rot(arm_obj, "head", f_h, hp, h_twist_y, h_tilt_z)
 
-            # Listener Arms: attentive forward-bent elbow listening pose
-            _keyframe_bone_rot(arm_obj, "upper_arm.L", f_start, -0.14, 0.0, -0.05)
-            _keyframe_bone_rot(arm_obj, "forearm.L", f_start, -0.38, 0.0, 0.08)
-            _keyframe_bone_rot(arm_obj, "upper_arm.R", f_start, -0.20, 0.0, 0.06)
-            _keyframe_bone_rot(arm_obj, "forearm.R", f_start, -0.52, 0.0, -0.12)
+            # Calm attentive listening arms
+            for f_a, ua_l, fa_l, ua_r, fa_r in [
+                (f_start, (-0.12, 0.0, -0.04), (-0.34, 0.0, 0.06), (-0.14, 0.0, 0.04), (-0.38, 0.0, -0.06)),
+                (f_b1 + 6, (-0.18, 0.0, -0.06), (-0.44, 0.0, 0.08), (-0.20, 0.0, 0.06), (-0.48, 0.0, -0.08)),
+                (f_settle, (-0.12, 0.0, -0.04), (-0.34, 0.0, 0.06), (-0.14, 0.0, 0.04), (-0.38, 0.0, -0.06)),
+            ]:
+                _keyframe_bone_rot(arm_obj, "upper_arm.L", f_a, *ua_l)
+                _keyframe_bone_rot(arm_obj, "forearm.L", f_a, *fa_l)
+                _keyframe_bone_rot(arm_obj, "upper_arm.R", f_a, *ua_r)
+                _keyframe_bone_rot(arm_obj, "forearm.R", f_a, *fa_r)
 
-            _keyframe_bone_rot(arm_obj, "upper_arm.L", f_b1 + 6, -0.22, 0.0, -0.08)
-            _keyframe_bone_rot(arm_obj, "forearm.L", f_b1 + 8, -0.54, 0.0, 0.14)
-            _keyframe_bone_rot(arm_obj, "upper_arm.R", f_b1 + 6, -0.28, 0.0, 0.10)
-            _keyframe_bone_rot(arm_obj, "forearm.R", f_b1 + 8, -0.68, 0.0, -0.18)
+            for f_br, b_lift in [(f_start, 0.002), (f_b1 + 8, 0.010), (f_b2 + 6, 0.008), (f_settle, 0.002)]:
+                _keyframe_bone_loc(arm_obj, "brow.L", min(f_end - 1, f_br), 0.0, b_lift, 0.0)
+                _keyframe_bone_loc(arm_obj, "brow.R", min(f_end - 1, f_br), 0.0, b_lift, 0.0)
+                _keyframe_bone_rot(arm_obj, "brow.L", min(f_end - 1, f_br), 0.0, 0.0, 0.0)
+                _keyframe_bone_rot(arm_obj, "brow.R", min(f_end - 1, f_br), 0.0, 0.0, 0.0)
 
-            _keyframe_bone_rot(arm_obj, "upper_arm.L", f_settle, -0.14, 0.0, -0.05)
-            _keyframe_bone_rot(arm_obj, "forearm.L", f_settle, -0.40, 0.0, 0.08)
-            _keyframe_bone_rot(arm_obj, "upper_arm.R", f_settle, -0.20, 0.0, 0.06)
-            _keyframe_bone_rot(arm_obj, "forearm.R", f_settle, -0.48, 0.0, -0.12)
-
-        # --- PHONEME-TO-VISEME LIP-SYNC & EMOTIONAL BROW KEYFRAMING ---
-        # Note: For vertical facial bones (roll=0), local +Y (ly) is World +Z (up/down)!
+        # --- PHONEME-TO-VISEME LIP-SYNC ---
+        # Note: For vertical facial bones (roll=0), local +Y (ly) is World +Z (vertical up/down)!
         if is_speaking and shot.get("narrationText"):
             viseme_events = generate_dialogue_viseme_timeline(
                 shot["narrationText"],
@@ -380,39 +368,33 @@ def author_character_timeline_performance(
                 shot.get("lipSyncEnvelope"),
             )
             for f_vis, vis_name, energy in viseme_events:
-                jaw_z, lip_low_z, mouth_scale_x, brow_z = VISEME_TARGETS.get(vis_name, VISEME_TARGETS["SIL"])
-                e = min(1.35, max(0.35, energy))
+                jaw_z, jaw_sy, mouth_scale_x, _ = VISEME_TARGETS.get(vis_name, VISEME_TARGETS["SIL"])
+                e = min(1.25, max(0.45, energy))
+                open_sy = 0.55 + (jaw_sy - 0.55) * e
                 _keyframe_bone_loc(arm_obj, "jaw", f_vis, 0.0, jaw_z * e, 0.0)
-                _keyframe_bone_loc(arm_obj, "lip_lower", f_vis, 0.0, lip_low_z * e, 0.0)
+                _keyframe_bone_scale(arm_obj, "jaw", f_vis, mouth_scale_x, open_sy, 1.0)
+                _keyframe_bone_loc(arm_obj, "lip_lower", f_vis, 0.0, jaw_z * 0.6 * e, 0.0)
                 _keyframe_bone_scale(arm_obj, "lip_lower", f_vis, mouth_scale_x, 1.0, 1.0)
-                _keyframe_bone_loc(arm_obj, "lip_upper", f_vis, 0.0, abs(lip_low_z) * 0.30 * e, 0.0)
+                _keyframe_bone_loc(arm_obj, "lip_upper", f_vis, 0.0, 0.0, 0.0)
                 _keyframe_bone_scale(arm_obj, "lip_upper", f_vis, mouth_scale_x, 1.0, 1.0)
-
-                brow_tilt = 0.06 if "excited" in emotion or "awe" in emotion else -0.03
-                _keyframe_bone_loc(arm_obj, "brow.L", f_vis, 0.0, brow_z * e, 0.0)
-                _keyframe_bone_loc(arm_obj, "brow.R", f_vis, 0.0, brow_z * e, 0.0)
-                _keyframe_bone_rot(arm_obj, "brow.L", f_vis, 0.0, 0.0, brow_tilt)
-                _keyframe_bone_rot(arm_obj, "brow.R", f_vis, 0.0, 0.0, -brow_tilt)
         else:
             for f_sil in (f_start, f_b1 + 8, f_b2 + 8, f_end - 1):
                 _keyframe_bone_loc(arm_obj, "jaw", f_sil, 0.0, 0.0, 0.0)
+                _keyframe_bone_scale(arm_obj, "jaw", f_sil, 0.96, 0.48, 1.0)
                 _keyframe_bone_loc(arm_obj, "lip_lower", f_sil, 0.0, 0.0, 0.0)
-                _keyframe_bone_scale(arm_obj, "lip_lower", f_sil, 1.05, 1.0, 1.0)
+                _keyframe_bone_scale(arm_obj, "lip_lower", f_sil, 0.96, 1.0, 1.0)
                 _keyframe_bone_loc(arm_obj, "lip_upper", f_sil, 0.0, 0.0, 0.0)
-                _keyframe_bone_scale(arm_obj, "lip_upper", f_sil, 1.05, 1.0, 1.0)
-                brow_react = 0.012 if f_sil in (f_b1 + 8, f_b2 + 8) else 0.003
-                _keyframe_bone_loc(arm_obj, "brow.L", f_sil, 0.0, brow_react, 0.0)
-                _keyframe_bone_loc(arm_obj, "brow.R", f_sil, 0.0, brow_react, 0.0)
+                _keyframe_bone_scale(arm_obj, "lip_upper", f_sil, 0.96, 1.0, 1.0)
 
         # --- NATURAL 5-FRAME ASYMMETRIC EYE BLINKS (local +Y = World +Z) ---
-        blink_frames = [f_start + 9, f_start + int(dur * 0.55)]
+        blink_frames = [f_start + 11, f_start + int(dur * 0.58)]
         for bf in blink_frames:
             if bf + 5 >= f_end:
                 continue
             for side in ("L", "R"):
                 _keyframe_bone_loc(arm_obj, f"eyelid_upper.{side}", bf, 0.0, 0.0, 0.0)
-                _keyframe_bone_loc(arm_obj, f"eyelid_upper.{side}", bf + 2, 0.0, -0.018, 0.0)
-                _keyframe_bone_loc(arm_obj, f"eyelid_upper.{side}", bf + 3, 0.0, -0.018, 0.0)
+                _keyframe_bone_loc(arm_obj, f"eyelid_upper.{side}", bf + 2, 0.0, -0.020, 0.0)
+                _keyframe_bone_loc(arm_obj, f"eyelid_upper.{side}", bf + 3, 0.0, -0.020, 0.0)
                 _keyframe_bone_loc(arm_obj, f"eyelid_upper.{side}", bf + 5, 0.0, 0.0, 0.0)
 
     _smooth_all_fcurves(arm_obj)

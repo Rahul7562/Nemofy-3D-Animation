@@ -2,9 +2,9 @@
 AetherFrame 3D — Cinematography, Lens Selection, Depth of Field & Shot Camera Switching
 (scripts/blender/configure_camera.py)
 
-Configures physical Blender cameras (28mm-85mm lenses on a 36mm full-frame sensor),
+Configures physical Blender cameras (28mm-70mm lenses on a 36mm full-frame sensor),
 aspect-ratio-aware framing (especially 9:16 vertical 1080x1920), Depth of Field,
-smooth Bezier camera choreography (Establishing Wide, OTS, Close-Up, Dolly, Tracking, Orbit),
+rock-steady TRACK_TO Empty camera choreography (eliminating Euler interpolation drift),
 and timeline marker camera binding so multi-shot sequences cut cleanly inside a single .blend.
 """
 
@@ -14,16 +14,16 @@ import mathutils
 
 
 SHOT_LENS_DEFAULTS = {
-    "establishing-wide": (28.0, 5.6),
-    "dolly-in":          (40.0, 4.0),
+    "establishing-wide": (32.0, 5.6),
+    "dolly-in":          (38.0, 4.0),
     "dolly-out":         (35.0, 4.5),
-    "tracking":          (45.0, 3.5),
-    "orbit":             (38.0, 4.0),
+    "tracking":          (40.0, 3.8),
+    "orbit":             (36.0, 4.0),
     "crane-up":          (32.0, 4.8),
-    "close-up":          (70.0, 2.4),
-    "crash-zoom":        (52.0, 2.8),
-    "shot-reverse-shot": (48.0, 3.2),
-    "static":            (50.0, 4.0),
+    "close-up":          (52.0, 2.8),
+    "crash-zoom":        (48.0, 2.8),
+    "shot-reverse-shot": (34.0, 4.5),
+    "static":            (40.0, 4.0),
 }
 
 
@@ -40,9 +40,9 @@ def configure_shot_cameras(
     character_rigs: dict,
 ):
     """
-    Creates a dedicated physical Blender Camera per shot, binds it to a timeline marker
-    at shot['startFrame'], configures lens focal length, 9:16 vertical framing adjustments,
-    Depth of Field, and smooth Bezier camera movement across the shot.
+    Creates a dedicated physical Blender Camera per shot with a dedicated TRACK_TO Empty target,
+    binds it to a timeline marker at shot['startFrame'], configures lens focal length,
+    9:16 vertical framing adjustments, Depth of Field, and smooth Bezier camera movement.
     """
     scene.timeline_markers.clear()
     is_vertical = aspect_ratio == "9:16"
@@ -60,10 +60,13 @@ def configure_shot_cameras(
         cam_obj = bpy.data.objects.new(name=f"ShotCam_{idx + 1:02d}", object_data=cam_data)
         scene.collection.objects.link(cam_obj)
 
-        lens_mm, fstop = SHOT_LENS_DEFAULTS.get(move_type, (40.0, 4.0))
+        # Create dedicated Look-At Target Empty so camera gaze is 100% locked with zero Euler wobble
+        tgt_empty = bpy.data.objects.new(name=f"ShotCamTarget_{idx + 1:02d}", object_data=None)
+        tgt_empty.empty_display_size = 0.15
+        scene.collection.objects.link(tgt_empty)
+
+        lens_mm, fstop = SHOT_LENS_DEFAULTS.get(move_type, (38.0, 4.0))
         cam_data.sensor_width = 36.0
-        # For 9:16 vertical (1080x1920), fit sensor horizontally and slightly widen lens
-        # so both Nemo & Leo fit comfortably inside the vertical frame without edge clipping.
         if is_vertical:
             cam_data.sensor_fit = "HORIZONTAL"
             cam_data.lens = lens_mm * 0.78
@@ -77,72 +80,80 @@ def configure_shot_cameras(
         cam_data.clip_start = 0.1
         cam_data.clip_end = 250.0
 
-        # Configure Depth of Field
+        # Configure Depth of Field focused on target Empty
         cam_data.dof.use_dof = True
         cam_data.dof.aperture_fstop = fstop
+        cam_data.dof.focus_object = tgt_empty
 
         # Determine start/end camera positions and look-at target in Blender world space
-        # (Leo at X = -0.42, Nemo at X = +0.42, Y = 0.0, Z in [0.0, 1.42], facing -Y)
-        speaker_x = 0.42 if "nemo" in speaker_name else -0.42
-        dist_mult = 1.05 if is_vertical else 0.88
+        # (Leo at X = -0.38, Nemo at X = +0.38, Y = 0.0, Z in [0.0, 1.42], facing -Y)
+        speaker_x = 0.38 if "nemo" in speaker_name else -0.38
+        dist_mult = 1.04 if is_vertical else 0.88
 
         if move_type == "establishing-wide":
-            pos_start = mathutils.Vector((-0.08, -2.55 * dist_mult, 0.96))
-            pos_end   = mathutils.Vector(( 0.06, -2.30 * dist_mult, 0.94))
-            tgt_start = mathutils.Vector(( 0.0, 0.0, 0.88))
-            tgt_end   = mathutils.Vector(( 0.0, 0.0, 0.90))
+            # Balanced @agentmorphy 2-shot framing both Leo (left) and Nemo (right) prominently on the window ledge
+            pos_start = mathutils.Vector((0.0, -2.02 * dist_mult, 0.78))
+            pos_end   = mathutils.Vector((0.0, -1.88 * dist_mult, 0.77))
+            tgt_start = mathutils.Vector((0.0, 0.0, 0.72))
+            tgt_end   = mathutils.Vector((0.0, 0.0, 0.73))
         elif move_type in ("close-up", "crash-zoom"):
-            # Tight @agentmorphy 3/4 Close-Up on active speaker while keeping partner's shoulder in frame
-            pos_start = mathutils.Vector((speaker_x * 0.42, -2.15 * dist_mult, 0.96))
-            pos_end   = mathutils.Vector((speaker_x * 0.55, -1.78 * dist_mult, 0.94))
-            tgt_start = mathutils.Vector((speaker_x * 0.45, 0.0, 0.88))
-            tgt_end   = mathutils.Vector((speaker_x * 0.58, 0.0, 0.90))
+            # Clean @agentmorphy Medium Close-Up favoring the active speaker while keeping the partner cleanly visible
+            focus_x = 0.16 if "nemo" in speaker_name else -0.16
+            focus_z = 0.66 if "nemo" in speaker_name else 0.76
+            pos_start = mathutils.Vector((focus_x * 0.80, -1.82 * dist_mult, focus_z + 0.06))
+            pos_end   = mathutils.Vector((focus_x * 0.90, -1.70 * dist_mult, focus_z + 0.05))
+            tgt_start = mathutils.Vector((focus_x, 0.0, focus_z))
+            tgt_end   = mathutils.Vector((focus_x, 0.0, focus_z))
         elif move_type in ("tracking", "shot-reverse-shot"):
-            pos_start = mathutils.Vector((-0.38, -2.20 * dist_mult, 0.95))
-            pos_end   = mathutils.Vector(( 0.38, -2.15 * dist_mult, 0.95))
-            tgt_start = mathutils.Vector((-0.14, 0.0, 0.88))
-            tgt_end   = mathutils.Vector(( 0.14, 0.0, 0.90))
+            # Steady Two-Shot Payoff framing both characters prominently on the window ledge
+            pos_start = mathutils.Vector((-0.03, -1.92 * dist_mult, 0.77))
+            pos_end   = mathutils.Vector(( 0.03, -2.00 * dist_mult, 0.78))
+            tgt_start = mathutils.Vector(( 0.0, 0.0, 0.72))
+            tgt_end   = mathutils.Vector(( 0.0, 0.0, 0.73))
         elif move_type == "orbit":
-            pos_start = mathutils.Vector(( 0.45, -2.35 * dist_mult, 0.98))
-            pos_end   = mathutils.Vector((-0.42, -2.25 * dist_mult, 0.98))
-            tgt_start = mathutils.Vector(( 0.0, 0.0, 0.88))
-            tgt_end   = mathutils.Vector(( 0.0, 0.0, 0.90))
+            pos_start = mathutils.Vector(( 0.24, -2.00 * dist_mult, 0.80))
+            pos_end   = mathutils.Vector((-0.24, -1.96 * dist_mult, 0.80))
+            tgt_start = mathutils.Vector(( 0.0, 0.0, 0.73))
+            tgt_end   = mathutils.Vector(( 0.0, 0.0, 0.73))
         elif move_type == "dolly-in":
-            pos_start = mathutils.Vector(( 0.0, -2.50 * dist_mult, 0.96))
-            pos_end   = mathutils.Vector((speaker_x * 0.40, -1.95 * dist_mult, 0.94))
-            tgt_start = mathutils.Vector(( 0.0, 0.0, 0.88))
-            tgt_end   = mathutils.Vector((speaker_x * 0.45, 0.0, 0.90))
+            pos_start = mathutils.Vector((0.0, -2.05 * dist_mult, 0.79))
+            pos_end   = mathutils.Vector((speaker_x * 0.35, -1.76 * dist_mult, 0.75))
+            tgt_start = mathutils.Vector((0.0, 0.0, 0.73))
+            tgt_end   = mathutils.Vector((speaker_x * 0.38, 0.0, 0.73))
         else:
-            pos_start = mathutils.Vector(( 0.0, -2.35 * dist_mult, 0.95))
-            pos_end   = mathutils.Vector(( 0.10, -2.20 * dist_mult, 0.95))
-            tgt_start = mathutils.Vector(( 0.0, 0.0, 0.88))
-            tgt_end   = mathutils.Vector(( 0.0, 0.0, 0.90))
-
-        # Keyframe start, midpoint, and end of shot camera motion
-        f_mid = (f_start + f_end) // 2
-        pos_mid = pos_start.lerp(pos_end, 0.5)
-        tgt_mid = tgt_start.lerp(tgt_end, 0.5)
+            pos_start = mathutils.Vector((0.0, -1.98 * dist_mult, 0.78))
+            pos_end   = mathutils.Vector((0.0, -1.88 * dist_mult, 0.78))
+            tgt_start = mathutils.Vector((0.0, 0.0, 0.73))
+            tgt_end   = mathutils.Vector((0.0, 0.0, 0.73))
 
         for frame_pt, pos_vec, tgt_vec in [
             (f_start, pos_start, tgt_start),
-            (f_mid, pos_mid, tgt_mid),
             (f_end - 1, pos_end, tgt_end),
         ]:
             cam_obj.location = pos_vec
+            tgt_empty.location = tgt_vec
             _aim_camera_at_target(cam_obj, tgt_vec)
             cam_obj.keyframe_insert(data_path="location", frame=frame_pt)
             cam_obj.keyframe_insert(data_path="rotation_euler", frame=frame_pt)
+            tgt_empty.keyframe_insert(data_path="location", frame=frame_pt)
 
             cam_data.dof.focus_distance = (pos_vec - tgt_vec).length
             cam_data.dof.keyframe_insert(data_path="focus_distance", frame=frame_pt)
 
-        if cam_obj.animation_data and cam_obj.animation_data.action:
-            for fc in cam_obj.animation_data.action.fcurves:
-                for kp in fc.keyframe_points:
-                    kp.interpolation = "BEZIER"
-                    kp.handle_left_type = "AUTO_CLAMPED"
-                    kp.handle_right_type = "AUTO_CLAMPED"
-                fc.update()
+        # Attach TRACK_TO constraint so camera stays locked on tgt_empty at every frame
+        track_con = cam_obj.constraints.new(type="TRACK_TO")
+        track_con.target = tgt_empty
+        track_con.track_axis = "TRACK_NEGATIVE_Z"
+        track_con.up_axis = "UP_Y"
+
+        for obj in (cam_obj, tgt_empty):
+            if obj.animation_data and obj.animation_data.action:
+                for fc in obj.animation_data.action.fcurves:
+                    for kp in fc.keyframe_points:
+                        kp.interpolation = "BEZIER"
+                        kp.handle_left_type = "AUTO_CLAMPED"
+                        kp.handle_right_type = "AUTO_CLAMPED"
+                    fc.update()
 
         # Bind camera to timeline marker at shot boundary
         marker = scene.timeline_markers.new(name=f"Shot_{idx + 1:02d}", frame=f_start)

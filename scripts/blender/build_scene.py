@@ -398,8 +398,8 @@ def build_project_from_manifest(manifest_path: str, output_blend_path: str, insp
             "startFrame": cursor_f,
             "endFrame": end_f,
             "characterStaging": {
-                "char-leo":  {"x": -0.42, "y": 0.0},
-                "char-nemo": {"x":  0.42, "y": 0.0},
+                "char-leo":  {"x": -0.38, "y": 0.0},
+                "char-nemo": {"x":  0.38, "y": 0.0},
             },
         })
         cursor_f = end_f
@@ -409,7 +409,7 @@ def build_project_from_manifest(manifest_path: str, output_blend_path: str, insp
     for idx, cid in enumerate(rig_ids):
         partner_id = rig_ids[1 - idx] if len(rig_ids) > 1 else cid
         partner_positions = [
-            s["characterStaging"].get(partner_id, {"x": 0.42 if "leo" in cid else -0.42, "y": 0.0})
+            s["characterStaging"].get(partner_id, {"x": 0.38 if "leo" in cid else -0.38, "y": 0.0})
             for s in normalized_shots
         ]
         author_character_timeline_performance(

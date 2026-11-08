@@ -154,8 +154,8 @@ test("AGENTMORPHY_SKIT_PROJECT stars Nemo & Leo in agent-command-desk with close
     30,
     "leo-celebrate",
   );
-  assert.ok(panicPose.leftUpperArmX < -1.2);
-  assert.ok(celebratePose.rightUpperArmX < -1.8);
+  assert.ok(panicPose.leftUpperArmX < -1.15);
+  assert.ok(celebratePose.rightUpperArmX < -1.65);
 });
 
 test("sanitizeOmniVoiceInstruct keeps valid OmniVoice voice-design tags and drops invalid prose", () => {
@@ -304,7 +304,7 @@ test("inspectSystemHardware and processUploadedDialogueAudio validate real audio
   assert.ok(uploaded.wordTimings.length >= 8);
 });
 
-test("serializeProjectToBlenderManifest produces native 1080x1920 504-frame Blender manifest for Nemo and Leo", () => {
+test("serializeProjectToBlenderManifest produces native 1080x1920 564-frame Blender manifest for Nemo and Leo", () => {
   const manifest = serializeProjectToBlenderManifest({
     project: AGENTMORPHY_SKIT_PROJECT,
     aspectRatio: "9:16",
@@ -316,10 +316,10 @@ test("serializeProjectToBlenderManifest produces native 1080x1920 504-frame Blen
   assert.equal(manifest.width, 1080);
   assert.equal(manifest.height, 1920);
   assert.equal(manifest.fps, 30);
-  assert.equal(manifest.totalFrames, 504);
+  assert.equal(manifest.totalFrames, 564);
   assert.equal(manifest.shots.length, 4);
   assert.equal(manifest.shots[0].startFrame, 1);
-  assert.equal(manifest.shots[3].endFrame, 504);
+  assert.equal(manifest.shots[3].endFrame, 564);
 });
 
 test("Blender asset catalogue and diagnostics verify Rain, Snow, Security Bot, Mixamo, Poly Haven, Nemo & Leo rigs", async () => {

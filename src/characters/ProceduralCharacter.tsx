@@ -170,9 +170,10 @@ export const ProceduralCharacter: React.FC<ProceduralCharacterProps> = ({
 
     return (
       <group scale={config.scale}>
-        <group position={[0, 0.42 + pose.hipBobY * 1.2, 0]}>
-          {/* Main Wide Cube Head/Body */}
+        <group position={[0, 0.42, 0]}>
+          {/* Main Wide Cube Head/Body (breathes gently while legs stay planted on the sill) */}
           <group
+            position={[0, pose.hipBobY * 0.45, 0]}
             rotation={[
               pose.headPitchX * 0.65 + pose.torsoLeanX * 0.45,
               pose.headYawY * 0.8 + pose.torsoTwistY * 0.45,
@@ -283,7 +284,7 @@ export const ProceduralCharacter: React.FC<ProceduralCharacterProps> = ({
             </group>
           </group>
 
-          {/* 4 Cute Stubby Blocky Legs */}
+          {/* 4 Cute Stubby Blocky Legs (Planted firmly on the window sill ledge) */}
           <group
             position={[-0.165, -0.23, 0.105]}
             rotation={[pose.leftThighX * 0.6, 0, 0]}
@@ -336,16 +337,16 @@ export const ProceduralCharacter: React.FC<ProceduralCharacterProps> = ({
 
     return (
       <group scale={config.scale}>
-        <group position={[0, 0.54 + pose.hipBobY, 0]}>
+        <group position={[0, 0.54, 0]}>
           {/* Pelvis / Hip Block */}
           <mesh castShadow receiveShadow>
             <boxGeometry args={[0.42, 0.14, 0.28]} />
             <meshStandardMaterial color={pantsBlue} roughness={0.5} />
           </mesh>
 
-          {/* Torso Group */}
+          {/* Torso Group (upper body breathes softly while sneakers remain planted on the ledge) */}
           <group
-            position={[0, 0.06, 0]}
+            position={[0, 0.06 + pose.hipBobY * 0.45, 0]}
             rotation={[pose.torsoLeanX, pose.torsoTwistY, 0]}
           >
             {/* Cobalt-Blue Hoodie Torso */}
@@ -521,14 +522,8 @@ export const ProceduralCharacter: React.FC<ProceduralCharacterProps> = ({
                 <meshStandardMaterial color={hairDark} roughness={0.4} />
               </mesh>
 
-              {/* Subtle Blocky Nose */}
-              <mesh position={[0, 0.18, 0.228]} castShadow>
-                <boxGeometry args={[0.036, 0.034, 0.028]} />
-                <meshStandardMaterial color="#E2A889" roughness={0.5} />
-              </mesh>
-
-              {/* Articulated Mouth Cavity + Tongue */}
-              <mesh position={[0, 0.105 - pose.mouthOpenness * 0.02, 0.222]}>
+              {/* Articulated Mouth Cavity + Tongue (Clean @agentmorphy style without nose block) */}
+              <mesh position={[0, 0.112 - pose.mouthOpenness * 0.02, 0.222]}>
                 <boxGeometry
                   args={[mouthActualWidth, mouthOpenHeight, 0.028]}
                 />
@@ -536,7 +531,7 @@ export const ProceduralCharacter: React.FC<ProceduralCharacterProps> = ({
               </mesh>
               {pose.mouthOpenness > 0.12 && (
                 <mesh
-                  position={[0, 0.092 - pose.mouthOpenness * 0.022, 0.228]}
+                  position={[0, 0.098 - pose.mouthOpenness * 0.022, 0.228]}
                 >
                   <boxGeometry
                     args={[
