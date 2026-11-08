@@ -220,58 +220,122 @@ export async function exportProjectToMp4({
         renderHeight,
       );
 
-      // Scene Slate Badge
-      const slateW = Math.min(renderWidth - 40, 460);
-      ctx.fillStyle = "rgba(9, 13, 22, 0.88)";
-      ctx.fillRect(24, 24, slateW, 36);
-      ctx.strokeStyle = "rgba(148, 163, 184, 0.25)";
-      ctx.strokeRect(24, 24, slateW, 36);
-      ctx.fillStyle = "#6366F1";
-      ctx.fillRect(36, 37, 10, 10);
-      ctx.fillStyle = "#F8FAFC";
-      ctx.font = "600 14px monospace";
-      ctx.fillText(
-        `SCENE ${String(sceneIdx + 1).padStart(2, "0")} // ${currentTiming.scene.title.toUpperCase()} [${currentTiming.scene.cameraMovement.toUpperCase()}]`,
-        54,
-        47,
-      );
+      const isViralReels = currentTiming.scene.captionStyle === "viral-reels";
+
+      // Scene Slate Badge (only when not in clean viral-reels mode)
+      if (!isViralReels) {
+        const slateW = Math.min(renderWidth - 40, 460);
+        ctx.fillStyle = "rgba(9, 13, 22, 0.88)";
+        ctx.fillRect(24, 24, slateW, 36);
+        ctx.strokeStyle = "rgba(148, 163, 184, 0.25)";
+        ctx.strokeRect(24, 24, slateW, 36);
+        ctx.fillStyle = "#6366F1";
+        ctx.fillRect(36, 37, 10, 10);
+        ctx.fillStyle = "#F8FAFC";
+        ctx.font = "600 14px monospace";
+        ctx.fillText(
+          `SCENE ${String(sceneIdx + 1).padStart(2, "0")} // ${currentTiming.scene.title.toUpperCase()} [${currentTiming.scene.cameraMovement.toUpperCase()}]`,
+          54,
+          47,
+        );
+      }
 
       // Synchronized Burned-in Subtitles (matching CinematicStoryComposition)
       if (
         project.subtitlesEnabled &&
         currentTiming.scene.narrationText.trim().length > 0
       ) {
-        const subBoxW = Math.min(renderWidth - 80, 880);
-        const subBoxH = 76;
-        const subBoxX = (renderWidth - subBoxW) / 2;
-        const subBoxY = renderHeight - Math.max(48, Math.round(renderHeight * 0.06)) - subBoxH;
+        if (isViralReels) {
+          const words = currentTiming.scene.narrationText
+            .trim()
+            .split(/\s+/)
+            .filter(Boolean);
+          const progress = Math.max(
+            0,
+            Math.min(0.999, localFrame / Math.max(1, currentTiming.durationInFrames * 0.92)),
+          );
+          const activeWordIndex = Math.floor(progress * words.length);
+          const windowSize = 4;
+          const windowIndex = Math.floor(activeWordIndex / windowSize);
+          const startIdx = windowIndex * windowSize;
+          const visibleWords = words.slice(startIdx, startIdx + windowSize);
+          const isNemoSpeaker = (currentTiming.scene.dialogueSpeaker || "")
+            .toLowerCase()
+            .includes("nemo");
 
-        ctx.fillStyle = "rgba(9, 13, 22, 0.90)";
-        ctx.fillRect(subBoxX, subBoxY, subBoxW, subBoxH);
-        ctx.strokeStyle = "rgba(99, 102, 241, 0.42)";
-        ctx.strokeRect(subBoxX, subBoxY, subBoxW, subBoxH);
+          const fontSize = Math.max(36, Math.round(renderWidth * 0.044));
+          ctx.font = `900 ${fontSize}px Inter, system-ui, sans-serif`;
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
 
-        ctx.textAlign = "center";
-        ctx.fillStyle = "#38BDF8";
-        ctx.font = "600 13px monospace";
-        ctx.fillText(
-          (currentTiming.scene.dialogueSpeaker || "NARRATOR").toUpperCase(),
-          renderWidth / 2,
-          subBoxY + 24,
-        );
+          const captionY = Math.round(renderHeight * 0.145);
+          const pillW = Math.min(renderWidth - 96, 860);
+          const pillH = Math.round(fontSize * 2.15);
+          const pillX = (renderWidth - pillW) / 2;
+          const pillY = captionY - pillH / 2;
 
-        ctx.fillStyle = "#F8FAFC";
-        const fontSize = Math.max(
-          16,
-          Math.min(26, Math.round(renderWidth * 0.02)),
-        );
-        ctx.font = `600 ${fontSize}px sans-serif`;
-        const line =
-          currentTiming.scene.narrationText.length > 82
-            ? currentTiming.scene.narrationText.slice(0, 79) + "..."
-            : currentTiming.scene.narrationText;
-        ctx.fillText(`“${line}”`, renderWidth / 2, subBoxY + 54);
-        ctx.textAlign = "left";
+          ctx.fillStyle = "rgba(10, 13, 26, 0.56)";
+          ctx.fillRect(pillX, pillY, pillW, pillH);
+          ctx.strokeStyle = isNemoSpeaker
+            ? "rgba(249, 115, 22, 0.45)"
+            : "rgba(56, 189, 248, 0.45)";
+          ctx.lineWidth = 2;
+          ctx.strokeRect(pillX, pillY, pillW, pillH);
+
+          const activeWord = visibleWords[activeWordIndex - startIdx] || "";
+          const lineText = visibleWords.map((w) => w.toUpperCase()).join("  ");
+
+          ctx.fillStyle = "rgba(0, 0, 0, 0.85)";
+          ctx.fillText(lineText, renderWidth / 2 + 3, captionY + 4);
+
+          ctx.fillStyle = "#FFFFFF";
+          ctx.fillText(lineText, renderWidth / 2, captionY);
+
+          if (activeWord) {
+            ctx.font = `800 ${Math.round(fontSize * 0.42)}px monospace`;
+            ctx.fillStyle = isNemoSpeaker ? "#FB923C" : "#34D399";
+            ctx.fillText(
+              `${(currentTiming.scene.dialogueSpeaker || "AGENT").toUpperCase()} • ${activeWord.toUpperCase()}`,
+              renderWidth / 2,
+              pillY - 16,
+            );
+          }
+          ctx.textAlign = "left";
+          ctx.textBaseline = "alphabetic";
+        } else {
+          const subBoxW = Math.min(renderWidth - 80, 880);
+          const subBoxH = 76;
+          const subBoxX = (renderWidth - subBoxW) / 2;
+          const subBoxY =
+            renderHeight - Math.max(48, Math.round(renderHeight * 0.06)) - subBoxH;
+
+          ctx.fillStyle = "rgba(9, 13, 22, 0.90)";
+          ctx.fillRect(subBoxX, subBoxY, subBoxW, subBoxH);
+          ctx.strokeStyle = "rgba(99, 102, 241, 0.42)";
+          ctx.strokeRect(subBoxX, subBoxY, subBoxW, subBoxH);
+
+          ctx.textAlign = "center";
+          ctx.fillStyle = "#38BDF8";
+          ctx.font = "600 13px monospace";
+          ctx.fillText(
+            (currentTiming.scene.dialogueSpeaker || "NARRATOR").toUpperCase(),
+            renderWidth / 2,
+            subBoxY + 24,
+          );
+
+          ctx.fillStyle = "#F8FAFC";
+          const fontSize = Math.max(
+            16,
+            Math.min(26, Math.round(renderWidth * 0.02)),
+          );
+          ctx.font = `600 ${fontSize}px sans-serif`;
+          const line =
+            currentTiming.scene.narrationText.length > 82
+              ? currentTiming.scene.narrationText.slice(0, 79) + "..."
+              : currentTiming.scene.narrationText;
+          ctx.fillText(`“${line}”`, renderWidth / 2, subBoxY + 54);
+          ctx.textAlign = "left";
+        }
       }
 
       // Transition Fade Overlay

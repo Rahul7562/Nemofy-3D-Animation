@@ -57,6 +57,11 @@ export const ENVIRONMENT_PRESETS: Array<{
   accent: string;
 }> = [
   {
+    id: "agent-command-desk",
+    label: "AgentMorphy Coding War Room",
+    accent: "#22D3EE",
+  },
+  {
     id: "observatory-citadel",
     label: "Sunlit Observatory Citadel",
     accent: "#6366F1",
@@ -94,6 +99,8 @@ export const CAMERA_MOVEMENT_PRESETS: Array<{
   shotType: string;
 }> = [
   { id: "establishing-wide", label: "Establishing Wide", shotType: "WIDE" },
+  { id: "shot-reverse-shot", label: "Shot-Reverse-Shot OTS", shotType: "OTS" },
+  { id: "crash-zoom", label: "Comedic Crash Zoom", shotType: "PUNCH" },
   { id: "dolly-in", label: "Slow Dolly In", shotType: "MEDIUM" },
   { id: "dolly-out", label: "Pull Back Reveal", shotType: "WIDE" },
   { id: "orbit", label: "Cinematic Orbit", shotType: "HERO" },
@@ -130,11 +137,14 @@ export const CHARACTER_ACTIONS: Array<{
   id: CharacterAction;
   label: string;
 }> = [
+  { id: "type-code", label: "Vibe-Coding / Rapid Typing" },
+  { id: "panic-react", label: "98% Limit Panic Reaction" },
+  { id: "celebrate", label: "Prod Deploy Victory" },
+  { id: "talk", label: "Expressive Dialogue" },
+  { id: "gesture", label: "Heroic Gesture" },
   { id: "idle", label: "Breathing Idle" },
   { id: "walk", label: "Forward Walk Cycle" },
   { id: "run", label: "Dynamic Run Cycle" },
-  { id: "talk", label: "Expressive Dialogue" },
-  { id: "gesture", label: "Heroic Gesture" },
   { id: "sit", label: "Seated Pose" },
 ];
 

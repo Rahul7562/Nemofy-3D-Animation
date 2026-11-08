@@ -25,6 +25,7 @@ import {
   computeSceneTimeline,
   getDimensionsForAspectRatio,
 } from "../utils/animation-math";
+import { exportProjectToMp4 } from "../renderer/VideoExportEngine";
 
 interface ExportModalProps {
   project: StudioProject;
@@ -300,6 +301,71 @@ export const ExportModal: React.FC<ExportModalProps> = ({
     }
   };
 
+  const handleStartRemotionRender = async () => {
+    setIsRendering(true);
+    setError(null);
+    try {
+      const result = await exportProjectToMp4({
+        project,
+        aspectRatio,
+        fps,
+        onProgress: (status) => {
+          setJobState((prev) => ({
+            jobId: status.jobId || prev?.jobId || "remotion-webgl",
+            projectName: project.brief.title || project.name,
+            status: status.phase,
+            progressPercent: status.percent,
+            framesCompleted: status.currentFrame,
+            totalFrames: status.totalFrames,
+            fps,
+            width: targetDims.width,
+            height: targetDims.height,
+            blendFileUrl: prev?.blendFileUrl || null,
+            previewImageUrls: prev?.previewImageUrls || [],
+            outputMp4Url: prev?.outputMp4Url || null,
+            contactSheetUrl: prev?.contactSheetUrl || null,
+            sceneInspection: prev?.sceneInspection || null,
+            verification: prev?.verification || null,
+            logs: [...(prev?.logs || []).slice(-6), status.message],
+            errorMessage: null,
+          }));
+        },
+      });
+
+      setJobState((prev) => ({
+        jobId: result.jobId,
+        projectName: project.brief.title || project.name,
+        status: "completed",
+        progressPercent: 100,
+        framesCompleted: result.totalFrames,
+        totalFrames: result.totalFrames,
+        fps: result.fps,
+        width: result.width,
+        height: result.height,
+        blendFileUrl: prev?.blendFileUrl || null,
+        previewImageUrls: prev?.previewImageUrls || [],
+        outputMp4Url: result.videoUrl,
+        contactSheetUrl: prev?.contactSheetUrl || null,
+        sceneInspection: prev?.sceneInspection || null,
+        verification: result.verification,
+        logs: [
+          "Remotion + Three.js 3D Stage rendered at native resolution.",
+          "Neural Piper OmniVoice dialogue tracks mixed & mastered.",
+          `Encoded H.264 + AAC MP4 (${result.width}×${result.height} @ ${result.fps} FPS) via FFmpeg.`,
+        ],
+        errorMessage: null,
+      }));
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Remotion 3D WebGL MP4 export failed.",
+      );
+    } finally {
+      setIsRendering(false);
+    }
+  };
+
   const handleCancelRender = async () => {
     if (!jobState?.jobId) return;
     try {
@@ -469,6 +535,16 @@ export const ExportModal: React.FC<ExportModalProps> = ({
           <div className="flex flex-wrap items-center gap-2.5">
             <button
               type="button"
+              disabled={isRendering || isPreviewing}
+              onClick={handleStartRemotionRender}
+              className="flex items-center gap-1.5 px-4 py-2.5 rounded-md bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white text-xs font-semibold cursor-pointer"
+            >
+              <Film className="w-4 h-4" />
+              <span>Fast Remotion 3D + OmniVoice MP4 Export</span>
+            </button>
+
+            <button
+              type="button"
               disabled={isRendering || isPreviewing || !diagnostics?.available}
               onClick={handleRenderPreviewStills}
               className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-md bg-slate-900 hover:bg-slate-800 disabled:opacity-50 border border-slate-700 text-slate-200 text-xs font-semibold cursor-pointer"
@@ -507,7 +583,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
                   <span>
-                    Blender Rendering ({jobState?.framesCompleted ?? 0}/
+                    Rendering ({jobState?.framesCompleted ?? 0}/
                     {jobState?.totalFrames ?? totalFrames})...
                   </span>
                 </>

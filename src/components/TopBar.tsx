@@ -9,13 +9,15 @@ import {
   Mic,
   Smartphone,
 } from "lucide-react";
-import { WorkflowStage } from "../utils/types";
+import { WorkflowStage, StudioProject } from "../utils/types";
+import { STUDIO_PRESET_PROJECTS } from "../utils/default-project";
 
 interface TopBarProps {
   projectTitle: string;
   activeStage: WorkflowStage;
   onSelectStage: (stage: WorkflowStage) => void;
   onOpenExport: () => void;
+  onSelectPresetProject?: (project: StudioProject) => void;
   onLoadVerticalShowcase?: () => void;
   onLoadDefaultProject?: () => void;
   activeProjectId?: string;
@@ -39,8 +41,7 @@ export const TopBar: React.FC<TopBarProps> = ({
   activeStage,
   onSelectStage,
   onOpenExport,
-  onLoadVerticalShowcase,
-  onLoadDefaultProject,
+  onSelectPresetProject,
   activeProjectId,
 }) => {
   return (
@@ -91,26 +92,35 @@ export const TopBar: React.FC<TopBarProps> = ({
         })}
       </nav>
 
-      {/* Zone 3: Preset Switcher & Primary Action CTA */}
+      {/* Zone 3: Skit Preset Switcher & Primary Action CTA */}
       <div className="flex items-center gap-2 shrink-0">
-        {onLoadVerticalShowcase && onLoadDefaultProject && (
-          <button
-            type="button"
-            onClick={() =>
-              activeProjectId === "nemo-and-leo-cinematic-encounter"
-                ? onLoadDefaultProject()
-                : onLoadVerticalShowcase()
-            }
-            title="Switch between 16s 16:9 Observatory Project and 10s 9:16 Nemo and Leo — A Cinematic Encounter"
-            className="hidden lg:flex items-center gap-1.5 px-2.5 py-1.5 rounded bg-slate-900 hover:bg-slate-800 border border-slate-700 text-cyan-300 text-xs font-mono cursor-pointer"
-          >
-            <Smartphone className="w-3.5 h-3.5" />
-            <span>
-              {activeProjectId === "nemo-and-leo-cinematic-encounter"
-                ? "16:9 Observatory (16s)"
-                : "9:16 Nemo & Leo (10s)"}
-            </span>
-          </button>
+        {onSelectPresetProject && (
+          <div className="hidden lg:flex items-center gap-1.5 px-2 py-1 rounded bg-slate-900 border border-slate-700">
+            <Smartphone className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+            <select
+              aria-label="Select Skit or Project Preset"
+              value={activeProjectId || STUDIO_PRESET_PROJECTS[0].id}
+              onChange={(e) => {
+                const found = STUDIO_PRESET_PROJECTS.find(
+                  (p) => p.id === e.target.value,
+                );
+                if (found) {
+                  onSelectPresetProject(found.project);
+                }
+              }}
+              className="bg-transparent text-cyan-300 text-xs font-mono focus:outline-none cursor-pointer"
+            >
+              {STUDIO_PRESET_PROJECTS.map((item) => (
+                <option
+                  key={item.id}
+                  value={item.id}
+                  className="bg-slate-950 text-slate-100"
+                >
+                  [{item.badge}] {item.label}
+                </option>
+              ))}
+            </select>
+          </div>
         )}
 
         <button

@@ -59,7 +59,7 @@ export const CharacterActor: React.FC<CharacterActorProps> = ({
         />
       </mesh>
 
-      {(isSelected || (showDirectorGizmos && placement.speaking)) && (
+      {showDirectorGizmos && (isSelected || placement.speaking) && (
         <mesh
           position={[0, 0.025, 0]}
           rotation={[-Math.PI / 2, 0, 0]}

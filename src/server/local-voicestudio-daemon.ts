@@ -3,11 +3,15 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import net from "node:net";
-import { execFile } from "node:child_process";
+import { execFile, spawn } from "node:child_process";
 import { promisify } from "node:util";
 import { BUILT_IN_VOICE_PROFILES } from "../assets/preset-library";
 
 const execFileAsync = promisify(execFile);
+
+const MODELS_DIR = path.resolve("./data/voicestudio/models");
+const LEO_ONNX_PATH = path.join(MODELS_DIR, "leo.onnx");
+const NEMO_ONNX_PATH = path.join(MODELS_DIR, "nemo.onnx");
 
 function isPortListening(port: number): Promise<boolean> {
   return new Promise((resolve) => {
@@ -29,63 +33,117 @@ function isPortListening(port: number): Promise<boolean> {
   });
 }
 
+function synthesizeWithPiperOnnx(params: {
+  text: string;
+  modelPath: string;
+  outputWavPath: string;
+  lengthScale: number;
+  noiseScale?: number;
+}): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const args = [
+      "--model",
+      params.modelPath,
+      "--output_file",
+      params.outputWavPath,
+      "--length_scale",
+      params.lengthScale.toFixed(3),
+      "--noise_scale",
+      (params.noiseScale ?? 0.667).toFixed(3),
+      "--sentence_silence",
+      "0.18",
+    ];
+    const child = spawn("piper", args, {
+      stdio: ["pipe", "pipe", "pipe"],
+    });
+    let stderr = "";
+    child.stderr.on("data", (chunk) => {
+      stderr += String(chunk);
+    });
+    child.on("error", (err) => reject(err));
+    child.on("close", (code) => {
+      if (code === 0 && fs.existsSync(params.outputWavPath)) {
+        resolve();
+      } else {
+        reject(
+          new Error(
+            `Piper ONNX exited with code ${code}: ${stderr.slice(0, 240)}`,
+          ),
+        );
+      }
+    });
+    child.stdin.write(params.text + "\n");
+    child.stdin.end();
+  });
+}
+
 /**
- * Selects the best CMU Arctic / Flite voice or espeak-ng voice based on character
- * voiceId, language, and OmniVoice instruct tags.
+ * Selects the best neural ONNX voice model & prosody parameters based on
+ * character voiceId, language, and OmniVoice instruct tags.
  */
 function selectVoiceConfig(
   voiceId: string,
   language: string,
   instruct: string,
 ): {
-  useFlite: boolean;
+  onnxModelPath: string | null;
+  pitchShiftSemitones: number;
   fliteVoice: "slt" | "rms" | "kal16" | "awb";
   espeakVoice: string;
-  pitchShiftSemitones: number;
 } {
   const v = (voiceId || "").toLowerCase();
   const inst = (instruct || "").toLowerCase();
   const lang = (language || "en").toLowerCase();
 
-  const isFemale =
+  const isNemoOrAria =
     v.includes("nemo") ||
     v.includes("aria") ||
     v.includes("slt") ||
     (inst.includes("female") && !inst.includes("male"));
 
-  const isBritishOrScottish =
-    v.includes("kaelen") || inst.includes("british") || inst.includes("scottish");
-
-  let pitchShiftSemitones = 0;
-  if (inst.includes("high pitch") || v.includes("nemo")) {
-    pitchShiftSemitones = 1.2;
-  } else if (inst.includes("low pitch") || v.includes("kaelen")) {
-    pitchShiftSemitones = -1.5;
+  let onnxModelPath: string | null = null;
+  if (lang === "en" || lang === "auto" || lang.startsWith("en-")) {
+    if (isNemoOrAria && fs.existsSync(NEMO_ONNX_PATH)) {
+      onnxModelPath = NEMO_ONNX_PATH;
+    } else if (fs.existsSync(LEO_ONNX_PATH)) {
+      onnxModelPath = LEO_ONNX_PATH;
+    } else if (fs.existsSync(NEMO_ONNX_PATH)) {
+      onnxModelPath = NEMO_ONNX_PATH;
+    }
   }
 
-  const useFlite = lang === "en" || lang === "auto" || lang.startsWith("en-");
-  const fliteVoice: "slt" | "rms" | "kal16" | "awb" = isFemale
-    ? "slt"
-    : isBritishOrScottish
-      ? "awb"
-      : "rms";
+  let pitchShiftSemitones = 0;
+  if (v.includes("nemo")) {
+    pitchShiftSemitones = 0.8; // Crisp, bright AI agent companion tone
+  } else if (v.includes("leo")) {
+    pitchShiftSemitones = 0.0; // Natural young adult male developer voice
+  } else if (v.includes("kaelen") || inst.includes("low pitch")) {
+    pitchShiftSemitones = -1.8;
+  } else if (inst.includes("high pitch")) {
+    pitchShiftSemitones = 1.2;
+  }
 
+  const fliteVoice: "slt" | "rms" | "kal16" | "awb" = isNemoOrAria
+    ? "slt"
+    : "rms";
   const langBase = lang === "auto" ? "en" : lang.split("-")[0];
-  const espeakVoice = isFemale ? `${langBase}+f3` : `${langBase}+m3`;
+  const espeakVoice = isNemoOrAria ? `${langBase}+f3` : `${langBase}+m3`;
 
   return {
-    useFlite,
+    onnxModelPath,
+    pitchShiftSemitones,
     fliteVoice,
     espeakVoice,
-    pitchShiftSemitones,
   };
 }
 
 /**
  * Starts a local OpenAI-compatible VoiceStudio (k2-fsa/OmniVoice contract) service on
- * port 3900 if an external GPU VoiceStudio container is not already bound to 3900.
+ * port 3900 powered by local Neural VITS ONNX speech synthesis (Piper ONNX).
  */
-export async function ensureLocalVoiceStudioService(port = 3900): Promise<void> {
+export async function ensureLocalVoiceStudioService(
+  port = 3900,
+): Promise<void> {
   const alreadyRunning = await isPortListening(port);
   if (alreadyRunning) {
     return;
@@ -99,7 +157,10 @@ export async function ensureLocalVoiceStudioService(port = 3900): Promise<void> 
       status: "ok",
       service: "VoiceStudio",
       engine: "omnivoice",
-      mode: "local-cpu-synthesizer",
+      mode:
+        fs.existsSync(LEO_ONNX_PATH) && fs.existsSync(NEMO_ONNX_PATH)
+          ? "neural-vits-onnx"
+          : "local-cpu-synthesizer",
     });
   });
 
@@ -135,42 +196,71 @@ export async function ensureLocalVoiceStudioService(port = 3900): Promise<void> 
         return res.status(400).json({ error: "Missing input text" });
       }
 
-      const cfg = selectVoiceConfig(String(voice), String(language), String(instruct));
-      const numericSpeed = Math.max(0.6, Math.min(1.8, Number(speed) || 1.0));
+      const cfg = selectVoiceConfig(
+        String(voice),
+        String(language),
+        String(instruct),
+      );
+      const numericSpeed = Math.max(0.65, Math.min(1.6, Number(speed) || 1.0));
 
-      if (cfg.useFlite) {
-        const stretch = (1.0 / (numericSpeed * 1.12)).toFixed(2);
-        await execFileAsync("flite", [
-          "-voice",
-          cfg.fliteVoice,
-          "--setf",
-          `duration_stretch=${stretch}`,
-          "-t",
-          text,
-          "-o",
-          rawWav,
-        ]);
-      } else {
-        const wpm = Math.round(165 * numericSpeed);
-        await execFileAsync("espeak-ng", [
-          "-v",
-          cfg.espeakVoice,
-          "-s",
-          String(wpm),
-          "-w",
-          rawWav,
-          text,
-        ]);
+      let synthesizedWithNeural = false;
+      let sourceSampleRate = 22050;
+
+      if (cfg.onnxModelPath) {
+        try {
+          const lengthScale = 1.0 / numericSpeed;
+          await synthesizeWithPiperOnnx({
+            text,
+            modelPath: cfg.onnxModelPath,
+            outputWavPath: rawWav,
+            lengthScale,
+            noiseScale: 0.68,
+          });
+          synthesizedWithNeural = true;
+          sourceSampleRate = 22050;
+        } catch {
+          synthesizedWithNeural = false;
+        }
       }
 
-      // Apply warm broadcast presence EQ + pitch shift + 24kHz 16-bit mono PCM normalization
+      if (!synthesizedWithNeural) {
+        sourceSampleRate = 16000;
+        const lang = String(language || "en").toLowerCase();
+        if (lang === "en" || lang === "auto" || lang.startsWith("en-")) {
+          const stretch = (1.0 / (numericSpeed * 1.12)).toFixed(2);
+          await execFileAsync("flite", [
+            "-voice",
+            cfg.fliteVoice,
+            "--setf",
+            `duration_stretch=${stretch}`,
+            "-t",
+            text,
+            "-o",
+            rawWav,
+          ]);
+        } else {
+          const wpm = Math.round(165 * numericSpeed);
+          await execFileAsync("espeak-ng", [
+            "-v",
+            cfg.espeakVoice,
+            "-s",
+            String(wpm),
+            "-w",
+            rawWav,
+            text,
+          ]);
+        }
+      }
+
+      // Broadcast studio mastering + subtle pitch contour + 24kHz 16-bit mono PCM normalization
       const pitchFactor = Math.pow(2, cfg.pitchShiftSemitones / 12).toFixed(4);
       const afChain = [
-        `asetrate=16000*${pitchFactor}`,
+        `asetrate=${sourceSampleRate}*${pitchFactor}`,
         "aresample=24000",
-        "highpass=f=85",
-        "lowpass=f=7600",
-        "apad=pad_dur=0.12",
+        "highpass=f=75",
+        "lowpass=f=10500",
+        "acompressor=threshold=-18dB:ratio=2.5:attack=5:release=50:makeup=2",
+        "apad=pad_dur=0.10",
       ].join(",");
 
       await execFileAsync("ffmpeg", [
@@ -207,7 +297,7 @@ export async function ensureLocalVoiceStudioService(port = 3900): Promise<void> 
   await new Promise<void>((resolve) => {
     const server = vApp.listen(port, "127.0.0.1", () => {
       console.log(
-        `VoiceStudio (k2-fsa/OmniVoice API service) active on http://127.0.0.1:${port}`,
+        `VoiceStudio (k2-fsa/OmniVoice Neural VITS ONNX service) active on http://127.0.0.1:${port}`,
       );
       resolve();
     });

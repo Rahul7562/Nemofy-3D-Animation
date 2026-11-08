@@ -15,6 +15,7 @@ import {
   WorkflowStage,
 } from "../utils/types";
 import {
+  AGENTMORPHY_SKIT_PROJECT,
   DEFAULT_STUDIO_PROJECT,
   VERTICAL_SHOWCASE_PROJECT,
 } from "../utils/default-project";
@@ -40,16 +41,16 @@ import { ExportModal } from "./ExportModal";
 type PhoneMediaMetadata = Awaited<ReturnType<typeof getMediaMetadata>>;
 
 export const StudioApp: React.FC = () => {
-  const [project, setProject] = useState<StudioProject>(VERTICAL_SHOWCASE_PROJECT);
+  const [project, setProject] = useState<StudioProject>(AGENTMORPHY_SKIT_PROJECT);
   const [activeStage, setActiveStage] = useState<WorkflowStage>("stage3d");
   const [activeCompositionMode, setActiveCompositionMode] = useState<
     "cinematic" | "phone-demo"
   >("cinematic");
   const [selectedSceneId, setSelectedSceneId] = useState<string>(
-    VERTICAL_SHOWCASE_PROJECT.scenes[0].id,
+    AGENTMORPHY_SKIT_PROJECT.scenes[0].id,
   );
   const [selectedCharacterId, setSelectedCharacterId] = useState<string>(
-    VERTICAL_SHOWCASE_PROJECT.characters[0].id,
+    AGENTMORPHY_SKIT_PROJECT.characters[0].id,
   );
   const [isolateSelectedScene, setIsolateSelectedScene] =
     useState<boolean>(false);
@@ -373,6 +374,12 @@ export const StudioApp: React.FC = () => {
         onSelectStage={setActiveStage}
         onOpenExport={() => setActiveStage("export")}
         activeProjectId={project.id}
+        onSelectPresetProject={(nextProject) => {
+          setProject(nextProject);
+          setSelectedSceneId(nextProject.scenes[0].id);
+          setSelectedCharacterId(nextProject.characters[0].id);
+          handleSeekFrame(0);
+        }}
         onLoadVerticalShowcase={() => {
           setProject(VERTICAL_SHOWCASE_PROJECT);
           setSelectedSceneId(VERTICAL_SHOWCASE_PROJECT.scenes[0].id);

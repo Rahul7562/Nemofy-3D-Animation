@@ -108,10 +108,10 @@ function buildSubtitleFilterChain(manifest: BlenderProjectManifest): string {
   const isVertical = manifest.height > manifest.width;
   const maxChars = isVertical ? 48 : 68;
   const fontSize = Math.max(
-    16,
-    Math.round(manifest.width * (isVertical ? 0.0175 : 0.021)),
+    18,
+    Math.round(manifest.width * (isVertical ? 0.022 : 0.021)),
   );
-  const boxY = Math.round(manifest.height * 0.88);
+  const boxY = Math.round(manifest.height * (isVertical ? 0.17 : 0.84));
 
   for (const shot of manifest.shots) {
     if (!shot.narrationText || !shot.narrationText.trim()) continue;
@@ -128,7 +128,7 @@ function buildSubtitleFilterChain(manifest: BlenderProjectManifest): string {
       .replace(/"/g, "");
 
     filters.push(
-      `drawtext=text='${escapedText}':fontcolor=white:fontsize=${fontSize}:box=1:boxcolor=0x090D16D9:boxborderw=12:x=(w-text_w)/2:y=${boxY}:enable='between(t,${tStart},${tEnd})'`,
+      `drawtext=text='${escapedText}':fontcolor=white:fontsize=${fontSize}:box=1:boxcolor=0x0B0F1D99:boxborderw=10:x=(w-text_w)/2:y=${boxY}:enable='between(t,${tStart},${tEnd})'`,
     );
   }
 
@@ -346,13 +346,13 @@ async function runBlenderJobPipeline(
       const padPath = path.join(job.workDir, "score_pad.wav");
       const fadeOutStart = Math.max(0.5, durSec - 0.85).toFixed(2);
 
-      // 1. Generate warm cinematic triad pad + transition chimes
+      // 1. Generate subtle warm ambient bed so neural dialogue is crystal clear
       await execFileAsync("ffmpeg", [
         "-y",
         "-f",
         "lavfi",
         "-i",
-        `aevalsrc='0.055*sin(2*PI*220*t)+0.045*sin(2*PI*277.18*t)+0.045*sin(2*PI*329.63*t)+0.025*sin(2*PI*440*t)':s=24000:d=${durSec}`,
+        `aevalsrc='0.014*sin(2*PI*220*t)+0.011*sin(2*PI*277.18*t)+0.011*sin(2*PI*329.63*t)':s=24000:d=${durSec}`,
         "-af",
         `afade=t=in:st=0:d=0.6,afade=t=out:st=${fadeOutStart}:d=0.85`,
         padPath,
@@ -360,7 +360,7 @@ async function runBlenderJobPipeline(
 
       // 2. Synthesize character dialogue per shot via VoiceStudio / OmniVoice
       const inputArgs: string[] = ["-i", padPath];
-      const filterParts: string[] = ["[0:a]volume=0.85[bg]"];
+      const filterParts: string[] = ["[0:a]volume=0.45[bg]"];
       const mixLabels: string[] = ["[bg]"];
       let inputIdx = 1;
 

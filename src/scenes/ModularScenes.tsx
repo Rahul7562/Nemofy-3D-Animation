@@ -18,6 +18,13 @@ export interface ModularSceneProps {
   interactiveDirectorMode?: boolean;
 }
 
+export const AgentCommandDeskScene: React.FC<ModularSceneProps> = (props) => (
+  <StageScene3D
+    {...props}
+    scene={{ ...props.scene, environment: "agent-command-desk" }}
+  />
+);
+
 export const ObservatoryCitadelScene: React.FC<ModularSceneProps> = (props) => (
   <StageScene3D
     {...props}
@@ -66,6 +73,7 @@ export const SceneComponentRegistry: Record<
   EnvironmentType,
   React.FC<ModularSceneProps>
 > = {
+  "agent-command-desk": AgentCommandDeskScene,
   "observatory-citadel": ObservatoryCitadelScene,
   "bioluminescent-forest": BioluminescentForestScene,
   "cyber-harbor": CyberHarborScene,

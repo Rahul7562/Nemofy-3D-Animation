@@ -1,9 +1,13 @@
 """
 AetherFrame 3D — Production Character Builder & Importer (scripts/blender/import_character.py)
-Imports external rigged character assets (Blender Studio Rain, Snow, Security Bot, or Mixamo GLB/FBX/BLEND)
-when available in assets/characters/, or constructs high-detail articulated Blender Armature rigs
-for Nemo (Digital AI Companion) and Leo (20-Year-Old College Student) with full skeletal hierarchy,
-facial pose bones (jaw, lips, brows, eyelids, eye gaze), and ShaderNode PBR materials.
+Imports external rigged character assets (GLB/FBX/BLEND) when available in assets/characters/,
+or constructs articulated Blender Armature rigs for:
+  - Leo (Left): @agentmorphy-style blocky chibi developer with wide peach head, 5 chunky
+    dark-indigo pyramidal hair spikes, vertical dark pixel eyes, articulated lip-sync mouth,
+    cobalt-blue hoodie with 2 crisp vertical white chest stripes, and white blocky sneakers.
+  - Nemo (Right): @agentmorphy-style cute wide coral-terracotta 3D cube AI agent companion
+    (#E06D53 with warm golden right bevel #F18F70), vertical dark pixel eyes, articulated
+    viseme mouth cavity with tongue, stubby waving side-arms, and 4 stubby blocky legs.
 """
 
 import os
@@ -54,7 +58,6 @@ def hex_to_rgba(hex_str: str, alpha: float = 1.0):
     r = int(h[0:2], 16) / 255.0
     g = int(h[2:4], 16) / 255.0
     b = int(h[4:6], 16) / 255.0
-    # Convert sRGB to linear approximate for Blender shader sockets
     return (pow(r, 2.2), pow(g, 2.2), pow(b, 2.2), alpha)
 
 
@@ -148,46 +151,46 @@ def _build_canonical_armature(rig_name: str, height_scale: float = 1.0) -> bpy.t
         return b
 
     # Core Spine & Head Hierarchy (Z-up in Blender meters, feet at Z=0.0)
-    add_bone("root", (0, 0, 0.0), (0, 0, 0.15))
-    add_bone("hips", (0, 0, 0.88), (0, 0, 1.00), "root")
-    add_bone("spine", (0, 0, 1.00), (0, 0, 1.18), "hips", True)
-    add_bone("chest", (0, 0, 1.18), (0, 0, 1.40), "spine", True)
-    add_bone("neck", (0, 0, 1.40), (0, 0, 1.49), "chest", True)
-    add_bone("head", (0, 0, 1.49), (0, 0, 1.76), "neck", True)
+    add_bone("root", (0, 0, 0.0), (0, 0, 0.12))
+    add_bone("hips", (0, 0, 0.34), (0, 0, 0.46), "root")
+    add_bone("spine", (0, 0, 0.46), (0, 0, 0.62), "hips", True)
+    add_bone("chest", (0, 0, 0.62), (0, 0, 0.82), "spine", True)
+    add_bone("neck", (0, 0, 0.82), (0, 0, 0.88), "chest", True)
+    add_bone("head", (0, 0, 0.88), (0, 0, 1.32), "neck", True)
 
-    # Facial Rig Bones (Vertical +Z tails so local +Y location = vertical Z, rx = pitch, ry = yaw)
-    add_bone("jaw", (0, -0.06, 1.54), (0, -0.06, 1.59), "head")
-    add_bone("lip_upper", (0, -0.140, 1.548), (0, -0.140, 1.578), "head")
-    add_bone("lip_lower", (0, -0.138, 1.522), (0, -0.138, 1.552), "jaw")
-    add_bone("mouth_corner.L", (0.042, -0.125, 1.535), (0.042, -0.125, 1.565), "head")
-    add_bone("mouth_corner.R", (-0.042, -0.125, 1.535), (-0.042, -0.125, 1.565), "head")
+    # Facial Rig Bones (Vertical +Z tails so local +Y location = vertical Z)
+    add_bone("jaw", (0, -0.18, 0.96), (0, -0.18, 1.02), "head")
+    add_bone("lip_upper", (0, -0.225, 0.985), (0, -0.225, 1.015), "head")
+    add_bone("lip_lower", (0, -0.225, 0.955), (0, -0.225, 0.985), "jaw")
+    add_bone("mouth_corner.L", (0.048, -0.22, 0.97), (0.048, -0.22, 1.00), "head")
+    add_bone("mouth_corner.R", (-0.048, -0.22, 0.97), (-0.048, -0.22, 1.00), "head")
 
-    add_bone("eye.L", (0.050, -0.122, 1.625), (0.050, -0.122, 1.665), "head")
-    add_bone("eye.R", (-0.050, -0.122, 1.625), (-0.050, -0.122, 1.665), "head")
-    add_bone("eyelid_upper.L", (0.050, -0.126, 1.638), (0.050, -0.126, 1.668), "head")
-    add_bone("eyelid_upper.R", (-0.050, -0.126, 1.638), (-0.050, -0.126, 1.668), "head")
-    add_bone("brow.L", (0.052, -0.136, 1.668), (0.052, -0.136, 1.698), "head")
-    add_bone("brow.R", (-0.052, -0.136, 1.668), (-0.052, -0.136, 1.698), "head")
+    add_bone("eye.L", (0.105, -0.225, 1.09), (0.105, -0.225, 1.14), "head")
+    add_bone("eye.R", (-0.105, -0.225, 1.09), (-0.105, -0.225, 1.14), "head")
+    add_bone("eyelid_upper.L", (0.105, -0.228, 1.13), (0.105, -0.228, 1.16), "head")
+    add_bone("eyelid_upper.R", (-0.105, -0.228, 1.13), (-0.105, -0.228, 1.16), "head")
+    add_bone("brow.L", (0.105, -0.230, 1.17), (0.105, -0.230, 1.20), "head")
+    add_bone("brow.R", (-0.105, -0.230, 1.17), (-0.105, -0.230, 1.20), "head")
 
-    # Left & Right Arms (Vertical downward -Z tails at x=±0.21 so rx < 0 swings arm forward -Y)
-    add_bone("shoulder.L", (0.06, 0, 1.37), (0.21, 0, 1.37), "chest")
-    add_bone("upper_arm.L", (0.21, 0, 1.37), (0.21, 0, 1.11), "shoulder.L", True)
-    add_bone("forearm.L", (0.21, 0, 1.11), (0.21, 0, 0.87), "upper_arm.L", True)
-    add_bone("hand.L", (0.21, 0, 0.87), (0.21, 0, 0.77), "forearm.L", True)
+    # Left & Right Arms (Vertical downward -Z tails)
+    add_bone("shoulder.L", (0.12, 0, 0.78), (0.24, 0, 0.78), "chest")
+    add_bone("upper_arm.L", (0.24, 0, 0.78), (0.24, 0, 0.58), "shoulder.L", True)
+    add_bone("forearm.L", (0.24, 0, 0.58), (0.24, 0, 0.42), "upper_arm.L", True)
+    add_bone("hand.L", (0.24, 0, 0.42), (0.24, 0, 0.34), "forearm.L", True)
 
-    add_bone("shoulder.R", (-0.06, 0, 1.37), (-0.21, 0, 1.37), "chest")
-    add_bone("upper_arm.R", (-0.21, 0, 1.37), (-0.21, 0, 1.11), "shoulder.R", True)
-    add_bone("forearm.R", (-0.21, 0, 1.11), (-0.21, 0, 0.87), "upper_arm.R", True)
-    add_bone("hand.R", (-0.21, 0, 0.87), (-0.21, 0, 0.77), "forearm.R", True)
+    add_bone("shoulder.R", (-0.12, 0, 0.78), (-0.24, 0, 0.78), "chest")
+    add_bone("upper_arm.R", (-0.24, 0, 0.78), (-0.24, 0, 0.58), "shoulder.R", True)
+    add_bone("forearm.R", (-0.24, 0, 0.58), (-0.24, 0, 0.42), "upper_arm.R", True)
+    add_bone("hand.R", (-0.24, 0, 0.42), (-0.24, 0, 0.34), "forearm.R", True)
 
     # Left & Right Legs (Feet planted at Z=0.0)
-    add_bone("thigh.L", (0.108, 0, 0.88), (0.108, 0, 0.48), "hips")
-    add_bone("shin.L", (0.108, 0, 0.48), (0.108, 0, 0.08), "thigh.L", True)
-    add_bone("foot.L", (0.108, 0, 0.08), (0.108, -0.16, 0.02), "shin.L", True)
+    add_bone("thigh.L", (0.095, 0, 0.34), (0.095, 0, 0.18), "hips")
+    add_bone("shin.L", (0.095, 0, 0.18), (0.095, 0, 0.05), "thigh.L", True)
+    add_bone("foot.L", (0.095, 0, 0.05), (0.095, -0.14, 0.01), "shin.L", True)
 
-    add_bone("thigh.R", (-0.108, 0, 0.88), (-0.108, 0, 0.48), "hips")
-    add_bone("shin.R", (-0.108, 0, 0.48), (-0.108, 0, 0.08), "thigh.R", True)
-    add_bone("foot.R", (-0.108, 0, 0.08), (-0.108, -0.16, 0.02), "shin.R", True)
+    add_bone("thigh.R", (-0.095, 0, 0.34), (-0.095, 0, 0.18), "hips")
+    add_bone("shin.R", (-0.095, 0, 0.18), (-0.095, 0, 0.05), "thigh.R", True)
+    add_bone("foot.R", (-0.095, 0, 0.05), (-0.095, -0.14, 0.01), "shin.R", True)
 
     bpy.ops.object.mode_set(mode="OBJECT")
 
@@ -197,12 +200,12 @@ def _build_canonical_armature(rig_name: str, height_scale: float = 1.0) -> bpy.t
     return arm_obj
 
 
-def _parent_mesh_to_bone(mesh_obj: bpy.types.Object, arm_obj: bpy.types.Object, bone_name: str, smooth: bool = True, subsurf_levels: int = 1):
+def _parent_mesh_to_bone(mesh_obj: bpy.types.Object, arm_obj: bpy.types.Object, bone_name: str, smooth: bool = True, subsurf_levels: int = 0):
     bpy.context.view_layer.objects.active = mesh_obj
     if subsurf_levels > 0:
         mod = mesh_obj.modifiers.new(name="Subsurf", type="SUBSURF")
-        mod.levels = 1
-        mod.render_levels = 1
+        mod.levels = subsurf_levels
+        mod.render_levels = subsurf_levels
         try:
             bpy.ops.object.modifier_apply(modifier=mod.name)
         except Exception:
@@ -211,7 +214,6 @@ def _parent_mesh_to_bone(mesh_obj: bpy.types.Object, arm_obj: bpy.types.Object, 
         for poly in mesh_obj.data.polygons:
             poly.use_smooth = True
 
-    # Compute world matrix before parenting and convert to bone local matrix
     world_mat = mesh_obj.matrix_world.copy()
     mesh_obj.parent = arm_obj
     mesh_obj.parent_type = "BONE"
@@ -219,42 +221,32 @@ def _parent_mesh_to_bone(mesh_obj: bpy.types.Object, arm_obj: bpy.types.Object, 
     mesh_obj.matrix_world = world_mat
 
 
-def _add_part_sphere(name: str, loc, scale, mat, arm_obj, bone_name: str, subsurf: int = 0):
-    bpy.ops.mesh.primitive_uv_sphere_add(segments=24, ring_count=16, radius=1.0, location=loc)
-    obj = bpy.context.active_object
-    obj.name = name
-    obj.scale = scale
-    bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
-    obj.data.materials.append(mat)
-    _parent_mesh_to_bone(obj, arm_obj, bone_name, smooth=True, subsurf_levels=subsurf)
-    return obj
-
-
-def _add_part_rounded_box(name: str, loc, scale, mat, arm_obj, bone_name: str, rot=(0, 0, 0), bevel_width: float = 0.025):
+def _add_part_rounded_box(name: str, loc, scale, mat, arm_obj, bone_name: str, rot=(0, 0, 0), bevel_width: float = 0.018):
     bpy.ops.mesh.primitive_cube_add(size=1.0, location=loc, rotation=rot)
     obj = bpy.context.active_object
     obj.name = name
     obj.scale = scale
     bpy.ops.object.transform_apply(location=False, rotation=True, scale=True)
-    bev = obj.modifiers.new(name="Bevel", type="BEVEL")
-    bev.width = bevel_width
-    bev.segments = 2
-    try:
-        bpy.ops.object.modifier_apply(modifier=bev.name)
-    except Exception:
-        pass
+    if bevel_width > 0:
+        bev = obj.modifiers.new(name="Bevel", type="BEVEL")
+        bev.width = bevel_width
+        bev.segments = 2
+        try:
+            bpy.ops.object.modifier_apply(modifier=bev.name)
+        except Exception:
+            pass
     obj.data.materials.append(mat)
     _parent_mesh_to_bone(obj, arm_obj, bone_name, smooth=True, subsurf_levels=0)
     return obj
 
 
-def _add_part_cylinder(name: str, loc, radius: float, depth: float, mat, arm_obj, bone_name: str, rot=(0, 0, 0)):
-    bpy.ops.mesh.primitive_cylinder_add(vertices=20, radius=radius, depth=depth, location=loc, rotation=rot)
+def _add_part_pyramid_spike(name: str, loc, radius1: float, depth: float, mat, arm_obj, bone_name: str, rot=(0, 0, 0)):
+    bpy.ops.mesh.primitive_cone_add(vertices=4, radius1=radius1, radius2=0.01, depth=depth, location=loc, rotation=rot)
     obj = bpy.context.active_object
     obj.name = name
     bpy.ops.object.transform_apply(location=False, rotation=True, scale=True)
     bev = obj.modifiers.new(name="Bevel", type="BEVEL")
-    bev.width = min(radius, depth) * 0.12
+    bev.width = 0.012
     bev.segments = 2
     try:
         bpy.ops.object.modifier_apply(modifier=bev.name)
@@ -267,154 +259,197 @@ def _add_part_cylinder(name: str, loc, radius: float, depth: float, mat, arm_obj
 
 def build_leo_character_rig(custom_colors=None) -> bpy.types.Object:
     """
-    Constructs Leo_Rig: 20-year-old college student with stylized Pixar/Blender-Studio
-    proportions, subsurface skin shader, sculpted layered chestnut hair, varsity jacket,
-    backpack straps, jeans, sneakers, and full facial pose bones for phoneme lip-sync.
+    Constructs Leo_Rig (@agentmorphy Blocky Chibi Developer):
+    - Wide cute beveled-box head (#F2C2A5) with 5 chunky dark-indigo pyramidal hair spikes (#1E1B4B)
+    - Two vertical dark rectangular pixel eyes (#0B0F1E) + blocky brows
+    - Articulated talking mouth cavity with tongue & upper teeth
+    - Cobalt-blue developer hoodie (#3B5BDB) with two crisp vertical white chest stripes (#F8FAFC)
+    - Blocky blue arms with peach hands, dark blue pants, and chunky bright-white blocky sneakers (#F8FAFC)
     """
     arm_obj = _build_canonical_armature("Leo_Rig", height_scale=1.0)
 
-    jacket_hex = (custom_colors or {}).get("primaryColor", "#2563EB")
-    accent_hex = (custom_colors or {}).get("secondaryColor", "#F59E0B")
+    hoodie_hex = (custom_colors or {}).get("primaryColor", "#3B5BDB")
+    if hoodie_hex.lower() in ("#2563eb", "#4f46e5"):
+        hoodie_hex = "#3B5BDB"
 
-    skin_mat = create_pbr_material("Leo_Skin", "#F2C19E", roughness=0.42, subsurface=0.25, bump_scale=0.015, noise_scale=60.0)
-    hair_mat = create_pbr_material("Leo_Hair", "#2B1B12", roughness=0.52, metallic=0.05, bump_scale=0.08, noise_scale=35.0)
-    jacket_mat = create_pbr_material("Leo_Jacket", jacket_hex, roughness=0.68, bump_scale=0.05, noise_scale=45.0)
-    shirt_mat = create_pbr_material("Leo_Shirt", "#F8FAFC", roughness=0.72)
-    strap_mat = create_pbr_material("Leo_Backpack", "#1E293B", roughness=0.55, metallic=0.15)
-    jeans_mat = create_pbr_material("Leo_Jeans", "#1E3A5F", roughness=0.78, bump_scale=0.06, noise_scale=55.0)
-    shoe_mat = create_pbr_material("Leo_Sneaker", accent_hex, roughness=0.48)
-    sole_mat = create_pbr_material("Leo_Sole", "#F8FAFC", roughness=0.65)
-    sclera_mat = create_pbr_material("Leo_Sclera", "#FFFFFF", roughness=0.12)
-    iris_mat = create_pbr_material("Leo_Iris", "#3B82F6", roughness=0.08, emission_hex="#60A5FA", emission_strength=0.35)
-    pupil_mat = create_pbr_material("Leo_Pupil", "#05070B", roughness=0.05)
-    lip_mat = create_pbr_material("Leo_Lips", "#C97A63", roughness=0.38)
-    mouth_inner_mat = create_pbr_material("Leo_MouthInner", "#3B0D11", roughness=0.85)
-    teeth_mat = create_pbr_material("Leo_Teeth", "#F8FAFC", roughness=0.18)
+    skin_mat = create_pbr_material("Leo_Skin", "#E8AD8E", roughness=0.55, subsurface=0.12)
+    hair_mat = create_pbr_material("Leo_SpikyHair", "#1E1B4B", roughness=0.62, metallic=0.05)
+    hoodie_mat = create_pbr_material("Leo_CobaltHoodie", hoodie_hex, roughness=0.58)
+    pants_mat = create_pbr_material("Leo_BluePants", "#2541B2", roughness=0.65)
+    white_mat = create_pbr_material("Leo_CrispWhite", "#F8FAFC", roughness=0.38)
+    eye_mat = create_pbr_material("Leo_PixelEye", "#0B0F1E", roughness=0.15)
+    mouth_mat = create_pbr_material("Leo_MouthDark", "#2A0810", roughness=0.82)
+    tongue_mat = create_pbr_material("Leo_Tongue", "#E11D48", roughness=0.55)
 
-    # Head & Neck
-    _add_part_cylinder("Leo_Neck", (0, -0.01, 1.45), 0.052, 0.11, skin_mat, arm_obj, "neck")
-    _add_part_sphere("Leo_Head", (0, -0.01, 1.615), (0.128, 0.140, 0.148), skin_mat, arm_obj, "head", subsurf=2)
-    # Ears
-    _add_part_sphere("Leo_Ear.L", (0.128, 0.0, 1.61), (0.024, 0.036, 0.045), skin_mat, arm_obj, "head")
-    _add_part_sphere("Leo_Ear.R", (-0.128, 0.0, 1.61), (0.024, 0.036, 0.045), skin_mat, arm_obj, "head")
-    # Nose
-    _add_part_sphere("Leo_Nose", (0, -0.148, 1.602), (0.022, 0.032, 0.028), skin_mat, arm_obj, "head")
+    # 1. Wide Blocky Chibi Head + Ears + Subtle Nose
+    _add_part_rounded_box("Leo_Neck", (0, 0, 0.85), (0.14, 0.14, 0.08), skin_mat, arm_obj, "neck", bevel_width=0.015)
+    _add_part_rounded_box("Leo_Head", (0, 0, 1.08), (0.48, 0.44, 0.40), skin_mat, arm_obj, "head", bevel_width=0.035)
+    _add_part_rounded_box("Leo_Ear.L", (0.255, 0, 1.07), (0.055, 0.08, 0.10), skin_mat, arm_obj, "head", bevel_width=0.012)
+    _add_part_rounded_box("Leo_Ear.R", (-0.255, 0, 1.07), (0.055, 0.08, 0.10), skin_mat, arm_obj, "head", bevel_width=0.012)
+    _add_part_rounded_box("Leo_Nose", (0, -0.228, 1.055), (0.044, 0.036, 0.048), skin_mat, arm_obj, "head", bevel_width=0.008)
 
-    # Sculpted College Hair (Crown + Swept Front Fringe + Side Tufts)
-    _add_part_sphere("Leo_HairCrown", (0, 0.012, 1.655), (0.138, 0.148, 0.132), hair_mat, arm_obj, "head", subsurf=2)
-    _add_part_rounded_box("Leo_HairFringe1", (0.025, -0.118, 1.718), (0.12, 0.08, 0.055), hair_mat, arm_obj, "head", rot=(0.25, -0.18, 0.12))
-    _add_part_rounded_box("Leo_HairFringe2", (-0.045, -0.112, 1.712), (0.10, 0.075, 0.048), hair_mat, arm_obj, "head", rot=(0.20, 0.22, -0.15))
+    # 2. Iconic @agentmorphy 5 Chunky Dark-Indigo Pyramidal Hair Spikes + Back Crown
+    _add_part_rounded_box("Leo_HairCrown", (0, 0.02, 1.26), (0.50, 0.46, 0.11), hair_mat, arm_obj, "head", bevel_width=0.022)
+    _add_part_rounded_box("Leo_HairBack", (0, 0.19, 1.13), (0.49, 0.12, 0.28), hair_mat, arm_obj, "head", bevel_width=0.020)
 
-    # Eyes, Irises, Pupils, Eyelids & Eyebrows
+    spike_configs = [
+        ("Leo_HairSpike_1", (-0.17, -0.05, 1.38), 0.125, 0.22, (0.16, -0.22, 0.35)),
+        ("Leo_HairSpike_2", (-0.08, -0.08, 1.41), 0.130, 0.25, (0.20, -0.10, 0.55)),
+        ("Leo_HairSpike_3", ( 0.02, -0.09, 1.42), 0.135, 0.26, (0.22,  0.04, 0.78)),
+        ("Leo_HairSpike_4", ( 0.12, -0.07, 1.40), 0.130, 0.24, (0.18,  0.15, 0.95)),
+        ("Leo_HairSpike_5", ( 0.20, -0.03, 1.36), 0.115, 0.20, (0.14,  0.26, 1.15)),
+    ]
+    for s_name, s_loc, s_rad, s_depth, s_rot in spike_configs:
+        _add_part_pyramid_spike(s_name, s_loc, s_rad, s_depth, hair_mat, arm_obj, "head", rot=s_rot)
+
+    # 3. Vertical Dark Rectangular Pixel Eyes + Eyelids + Blocky Brows
     for side, sx in [("L", 1.0), ("R", -1.0)]:
-        _add_part_sphere(f"Leo_EyeBall.{side}", (sx * 0.050, -0.122, 1.625), (0.026, 0.024, 0.026), sclera_mat, arm_obj, f"eye.{side}")
-        _add_part_sphere(f"Leo_Iris.{side}", (sx * 0.050, -0.143, 1.625), (0.014, 0.006, 0.014), iris_mat, arm_obj, f"eye.{side}")
-        _add_part_sphere(f"Leo_Pupil.{side}", (sx * 0.050, -0.147, 1.625), (0.008, 0.004, 0.008), pupil_mat, arm_obj, f"eye.{side}")
-        # Upper Eyelid (bound to eyelid_upper.L/R for natural blinking)
-        _add_part_sphere(f"Leo_Eyelid.{side}", (sx * 0.050, -0.126, 1.638), (0.029, 0.026, 0.016), skin_mat, arm_obj, f"eyelid_upper.{side}")
-        # Expressive Eyebrow
-        _add_part_rounded_box(f"Leo_Brow.{side}", (sx * 0.052, -0.136, 1.668), (0.052, 0.018, 0.014), hair_mat, arm_obj, f"brow.{side}", rot=(0, sx * -0.06, 0), bevel_width=0.005)
+        _add_part_rounded_box(
+            f"Leo_EyeBall.{side}",
+            (sx * 0.105, -0.222, 1.09),
+            (0.054, 0.028, 0.096),
+            eye_mat,
+            arm_obj,
+            f"eye.{side}",
+            bevel_width=0.006,
+        )
+        _add_part_rounded_box(
+            f"Leo_EyeCatch.{side}",
+            (sx * 0.105 + 0.010, -0.236, 1.118),
+            (0.016, 0.010, 0.018),
+            white_mat,
+            arm_obj,
+            f"eye.{side}",
+            bevel_width=0.002,
+        )
+        _add_part_rounded_box(
+            f"Leo_Eyelid.{side}",
+            (sx * 0.105, -0.225, 1.142),
+            (0.062, 0.032, 0.018),
+            skin_mat,
+            arm_obj,
+            f"eyelid_upper.{side}",
+            bevel_width=0.004,
+        )
+        _add_part_rounded_box(
+            f"Leo_Brow.{side}",
+            (sx * 0.105, -0.228, 1.175),
+            (0.088, 0.030, 0.022),
+            hair_mat,
+            arm_obj,
+            f"brow.{side}",
+            bevel_width=0.004,
+        )
 
-    # Articulated Jaw, Mouth Cavity, Teeth & Lips for Phoneme Visemes
-    _add_part_sphere("Leo_MouthCavity", (0, -0.128, 1.535), (0.042, 0.025, 0.024), mouth_inner_mat, arm_obj, "head")
-    _add_part_rounded_box("Leo_UpperTeeth", (0, -0.134, 1.544), (0.052, 0.014, 0.010), teeth_mat, arm_obj, "lip_upper", bevel_width=0.003)
-    _add_part_rounded_box("Leo_UpperLip", (0, -0.140, 1.548), (0.064, 0.018, 0.012), lip_mat, arm_obj, "lip_upper", bevel_width=0.005)
-    _add_part_rounded_box("Leo_LowerLip", (0, -0.138, 1.522), (0.060, 0.018, 0.013), lip_mat, arm_obj, "lip_lower", bevel_width=0.005)
-    _add_part_sphere("Leo_JawChin", (0, -0.095, 1.512), (0.088, 0.068, 0.042), skin_mat, arm_obj, "jaw")
+    # 4. Expressive Articulated Talking Mouth Cavity
+    _add_part_rounded_box("Leo_MouthCavity", (0, -0.218, 0.972), (0.095, 0.032, 0.044), mouth_mat, arm_obj, "head", bevel_width=0.005)
+    _add_part_rounded_box("Leo_UpperTeeth", (0, -0.225, 0.990), (0.072, 0.018, 0.012), white_mat, arm_obj, "lip_upper", bevel_width=0.002)
+    _add_part_rounded_box("Leo_UpperLip", (0, -0.226, 0.996), (0.092, 0.020, 0.012), skin_mat, arm_obj, "lip_upper", bevel_width=0.003)
+    _add_part_rounded_box("Leo_LowerLip", (0, -0.225, 0.955), (0.090, 0.022, 0.014), tongue_mat, arm_obj, "lip_lower", bevel_width=0.003)
+    _add_part_rounded_box("Leo_JawChin", (0, -0.195, 0.935), (0.14, 0.08, 0.035), skin_mat, arm_obj, "jaw", bevel_width=0.008)
 
-    # Torso, Collegiate Hoodie Jacket, Shirt Collar & Backpack
-    _add_part_rounded_box("Leo_Pelvis", (0, 0, 0.93), (0.25, 0.17, 0.14), jeans_mat, arm_obj, "hips")
-    _add_part_rounded_box("Leo_Abdomen", (0, 0, 1.09), (0.26, 0.18, 0.20), jacket_mat, arm_obj, "spine")
-    _add_part_rounded_box("Leo_Chest", (0, 0, 1.29), (0.31, 0.20, 0.24), jacket_mat, arm_obj, "chest")
-    _add_part_rounded_box("Leo_ShirtFront", (0, -0.098, 1.27), (0.11, 0.025, 0.22), shirt_mat, arm_obj, "chest", bevel_width=0.005)
-    _add_part_rounded_box("Leo_HoodieCollar", (0, 0.03, 1.40), (0.22, 0.18, 0.065), accent_hex and shoe_mat or jacket_mat, arm_obj, "chest")
-    # Collegiate Backpack & Straps
-    _add_part_rounded_box("Leo_BackpackMain", (0, 0.145, 1.24), (0.24, 0.11, 0.29), strap_mat, arm_obj, "chest")
-    _add_part_rounded_box("Leo_Strap.L", (0.105, -0.01, 1.29), (0.038, 0.22, 0.23), strap_mat, arm_obj, "chest", bevel_width=0.006)
-    _add_part_rounded_box("Leo_Strap.R", (-0.105, -0.01, 1.29), (0.038, 0.22, 0.23), strap_mat, arm_obj, "chest", bevel_width=0.006)
+    # 5. Cobalt-Blue Hoodie Torso + Two Crisp Vertical White Collar/Drawstring Stripes
+    _add_part_rounded_box("Leo_Pelvis", (0, 0, 0.37), (0.34, 0.24, 0.14), pants_mat, arm_obj, "hips", bevel_width=0.018)
+    _add_part_rounded_box("Leo_Abdomen", (0, 0, 0.53), (0.38, 0.28, 0.22), hoodie_mat, arm_obj, "spine", bevel_width=0.022)
+    _add_part_rounded_box("Leo_Chest", (0, 0, 0.71), (0.40, 0.30, 0.26), hoodie_mat, arm_obj, "chest", bevel_width=0.025)
+    # Two vertical white chest stripes (exact @agentmorphy signature detail)
+    _add_part_rounded_box("Leo_WhiteStripe.L", (0.058, -0.152, 0.70), (0.032, 0.022, 0.19), white_mat, arm_obj, "chest", bevel_width=0.004)
+    _add_part_rounded_box("Leo_WhiteStripe.R", (-0.058, -0.152, 0.70), (0.032, 0.022, 0.19), white_mat, arm_obj, "chest", bevel_width=0.004)
+    _add_part_rounded_box("Leo_HoodieCollar", (0, 0.04, 0.83), (0.32, 0.24, 0.07), hoodie_mat, arm_obj, "chest", bevel_width=0.015)
 
-    # Arms & Hands
+    # 6. Blocky Blue Hoodie Sleeves & Peach Hands
     for side, sx in [("L", 1.0), ("R", -1.0)]:
-        _add_part_sphere(f"Leo_Shoulder.{side}", (sx * 0.20, 0, 1.365), (0.062, 0.062, 0.062), jacket_mat, arm_obj, f"shoulder.{side}")
-        _add_part_cylinder(f"Leo_UpperArm.{side}", (sx * 0.21, 0, 1.24), 0.048, 0.26, jacket_mat, arm_obj, f"upper_arm.{side}")
-        _add_part_cylinder(f"Leo_Forearm.{side}", (sx * 0.21, 0, 0.99), 0.040, 0.24, jacket_mat, arm_obj, f"forearm.{side}")
-        _add_part_sphere(f"Leo_Hand.{side}", (sx * 0.21, 0, 0.82), (0.036, 0.045, 0.055), skin_mat, arm_obj, f"hand.{side}")
+        _add_part_rounded_box(f"Leo_Shoulder.{side}", (sx * 0.23, 0, 0.76), (0.12, 0.12, 0.12), hoodie_mat, arm_obj, f"shoulder.{side}", bevel_width=0.018)
+        _add_part_rounded_box(f"Leo_UpperArm.{side}", (sx * 0.24, 0, 0.67), (0.115, 0.115, 0.20), hoodie_mat, arm_obj, f"upper_arm.{side}", bevel_width=0.016)
+        _add_part_rounded_box(f"Leo_Forearm.{side}", (sx * 0.24, 0, 0.50), (0.108, 0.108, 0.18), hoodie_mat, arm_obj, f"forearm.{side}", bevel_width=0.015)
+        _add_part_rounded_box(f"Leo_Hand.{side}", (sx * 0.24, 0, 0.37), (0.095, 0.095, 0.095), skin_mat, arm_obj, f"hand.{side}", bevel_width=0.016)
 
-    # Legs & Sneakers (Planted cleanly at Z=0.0)
+    # 7. Blocky Blue Pants & Chunky Bright-White Sneakers (Planted at Z=0.0)
     for side, sx in [("L", 1.0), ("R", -1.0)]:
-        _add_part_cylinder(f"Leo_Thigh.{side}", (sx * 0.108, 0, 0.68), 0.064, 0.40, jeans_mat, arm_obj, f"thigh.{side}")
-        _add_part_cylinder(f"Leo_Shin.{side}", (sx * 0.108, 0, 0.28), 0.050, 0.40, jeans_mat, arm_obj, f"shin.{side}")
-        _add_part_rounded_box(f"Leo_SneakerUpper.{side}", (sx * 0.108, -0.045, 0.055), (0.095, 0.21, 0.075), shoe_mat, arm_obj, f"foot.{side}", bevel_width=0.015)
-        _add_part_rounded_box(f"Leo_SneakerSole.{side}", (sx * 0.108, -0.045, 0.012), (0.102, 0.22, 0.024), sole_mat, arm_obj, f"foot.{side}", bevel_width=0.005)
+        _add_part_rounded_box(f"Leo_Thigh.{side}", (sx * 0.095, 0, 0.26), (0.135, 0.145, 0.18), pants_mat, arm_obj, f"thigh.{side}", bevel_width=0.015)
+        _add_part_rounded_box(f"Leo_Shin.{side}", (sx * 0.095, 0, 0.12), (0.130, 0.140, 0.16), pants_mat, arm_obj, f"shin.{side}", bevel_width=0.015)
+        _add_part_rounded_box(f"Leo_Sneaker.{side}", (sx * 0.095, -0.025, 0.045), (0.148, 0.210, 0.090), white_mat, arm_obj, f"foot.{side}", bevel_width=0.016)
 
     return arm_obj
 
 
 def build_nemo_character_rig(custom_colors=None) -> bpy.types.Object:
     """
-    Constructs Nemo_Rig: Expressive Digital AI Companion inspired by Blender Studio
-    Security Bot + stylized harmonic android aesthetics, featuring a sleek articulated head,
-    glass visor with glowing cyan ocular iris rings, expressive brow plates, articulated
-    viseme jaw/mouth aperture, floating golden harmonic halo ring, and full humanoid limbs.
+    Constructs Nemo_Rig (@agentmorphy Cute Coral-Terracotta 3D Cube AI Agent):
+    - Single unified wide warm coral-terracotta 3D cube body (#D96043) with warm golden right bevel (#EA7B5F)
+    - Two vertical dark rectangular pixel eyes (#18131A) + expressive blocky brows
+    - Articulated rectangular lip-sync mouth cavity with tongue
+    - Two cute stubby waving side-arms + 4 stubby blocky legs planted at Z=0.0
     """
-    arm_obj = _build_canonical_armature("Nemo_Rig", height_scale=0.93)
-    s = 0.93
+    arm_obj = _build_canonical_armature("Nemo_Rig", height_scale=0.82)
+    s = 0.82
 
-    primary_hex = (custom_colors or {}).get("primaryColor", "#06B6D4")
-    accent_hex = (custom_colors or {}).get("secondaryColor", "#F59E0B")
+    coral_mat = create_pbr_material("Nemo_CoralBody", "#D96043", roughness=0.54, metallic=0.04)
+    coral_warm_mat = create_pbr_material("Nemo_CoralWarmSide", "#EA7B5F", roughness=0.50, metallic=0.04)
+    coral_dark_mat = create_pbr_material("Nemo_CoralLimb", "#C24E33", roughness=0.58, metallic=0.04)
+    eye_mat = create_pbr_material("Nemo_PixelEye", "#18131A", roughness=0.14)
+    white_mat = create_pbr_material("Nemo_Catchlight", "#F8FAFC", roughness=0.20)
+    tongue_mat = create_pbr_material("Nemo_Tongue", "#F43F5E", roughness=0.45)
 
-    chassis_mat = create_pbr_material("Nemo_Chassis", "#E2E8F0", roughness=0.22, metallic=0.35, bump_scale=0.01, noise_scale=80.0)
-    teal_armor_mat = create_pbr_material("Nemo_TealArmor", primary_hex, roughness=0.25, metallic=0.55)
-    gold_mat = create_pbr_material("Nemo_GoldTrim", accent_hex, roughness=0.18, metallic=0.88, emission_hex=accent_hex, emission_strength=0.4)
-    joint_mat = create_pbr_material("Nemo_DarkJoint", "#0F172A", roughness=0.40, metallic=0.75)
-    visor_mat = create_pbr_material("Nemo_Visor", "#040814", roughness=0.06, metallic=0.2)
-    cyan_glow_mat = create_pbr_material("Nemo_CyanGlow", "#38BDF8", roughness=0.10, emission_hex="#38BDF8", emission_strength=4.5)
-    mouth_glow_mat = create_pbr_material("Nemo_MouthGlow", "#67E8F9", roughness=0.10, emission_hex="#22D3EE", emission_strength=5.2)
+    # 1. Unified @agentmorphy Wide Coral-Terracotta 3D Cube Body sitting directly on 4 stubby legs
+    _add_part_rounded_box("Nemo_HeadCube", (0, 0, 0.64 * s), (0.68 * s, 0.52 * s, 0.62 * s), coral_mat, arm_obj, "head", bevel_width=0.038)
+    _add_part_rounded_box("Nemo_WarmSideBevel", (-0.325 * s, 0, 0.64 * s), (0.045 * s, 0.48 * s, 0.58 * s), coral_warm_mat, arm_obj, "head", bevel_width=0.012)
 
-    # Head, Visor, Glowing Ocular Rings, Expressive Brow Plates & Halo Ring
-    _add_part_cylinder("Nemo_NeckCore", (0, 0, 1.45 * s), 0.045 * s, 0.11 * s, joint_mat, arm_obj, "neck")
-    _add_part_sphere("Nemo_HeadHelm", (0, -0.005, 1.62 * s), (0.135 * s, 0.142 * s, 0.145 * s), chassis_mat, arm_obj, "head", subsurf=1)
-    _add_part_sphere("Nemo_VisorGlass", (0, -0.055 * s, 1.62 * s), (0.118 * s, 0.105 * s, 0.102 * s), visor_mat, arm_obj, "head", subsurf=1)
-
-    # Side Acoustic Antenna Pods + Floating Harmonic Halo Ring
+    # 2. Two Vertical Dark Rectangular Pixel Eyes + Eyelids + Blocky Brows on front of Unified Cube
     for side, sx in [("L", 1.0), ("R", -1.0)]:
-        _add_part_cylinder(f"Nemo_EarPod.{side}", (sx * 0.138 * s, 0, 1.62 * s), 0.036 * s, 0.032 * s, gold_mat, arm_obj, "head", rot=(0, math.pi / 2, 0))
-        _add_part_sphere(f"Nemo_EyeGlow.{side}", (sx * 0.048 * s, -0.145 * s, 1.63 * s), (0.024 * s, 0.008 * s, 0.024 * s), cyan_glow_mat, arm_obj, f"eye.{side}")
-        _add_part_rounded_box(f"Nemo_EyelidShutter.{side}", (sx * 0.048 * s, -0.147 * s, 1.648 * s), (0.052 * s, 0.016 * s, 0.014 * s), joint_mat, arm_obj, f"eyelid_upper.{side}", bevel_width=0.003)
-        _add_part_rounded_box(f"Nemo_BrowPlate.{side}", (sx * 0.052 * s, -0.148 * s, 1.678 * s), (0.055 * s, 0.016 * s, 0.012 * s), cyan_glow_mat, arm_obj, f"brow.{side}", bevel_width=0.003)
+        _add_part_rounded_box(
+            f"Nemo_EyeGlow.{side}",
+            (sx * 0.140 * s, -0.262 * s, 0.72 * s),
+            (0.068 * s, 0.032 * s, 0.130 * s),
+            eye_mat,
+            arm_obj,
+            f"eye.{side}",
+            bevel_width=0.006,
+        )
+        _add_part_rounded_box(
+            f"Nemo_EyeCatch.{side}",
+            ((sx * 0.140 + 0.012) * s, -0.276 * s, 0.755 * s),
+            (0.018 * s, 0.010 * s, 0.022 * s),
+            white_mat,
+            arm_obj,
+            f"eye.{side}",
+            bevel_width=0.002,
+        )
+        _add_part_rounded_box(
+            f"Nemo_EyelidShutter.{side}",
+            (sx * 0.140 * s, -0.265 * s, 0.785 * s),
+            (0.076 * s, 0.034 * s, 0.020 * s),
+            coral_dark_mat,
+            arm_obj,
+            f"eyelid_upper.{side}",
+            bevel_width=0.004,
+        )
+        _add_part_rounded_box(
+            f"Nemo_BrowPlate.{side}",
+            (sx * 0.140 * s, -0.268 * s, 0.83 * s),
+            (0.095 * s, 0.032 * s, 0.024 * s),
+            coral_dark_mat,
+            arm_obj,
+            f"brow.{side}",
+            bevel_width=0.004,
+        )
 
-    # Floating Golden Harmonic Halo above Head
-    bpy.ops.mesh.primitive_torus_add(major_radius=0.14 * s, minor_radius=0.012 * s, location=(0, 0.02 * s, 1.81 * s), rotation=(0.18, 0, 0))
-    halo = bpy.context.active_object
-    halo.name = "Nemo_HarmonicHalo"
-    halo.data.materials.append(gold_mat)
-    _parent_mesh_to_bone(halo, arm_obj, "head", smooth=True, subsurf_levels=0)
+    # 3. Articulated Rectangular Viseme Mouth Cavity & Tongue
+    _add_part_rounded_box("Nemo_MouthCavity", (0, -0.260 * s, 0.53 * s), (0.125 * s, 0.035 * s, 0.068 * s), eye_mat, arm_obj, "head", bevel_width=0.005)
+    _add_part_rounded_box("Nemo_UpperLipBar", (0, -0.265 * s, 0.565 * s), (0.128 * s, 0.025 * s, 0.018 * s), coral_dark_mat, arm_obj, "lip_upper", bevel_width=0.003)
+    _add_part_rounded_box("Nemo_LowerLipBar", (0, -0.265 * s, 0.500 * s), (0.118 * s, 0.025 * s, 0.020 * s), tongue_mat, arm_obj, "lip_lower", bevel_width=0.003)
 
-    # Articulated AI Viseme Mouth & Jaw
-    _add_part_rounded_box("Nemo_UpperLipBar", (0, -0.146 * s, 1.552 * s), (0.064 * s, 0.014 * s, 0.011 * s), mouth_glow_mat, arm_obj, "lip_upper", bevel_width=0.003)
-    _add_part_rounded_box("Nemo_LowerLipBar", (0, -0.144 * s, 1.525 * s), (0.060 * s, 0.014 * s, 0.011 * s), mouth_glow_mat, arm_obj, "lip_lower", bevel_width=0.003)
-    _add_part_sphere("Nemo_JawPlate", (0, -0.088 * s, 1.515 * s), (0.085 * s, 0.068 * s, 0.038 * s), teal_armor_mat, arm_obj, "jaw")
-
-    # Torso, Harmonic Core & Pelvis
-    _add_part_rounded_box("Nemo_Pelvis", (0, 0, 0.93 * s), (0.23 * s, 0.16 * s, 0.13 * s), teal_armor_mat, arm_obj, "hips")
-    _add_part_cylinder("Nemo_WaistCore", (0, 0, 1.09 * s), 0.085 * s, 0.19 * s, joint_mat, arm_obj, "spine")
-    _add_part_rounded_box("Nemo_ChestArmor", (0, 0, 1.29 * s), (0.29 * s, 0.19 * s, 0.23 * s), chassis_mat, arm_obj, "chest")
-    _add_part_sphere("Nemo_HeartCore", (0, -0.098 * s, 1.29 * s), (0.045 * s, 0.022 * s, 0.045 * s), cyan_glow_mat, arm_obj, "chest")
-    _add_part_rounded_box("Nemo_CollarRing", (0, 0, 1.39 * s), (0.21 * s, 0.17 * s, 0.045 * s), gold_mat, arm_obj, "chest")
-
-    # Articulated Arms & Hands
+    # 4. Cute Stubby Waving Side-Arms emerging from the sides of the Cube
     for side, sx in [("L", 1.0), ("R", -1.0)]:
-        _add_part_sphere(f"Nemo_ShoulderPad.{side}", (sx * 0.20 * s, 0, 1.365 * s), (0.060 * s, 0.060 * s, 0.060 * s), teal_armor_mat, arm_obj, f"shoulder.{side}")
-        _add_part_cylinder(f"Nemo_UpperArm.{side}", (sx * 0.21 * s, 0, 1.24 * s), 0.042 * s, 0.25 * s, chassis_mat, arm_obj, f"upper_arm.{side}")
-        _add_part_cylinder(f"Nemo_Forearm.{side}", (sx * 0.21 * s, 0, 0.99 * s), 0.038 * s, 0.23 * s, teal_armor_mat, arm_obj, f"forearm.{side}")
-        _add_part_sphere(f"Nemo_Hand.{side}", (sx * 0.21 * s, 0, 0.82 * s), (0.034 * s, 0.042 * s, 0.050 * s), gold_mat, arm_obj, f"hand.{side}")
+        _add_part_rounded_box(f"Nemo_UpperArm.{side}", (sx * 0.37 * s, 0, 0.58 * s), (0.115 * s, 0.120 * s, 0.14 * s), coral_dark_mat, arm_obj, f"upper_arm.{side}", bevel_width=0.015)
+        _add_part_rounded_box(f"Nemo_Forearm.{side}", (sx * 0.38 * s, 0, 0.46 * s), (0.110 * s, 0.115 * s, 0.13 * s), coral_mat, arm_obj, f"forearm.{side}", bevel_width=0.015)
+        _add_part_rounded_box(f"Nemo_Hand.{side}", (sx * 0.38 * s, 0, 0.36 * s), (0.105 * s, 0.110 * s, 0.095 * s), coral_warm_mat, arm_obj, f"hand.{side}", bevel_width=0.015)
 
-    # Articulated Legs & Boots (Planted cleanly at Z=0.0)
+    # 5. Four Cute Stubby Blocky Legs Underneath (Planted at Z=0.0)
     for side, sx in [("L", 1.0), ("R", -1.0)]:
-        _add_part_cylinder(f"Nemo_Thigh.{side}", (sx * 0.108 * s, 0, 0.68 * s), 0.056 * s, 0.39 * s, chassis_mat, arm_obj, f"thigh.{side}")
-        _add_part_cylinder(f"Nemo_Shin.{side}", (sx * 0.108 * s, 0, 0.28 * s), 0.046 * s, 0.39 * s, teal_armor_mat, arm_obj, f"shin.{side}")
-        _add_part_rounded_box(f"Nemo_Boot.{side}", (sx * 0.108 * s, -0.042 * s, 0.045 * s), (0.088 * s, 0.195 * s, 0.075 * s), chassis_mat, arm_obj, f"foot.{side}", bevel_width=0.014)
-        _add_part_rounded_box(f"Nemo_BootSole.{side}", (sx * 0.108 * s, -0.042 * s, 0.010 * s), (0.092 * s, 0.205 * s, 0.020 * s), gold_mat, arm_obj, f"foot.{side}", bevel_width=0.004)
+        _add_part_rounded_box(f"Nemo_Thigh.{side}", (sx * 0.18 * s, -0.10 * s, 0.18 * s), (0.125 * s, 0.125 * s, 0.28 * s), coral_dark_mat, arm_obj, f"thigh.{side}", bevel_width=0.014)
+        _add_part_rounded_box(f"Nemo_Shin.{side}", (sx * 0.18 * s, 0.12 * s, 0.16 * s), (0.120 * s, 0.120 * s, 0.28 * s), coral_dark_mat, arm_obj, f"shin.{side}", bevel_width=0.014)
+        _add_part_rounded_box(f"Nemo_Boot.{side}", (sx * 0.18 * s, -0.10 * s, 0.045 * s), (0.130 * s, 0.140 * s, 0.090 * s), coral_dark_mat, arm_obj, f"foot.{side}", bevel_width=0.014)
 
     return arm_obj
 
@@ -423,7 +458,7 @@ def import_or_build_character(char_config: dict) -> bpy.types.Object:
     """
     Resolves a character asset from char_config:
     1. If an external .blend or .glb asset path is provided and exists on disk, imports and validates it.
-    2. Otherwise builds the studio's articulated Armature rig for Nemo (AI companion) or Leo (college student).
+    2. Otherwise builds the studio's articulated Armature rig for Nemo (coral cube AI companion) or Leo (blocky chibi developer).
     """
     char_id = char_config.get("id", "").lower()
     char_name = char_config.get("name", "Character")

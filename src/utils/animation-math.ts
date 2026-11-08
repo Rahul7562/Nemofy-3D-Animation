@@ -237,13 +237,27 @@ export function computeCameraTransformAtFrame(
       break;
     }
     case "establishing-wide": {
-      px = lerp(sx * 1.15, ex * 1.05, eased);
-      py = lerp(Math.max(sy, 4.2), Math.max(ey, 3.6), eased);
-      pz = lerp(sz * 1.15, ez * 1.05, eased);
-      fov = Math.max(46, scene.cameraFov);
+      if (scene.environment === "agent-command-desk") {
+        px = lerp(sx, ex, eased);
+        py = lerp(sy, ey, eased);
+        pz = lerp(sz, ez, eased);
+        fov = scene.cameraFov;
+      } else {
+        px = lerp(sx * 1.15, ex * 1.05, eased);
+        py = lerp(Math.max(sy, 4.2), Math.max(ey, 3.6), eased);
+        pz = lerp(sz * 1.15, ez * 1.05, eased);
+        fov = Math.max(46, scene.cameraFov);
+      }
       break;
     }
     case "close-up": {
+      if (scene.environment === "agent-command-desk") {
+        px = lerp(sx, ex, eased);
+        py = lerp(sy, ey, eased);
+        pz = lerp(sz, ez, eased);
+        fov = scene.cameraFov;
+        break;
+      }
       const focusChar =
         scene.characters.find((c) => c.speaking) ?? scene.characters[0];
       if (focusChar) {
@@ -266,6 +280,78 @@ export function computeCameraTransformAtFrame(
         py = cy + 0.15;
         pz = cz + Math.cos(angle) * 2.35;
         fov = Math.min(34, scene.cameraFov);
+      }
+      break;
+    }
+    case "crash-zoom": {
+      const focusChar =
+        scene.characters.find((c) => c.speaking) ?? scene.characters[0];
+      const punchT = smoothstep(clamp(rawProgress * 2.4, 0, 1));
+      if (scene.environment === "agent-command-desk") {
+        px = lerp(sx, ex, punchT);
+        py = lerp(sy, ey, punchT);
+        pz = lerp(sz, ez, punchT);
+        fov = lerp(scene.cameraFov, Math.max(24, scene.cameraFov - 5), punchT);
+        break;
+      }
+      if (focusChar) {
+        const cx = lerp(
+          focusChar.startPosition[0],
+          focusChar.endPosition[0],
+          eased,
+        );
+        const cy = focusChar.startPosition[1] + 1.48;
+        const cz = lerp(
+          focusChar.startPosition[2],
+          focusChar.endPosition[2],
+          eased,
+        );
+        lookX = lerp(tx, cx, punchT);
+        lookY = lerp(ty, cy, punchT);
+        lookZ = lerp(tz, cz, punchT);
+        const dist = lerp(4.2, 2.05, punchT);
+        const angle = focusChar.rotationY * 0.45;
+        px = lookX + Math.sin(angle) * dist;
+        py = cy + lerp(0.45, 0.12, punchT);
+        pz = lookZ + Math.cos(angle) * dist;
+        fov = lerp(Math.max(44, scene.cameraFov), 28, punchT);
+        roll = Math.sin(punchT * Math.PI) * 0.035;
+      }
+      break;
+    }
+    case "shot-reverse-shot": {
+      if (scene.environment === "agent-command-desk") {
+        px = lerp(sx, ex, eased);
+        py = lerp(sy, ey, eased);
+        pz = lerp(sz, ez, eased);
+        fov = scene.cameraFov;
+        break;
+      }
+      const speaker =
+        scene.characters.find((c) => c.speaking) ?? scene.characters[0];
+      const listener =
+        scene.characters.find((c) => !c.speaking) ?? scene.characters[1] ?? speaker;
+      if (speaker) {
+        const sxChar = lerp(
+          speaker.startPosition[0],
+          speaker.endPosition[0],
+          eased,
+        );
+        const syChar = speaker.startPosition[1] + 1.42;
+        const szChar = lerp(
+          speaker.startPosition[2],
+          speaker.endPosition[2],
+          eased,
+        );
+        const lxChar = listener ? listener.startPosition[0] : 0;
+        lookX = sxChar * 0.72 + lxChar * 0.28;
+        lookY = syChar;
+        lookZ = szChar;
+        const sideSign = sxChar >= 0 ? -1 : 1;
+        px = sxChar + sideSign * 0.95 + lerp(-0.18, 0.18, eased);
+        py = syChar + 0.18;
+        pz = szChar + 2.65;
+        fov = Math.min(36, scene.cameraFov);
       }
       break;
     }
@@ -792,6 +878,47 @@ export function computeCharacterPoseAtFrame(
       leftForearmX = -0.5;
       break;
     }
+    case "type-code": {
+      const cycle = timeSec * 14.0 + phaseOffset;
+      hipBobY = Math.sin(timeSec * 4.5) * 0.02;
+      torsoLeanX = 0.14;
+      torsoTwistY = Math.sin(timeSec * 2.8) * 0.06;
+      leftUpperArmX = -0.68 + Math.sin(cycle) * 0.08;
+      rightUpperArmX = -0.68 + Math.cos(cycle * 1.15) * 0.08;
+      leftUpperArmZ = 0.14;
+      rightUpperArmZ = -0.14;
+      leftForearmX = -0.88 + Math.sin(cycle * 1.8) * 0.16;
+      rightForearmX = -0.88 + Math.cos(cycle * 1.9) * 0.16;
+      break;
+    }
+    case "panic-react": {
+      const cycle = timeSec * 8.5 + phaseOffset;
+      hipBobY = Math.abs(Math.sin(cycle * 0.8)) * 0.06;
+      torsoLeanX = -0.14 + Math.sin(cycle * 0.5) * 0.05;
+      torsoTwistY = Math.sin(cycle) * 0.22;
+      leftUpperArmX = -2.15 + Math.sin(cycle) * 0.22;
+      rightUpperArmX = -2.15 + Math.cos(cycle) * 0.22;
+      leftUpperArmZ = 0.45;
+      rightUpperArmZ = -0.45;
+      leftForearmX = -0.95;
+      rightForearmX = -0.95;
+      break;
+    }
+    case "celebrate": {
+      const cycle = timeSec * 6.5 + phaseOffset;
+      hipBobY = Math.abs(Math.sin(cycle)) * 0.11;
+      torsoLeanX = -0.08;
+      torsoTwistY = Math.sin(cycle * 0.5) * 0.18;
+      leftUpperArmX = -2.45 + Math.sin(cycle) * 0.28;
+      rightUpperArmX = -2.45 - Math.sin(cycle) * 0.28;
+      leftUpperArmZ = 0.35;
+      rightUpperArmZ = -0.35;
+      leftForearmX = -0.35;
+      rightForearmX = -0.35;
+      leftThighX = Math.max(0, Math.sin(cycle)) * 0.25;
+      rightThighX = Math.max(0, -Math.sin(cycle)) * 0.25;
+      break;
+    }
     case "idle":
     default: {
       const cycle = timeSec * 2.0 + phaseOffset;
@@ -803,16 +930,16 @@ export function computeCharacterPoseAtFrame(
   }
 
   const lookDx = placement.headLookAt[0] - wx;
-  const lookDz = placement.headLookAt[2] - wz;
-  const targetYaw = Math.atan2(lookDx, lookDz) - worldRotationY;
+  const lookDz = Math.max(0.85, Math.abs(placement.headLookAt[2] - wz));
+  const targetYaw = Math.atan2(lookDx, lookDz) - worldRotationY * 0.5;
   const normalizedYaw = Math.atan2(Math.sin(targetYaw), Math.cos(targetYaw));
   const headYawY =
-    clamp(normalizedYaw * 0.55, -0.65, 0.65) +
-    Math.sin(timeSec * 1.7 + phaseOffset) * 0.08;
+    clamp(normalizedYaw * 0.22, -0.22, 0.22) +
+    Math.sin(timeSec * 1.7 + phaseOffset) * 0.04;
   const headPitchX =
-    clamp((wx - placement.headLookAt[1]) * -0.05, -0.3, 0.3) +
+    clamp((wx - placement.headLookAt[1]) * -0.02, -0.08, 0.08) +
     (placement.speaking
-      ? Math.sin(timeSec * 5.2) * 0.04 + speechEnergy * 0.07
+      ? Math.sin(timeSec * 5.2) * 0.03 + speechEnergy * 0.04
       : 0);
 
   const blinkCycle = (timeSec + seededRandom(seedKey + "-blink") * 3.2) % 3.2;

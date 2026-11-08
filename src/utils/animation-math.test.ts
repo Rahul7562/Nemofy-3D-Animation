@@ -12,7 +12,9 @@ import {
   extractLipSyncFromWavBytes,
 } from "./animation-math";
 import {
+  AGENTMORPHY_SKIT_PROJECT,
   DEFAULT_STUDIO_PROJECT,
+  STUDIO_PRESET_PROJECTS,
   VERTICAL_SHOWCASE_PROJECT,
 } from "./default-project";
 import { generateProjectWavBytes, uint8ArrayToBase64 } from "../audio/procedural-audio";
@@ -101,6 +103,61 @@ test("VERTICAL_SHOWCASE_PROJECT ('Nemo and Leo — A Cinematic Encounter') has 3
   assert.ok(hasLeo);
 });
 
+test("AGENTMORPHY_SKIT_PROJECT stars Nemo & Leo in agent-command-desk with close-up, shot-reverse-shot, viral-reels captions, and expressive dev actions", () => {
+  assert.ok(STUDIO_PRESET_PROJECTS.length >= 5);
+  assert.equal(AGENTMORPHY_SKIT_PROJECT.brief.aspectRatio, "9:16");
+  assert.equal(AGENTMORPHY_SKIT_PROJECT.scenes.length, 4);
+  assert.equal(
+    AGENTMORPHY_SKIT_PROJECT.scenes[0].environment,
+    "agent-command-desk",
+  );
+  assert.equal(
+    AGENTMORPHY_SKIT_PROJECT.scenes[0].captionStyle,
+    "viral-reels",
+  );
+  assert.ok(
+    AGENTMORPHY_SKIT_PROJECT.scenes[0].statusBadgeText?.includes("98%"),
+  );
+  assert.ok(
+    AGENTMORPHY_SKIT_PROJECT.scenes[0].dialogueAudioUrl?.endsWith(".wav"),
+  );
+
+  // Verify close-up and shot-reverse-shot camera math
+  const closeUpCam = computeCameraTransformAtFrame(
+    AGENTMORPHY_SKIT_PROJECT.scenes[1],
+    50,
+    165,
+    30,
+  );
+  assert.ok(Number.isFinite(closeUpCam.position[0]));
+
+  const srsCam = computeCameraTransformAtFrame(
+    AGENTMORPHY_SKIT_PROJECT.scenes[3],
+    45,
+    111,
+    30,
+  );
+  assert.ok(Number.isFinite(srsCam.position[0]));
+
+  // Verify panic-react, gesture, and celebrate joint poses
+  const panicPose = computeCharacterPoseAtFrame(
+    AGENTMORPHY_SKIT_PROJECT.scenes[0].characters[0],
+    20,
+    114,
+    30,
+    "leo-panic",
+  );
+  const celebratePose = computeCharacterPoseAtFrame(
+    AGENTMORPHY_SKIT_PROJECT.scenes[3].characters[0],
+    20,
+    111,
+    30,
+    "leo-celebrate",
+  );
+  assert.ok(panicPose.leftUpperArmX < -1.2);
+  assert.ok(celebratePose.rightUpperArmX < -1.8);
+});
+
 test("sanitizeOmniVoiceInstruct keeps valid OmniVoice voice-design tags and drops invalid prose", () => {
   const raw =
     "female, young adult, moderate pitch, british accent, robotic echo, super fast";
@@ -180,8 +237,9 @@ test("extractLipSyncFromWavBytes extracts 30Hz envelope and word timings from PC
   assert.ok(envelope[15].mouthOpenness > 0.25);
 });
 
-test("populateSharedStageScene3D builds complete 3D scene graphs across all 6 environments", () => {
+test("populateSharedStageScene3D builds complete 3D scene graphs across all 7 environments including agent-command-desk", () => {
   const environments = [
+    "agent-command-desk",
     "observatory-citadel",
     "bioluminescent-forest",
     "cyber-harbor",
@@ -194,7 +252,7 @@ test("populateSharedStageScene3D builds complete 3D scene graphs across all 6 en
     const threeScene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(45, 1080 / 1920, 0.1, 200);
     const sceneConfig = {
-      ...DEFAULT_STUDIO_PROJECT.scenes[0],
+      ...AGENTMORPHY_SKIT_PROJECT.scenes[0],
       environment: env,
     };
 
@@ -202,8 +260,8 @@ test("populateSharedStageScene3D builds complete 3D scene graphs across all 6 en
       threeScene,
       camera,
       sceneConfig,
-      DEFAULT_STUDIO_PROJECT.characters,
-      "low-poly",
+      AGENTMORPHY_SKIT_PROJECT.characters,
+      "pixar",
       15,
       120,
       30,
@@ -246,9 +304,9 @@ test("inspectSystemHardware and processUploadedDialogueAudio validate real audio
   assert.ok(uploaded.wordTimings.length >= 8);
 });
 
-test("serializeProjectToBlenderManifest produces native 1080x1920 300-frame Blender manifest for Nemo and Leo", () => {
+test("serializeProjectToBlenderManifest produces native 1080x1920 504-frame Blender manifest for Nemo and Leo", () => {
   const manifest = serializeProjectToBlenderManifest({
-    project: VERTICAL_SHOWCASE_PROJECT,
+    project: AGENTMORPHY_SKIT_PROJECT,
     aspectRatio: "9:16",
     fps: 30,
     renderPreset: "draft",
@@ -258,10 +316,10 @@ test("serializeProjectToBlenderManifest produces native 1080x1920 300-frame Blen
   assert.equal(manifest.width, 1080);
   assert.equal(manifest.height, 1920);
   assert.equal(manifest.fps, 30);
-  assert.equal(manifest.totalFrames, 300);
-  assert.equal(manifest.shots.length, 3);
+  assert.equal(manifest.totalFrames, 504);
+  assert.equal(manifest.shots.length, 4);
   assert.equal(manifest.shots[0].startFrame, 1);
-  assert.equal(manifest.shots[2].endFrame, 300);
+  assert.equal(manifest.shots[3].endFrame, 504);
 });
 
 test("Blender asset catalogue and diagnostics verify Rain, Snow, Security Bot, Mixamo, Poly Haven, Nemo & Leo rigs", async () => {

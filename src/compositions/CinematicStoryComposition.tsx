@@ -88,12 +88,12 @@ export const CinematicStoryComposition: React.FC<
   const subtitleOpacity = interpolate(
     localFrame,
     [
-      6,
-      16,
-      Math.max(17, currentTiming.durationInFrames - 16),
-      Math.max(18, currentTiming.durationInFrames - 5),
+      0,
+      4,
+      Math.max(17, currentTiming.durationInFrames - 10),
+      Math.max(18, currentTiming.durationInFrames - 2),
     ],
-    [0, 1, 1, 0],
+    [0.96, 1, 1, 0],
     {
       extrapolateLeft: "clamp",
       extrapolateRight: "clamp",
@@ -146,30 +146,30 @@ export const CinematicStoryComposition: React.FC<
       </div>
 
       {/* Scene Slate Badge */}
-      {showHudOverlay && (
+      {showHudOverlay && !currentTiming.scene.statusBadgeText && (
         <div
           style={{
             position: "absolute",
-            top: 16,
-            left: 16,
+            top: 20,
+            left: 20,
             display: "flex",
             alignItems: "center",
-            gap: 8,
-            padding: "5px 10px",
+            gap: 10,
+            padding: "8px 14px",
             backgroundColor: "rgba(9, 13, 22, 0.88)",
-            border: "1px solid rgba(148, 163, 184, 0.22)",
-            borderRadius: 6,
+            border: "1px solid rgba(148, 163, 184, 0.25)",
+            borderRadius: 8,
             color: "#F8FAFC",
             fontFamily: "JetBrains Mono, monospace",
-            fontSize: 11,
+            fontSize: Math.max(12, Math.round(width * 0.016)),
             letterSpacing: "0.04em",
             pointerEvents: "none",
           }}
         >
           <span
             style={{
-              width: 7,
-              height: 7,
+              width: 9,
+              height: 9,
               borderRadius: 2,
               backgroundColor: "#6366F1",
               display: "inline-block",
@@ -185,61 +185,223 @@ export const CinematicStoryComposition: React.FC<
         </div>
       )}
 
-      {/* Synchronized Burned-in Subtitles */}
-      {showSubtitles &&
-        currentTiming.scene.narrationText.trim().length > 0 && (
+      {/* Top-Center @agentmorphy Status Callout Pill */}
+      {currentTiming.scene.statusBadgeText && (
+        <div
+          style={{
+            position: "absolute",
+            top: 22,
+            left: "6%",
+            right: "6%",
+            display: "flex",
+            justifyContent: "center",
+            opacity: subtitleOpacity,
+            pointerEvents: "none",
+          }}
+        >
           <div
             style={{
-              position: "absolute",
-              bottom: Math.max(24, Math.round(height * 0.06)),
-              left: "8%",
-              right: "8%",
-              display: "flex",
-              justifyContent: "center",
-              opacity: subtitleOpacity,
-              pointerEvents: "none",
+              backgroundColor: "rgba(11, 15, 29, 0.82)",
+              border:
+                currentTiming.scene.statusBadgeText.includes("98%") ||
+                currentTiming.scene.statusBadgeText.includes("🚨") ||
+                currentTiming.scene.statusBadgeText.includes("🛑")
+                  ? "1.5px solid rgba(244, 63, 94, 0.78)"
+                  : "1.5px solid rgba(251, 191, 36, 0.72)",
+              boxShadow: "0 8px 24px rgba(0, 0, 0, 0.55)",
+              borderRadius: 999,
+              padding: "6px 16px",
+              color: "#F8FAFC",
+              fontFamily: "JetBrains Mono, monospace",
+              fontSize: Math.max(11, Math.round(width * 0.019)),
+              fontWeight: 700,
+              letterSpacing: "0.05em",
+              textTransform: "uppercase",
+              textAlign: "center",
             }}
           >
+            {currentTiming.scene.statusBadgeText}
+          </div>
+        </div>
+      )}
+
+      {/* Synchronized Burned-in Subtitles / @agentmorphy Clean Floating Upper-Middle Captions */}
+      {showSubtitles &&
+        currentTiming.scene.narrationText.trim().length > 0 && (() => {
+          const rawText = currentTiming.scene.narrationText.trim();
+          const words = rawText.split(/\s+/);
+          const isViralReels =
+            currentTiming.scene.captionStyle === "viral-reels" ||
+            currentTiming.scene.environment === "agent-command-desk";
+          const speakerName = currentTiming.scene.dialogueSpeaker || "Narrator";
+          const isNemoSpeaker = speakerName.toLowerCase().includes("nemo");
+          const activeWordIndex = Math.min(
+            words.length - 1,
+            Math.max(
+              0,
+              Math.floor(
+                (localFrame /
+                  Math.max(1, currentTiming.durationInFrames - 8)) *
+                  words.length,
+              ),
+            ),
+          );
+
+          if (isViralReels) {
+            const chunkSize = 4;
+            const chunkStart =
+              Math.floor(activeWordIndex / chunkSize) * chunkSize;
+            const visibleWords = words.slice(chunkStart, chunkStart + chunkSize);
+
+            return (
+              <div
+                style={{
+                  position: "absolute",
+                  top: currentTiming.scene.statusBadgeText ? "9.5%" : "7.5%",
+                  left: "6%",
+                  right: "6%",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  opacity: subtitleOpacity,
+                  pointerEvents: "none",
+                }}
+              >
+                <div
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 6,
+                    padding: "2px 10px",
+                    borderRadius: 999,
+                    backgroundColor: "rgba(11, 15, 29, 0.76)",
+                    border: isNemoSpeaker
+                      ? "1px solid rgba(224, 109, 83, 0.75)"
+                      : "1px solid rgba(96, 165, 250, 0.75)",
+                    color: isNemoSpeaker ? "#FDBA74" : "#93C5FD",
+                    fontFamily: "JetBrains Mono, monospace",
+                    fontSize: Math.max(9, Math.round(width * 0.015)),
+                    fontWeight: 800,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.08em",
+                    marginBottom: 5,
+                  }}
+                >
+                  <span
+                    style={{
+                      width: 6,
+                      height: 6,
+                      borderRadius: 99,
+                      backgroundColor: isNemoSpeaker ? "#E06D53" : "#3B82F6",
+                      display: "inline-block",
+                    }}
+                  />
+                  <span>{speakerName}</span>
+                </div>
+                <div
+                  style={{
+                    display: "flex",
+                    flexWrap: "wrap",
+                    justifyContent: "center",
+                    gap: "4px 7px",
+                    maxWidth: "94%",
+                    textAlign: "center",
+                    fontFamily: "Plus Jakarta Sans, Inter, sans-serif",
+                    fontSize: Math.max(16, Math.round(width * 0.035)),
+                    fontWeight: 800,
+                    lineHeight: 1.22,
+                    textShadow:
+                      "0 3px 14px rgba(0, 0, 0, 0.96), 0 1px 4px rgba(0, 0, 0, 0.98)",
+                  }}
+                >
+                  {visibleWords.map((word, idxInChunk) => {
+                    const wIdx = chunkStart + idxInChunk;
+                    const isCurrent = wIdx === activeWordIndex;
+                    const isSpoken = wIdx <= activeWordIndex;
+                    return (
+                      <span
+                        key={wIdx}
+                        style={{
+                          padding: isCurrent ? "1px 8px" : "1px 3px",
+                          borderRadius: 7,
+                          backgroundColor: isCurrent
+                            ? isNemoSpeaker
+                              ? "rgba(224, 109, 83, 0.92)"
+                              : "rgba(59, 91, 219, 0.92)"
+                            : "transparent",
+                          color: isCurrent
+                            ? "#FFFFFF"
+                            : isSpoken
+                              ? "#FFFFFF"
+                              : "rgba(226, 232, 240, 0.85)",
+                          transform: isCurrent ? "scale(1.05)" : "scale(1)",
+                          display: "inline-block",
+                        }}
+                      >
+                        {word}
+                      </span>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          }
+
+          return (
             <div
               style={{
-                backgroundColor: "rgba(9, 13, 22, 0.90)",
-                border: "1px solid rgba(99, 102, 241, 0.38)",
-                borderRadius: 8,
-                padding: "8px 16px",
-                maxWidth: 720,
-                textAlign: "center",
+                position: "absolute",
+                bottom: Math.max(24, Math.round(height * 0.06)),
+                left: "8%",
+                right: "8%",
+                display: "flex",
+                justifyContent: "center",
+                opacity: subtitleOpacity,
+                pointerEvents: "none",
               }}
             >
               <div
                 style={{
-                  color: "#38BDF8",
-                  fontFamily: "JetBrains Mono, monospace",
-                  fontSize: 10,
-                  textTransform: "uppercase",
-                  letterSpacing: "0.06em",
-                  marginBottom: 2,
+                  backgroundColor: "rgba(9, 13, 22, 0.90)",
+                  border: "1px solid rgba(99, 102, 241, 0.38)",
+                  borderRadius: 8,
+                  padding: "8px 16px",
+                  maxWidth: 720,
+                  textAlign: "center",
                 }}
               >
-                {currentTiming.scene.dialogueSpeaker || "Narrator"}
+                <div
+                  style={{
+                    color: "#38BDF8",
+                    fontFamily: "JetBrains Mono, monospace",
+                    fontSize: 10,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.06em",
+                    marginBottom: 2,
+                  }}
+                >
+                  {speakerName}
+                </div>
+                <p
+                  style={{
+                    margin: 0,
+                    color: "#F8FAFC",
+                    fontFamily: "Plus Jakarta Sans, sans-serif",
+                    fontSize: Math.max(
+                      13,
+                      Math.min(22, Math.round(width * 0.022)),
+                    ),
+                    fontWeight: 600,
+                    lineHeight: 1.35,
+                  }}
+                >
+                  “{rawText}”
+                </p>
               </div>
-              <p
-                style={{
-                  margin: 0,
-                  color: "#F8FAFC",
-                  fontFamily: "Plus Jakarta Sans, sans-serif",
-                  fontSize: Math.max(
-                    13,
-                    Math.min(22, Math.round(width * 0.022)),
-                  ),
-                  fontWeight: 600,
-                  lineHeight: 1.35,
-                }}
-              >
-                “{currentTiming.scene.narrationText}”
-              </p>
             </div>
-          </div>
-        )}
+          );
+        })()}
 
       {/* Deterministic Transition Overlay */}
       {transitionState.fadeOverlayOpacity > 0.01 && (

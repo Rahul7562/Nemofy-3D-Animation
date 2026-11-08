@@ -21,6 +21,8 @@ SHOT_LENS_DEFAULTS = {
     "orbit":             (38.0, 4.0),
     "crane-up":          (32.0, 4.8),
     "close-up":          (70.0, 2.4),
+    "crash-zoom":        (52.0, 2.8),
+    "shot-reverse-shot": (48.0, 3.2),
     "static":            (50.0, 4.0),
 }
 
@@ -80,41 +82,41 @@ def configure_shot_cameras(
         cam_data.dof.aperture_fstop = fstop
 
         # Determine start/end camera positions and look-at target in Blender world space
-        # (Characters stand near (X in [-0.68, +0.68], Y = 0.0, Z in [0.0, 1.75]), facing -Y)
-        speaker_x = 0.60 if "nemo" in speaker_name else -0.60
-        dist_mult = 1.28 if is_vertical else 1.0
+        # (Leo at X = -0.42, Nemo at X = +0.42, Y = 0.0, Z in [0.0, 1.42], facing -Y)
+        speaker_x = 0.42 if "nemo" in speaker_name else -0.42
+        dist_mult = 1.05 if is_vertical else 0.88
 
         if move_type == "establishing-wide":
-            pos_start = mathutils.Vector((-0.35, -4.35 * dist_mult, 1.48))
-            pos_end   = mathutils.Vector((0.15,  -3.75 * dist_mult, 1.42))
-            tgt_start = mathutils.Vector((0.0, 0.0, 1.18))
-            tgt_end   = mathutils.Vector((0.0, 0.0, 1.24))
-        elif move_type == "close-up":
-            # Medium Close-Up / OTS framing the active speaker while keeping partner's reaction inside the safe 9:16 frustum
-            pos_start = mathutils.Vector((speaker_x * 0.25, -2.95 * dist_mult, 1.48))
-            pos_end   = mathutils.Vector((speaker_x * 0.35, -2.65 * dist_mult, 1.50))
-            tgt_start = mathutils.Vector((speaker_x * 0.22, 0.0, 1.38))
-            tgt_end   = mathutils.Vector((speaker_x * 0.28, 0.0, 1.42))
-        elif move_type == "tracking":
-            pos_start = mathutils.Vector((-0.85, -3.15 * dist_mult, 1.42))
-            pos_end   = mathutils.Vector((0.85,  -2.95 * dist_mult, 1.46))
-            tgt_start = mathutils.Vector((-0.15, 0.0, 1.32))
-            tgt_end   = mathutils.Vector((0.20,  0.0, 1.35))
+            pos_start = mathutils.Vector((-0.08, -2.55 * dist_mult, 0.96))
+            pos_end   = mathutils.Vector(( 0.06, -2.30 * dist_mult, 0.94))
+            tgt_start = mathutils.Vector(( 0.0, 0.0, 0.88))
+            tgt_end   = mathutils.Vector(( 0.0, 0.0, 0.90))
+        elif move_type in ("close-up", "crash-zoom"):
+            # Tight @agentmorphy 3/4 Close-Up on active speaker while keeping partner's shoulder in frame
+            pos_start = mathutils.Vector((speaker_x * 0.42, -2.15 * dist_mult, 0.96))
+            pos_end   = mathutils.Vector((speaker_x * 0.55, -1.78 * dist_mult, 0.94))
+            tgt_start = mathutils.Vector((speaker_x * 0.45, 0.0, 0.88))
+            tgt_end   = mathutils.Vector((speaker_x * 0.58, 0.0, 0.90))
+        elif move_type in ("tracking", "shot-reverse-shot"):
+            pos_start = mathutils.Vector((-0.38, -2.20 * dist_mult, 0.95))
+            pos_end   = mathutils.Vector(( 0.38, -2.15 * dist_mult, 0.95))
+            tgt_start = mathutils.Vector((-0.14, 0.0, 0.88))
+            tgt_end   = mathutils.Vector(( 0.14, 0.0, 0.90))
         elif move_type == "orbit":
-            pos_start = mathutils.Vector((0.95,  -3.45 * dist_mult, 1.52))
-            pos_end   = mathutils.Vector((-0.85, -3.30 * dist_mult, 1.62))
-            tgt_start = mathutils.Vector((0.0, 0.0, 1.28))
-            tgt_end   = mathutils.Vector((0.0, 0.0, 1.34))
+            pos_start = mathutils.Vector(( 0.45, -2.35 * dist_mult, 0.98))
+            pos_end   = mathutils.Vector((-0.42, -2.25 * dist_mult, 0.98))
+            tgt_start = mathutils.Vector(( 0.0, 0.0, 0.88))
+            tgt_end   = mathutils.Vector(( 0.0, 0.0, 0.90))
         elif move_type == "dolly-in":
-            pos_start = mathutils.Vector((0.0, -4.10 * dist_mult, 1.46))
-            pos_end   = mathutils.Vector((speaker_x * 0.35, -2.85 * dist_mult, 1.48))
-            tgt_start = mathutils.Vector((0.0, 0.0, 1.24))
-            tgt_end   = mathutils.Vector((speaker_x * 0.45, 0.0, 1.38))
+            pos_start = mathutils.Vector(( 0.0, -2.50 * dist_mult, 0.96))
+            pos_end   = mathutils.Vector((speaker_x * 0.40, -1.95 * dist_mult, 0.94))
+            tgt_start = mathutils.Vector(( 0.0, 0.0, 0.88))
+            tgt_end   = mathutils.Vector((speaker_x * 0.45, 0.0, 0.90))
         else:
-            pos_start = mathutils.Vector((0.0, -3.65 * dist_mult, 1.45))
-            pos_end   = mathutils.Vector((0.20, -3.40 * dist_mult, 1.45))
-            tgt_start = mathutils.Vector((0.0, 0.0, 1.28))
-            tgt_end   = mathutils.Vector((0.0, 0.0, 1.30))
+            pos_start = mathutils.Vector(( 0.0, -2.35 * dist_mult, 0.95))
+            pos_end   = mathutils.Vector(( 0.10, -2.20 * dist_mult, 0.95))
+            tgt_start = mathutils.Vector(( 0.0, 0.0, 0.88))
+            tgt_end   = mathutils.Vector(( 0.0, 0.0, 0.90))
 
         # Keyframe start, midpoint, and end of shot camera motion
         f_mid = (f_start + f_end) // 2

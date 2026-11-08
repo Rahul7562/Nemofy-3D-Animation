@@ -1,15 +1,15 @@
 import fs from "node:fs";
 import path from "node:path";
-import { VERTICAL_SHOWCASE_PROJECT } from "../src/utils/default-project";
+import { AGENTMORPHY_SKIT_PROJECT } from "../src/utils/default-project";
 import {
   getBlenderRenderJobStatus,
   startFullBlenderRenderJob,
 } from "../src/blender/render-job-manager";
 
 async function main() {
-  console.log("=== Starting Authoritative Blender Render: Nemo and Leo — A Cinematic Encounter ===");
+  console.log("=== Starting Authoritative Blender Render: Nemo & Leo — @agentmorphy Viral AI Agent Skit ===");
   const initial = startFullBlenderRenderJob({
-    project: VERTICAL_SHOWCASE_PROJECT,
+    project: AGENTMORPHY_SKIT_PROJECT,
     aspectRatio: "9:16",
     fps: 30,
     renderPreset: "draft",

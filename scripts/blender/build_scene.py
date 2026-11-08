@@ -63,9 +63,102 @@ def build_detailed_environment(scene: bpy.types.Scene, env_type: str, total_fram
     emerald_crystal_mat = create_pbr_material(
         "Env_EmeraldGlow", "#34D399", roughness=0.14, metallic=0.10, emission_hex="#10B981", emission_strength=4.5
     )
-    foliage_mat = create_pbr_material(
-        "Env_CanopyFoliage", "#065F46", roughness=0.62, subsurface=0.18, bump_scale=0.12, noise_scale=30.0
-    )
+
+    if env_type == "agent-command-desk":
+        # Authentic @agentmorphy 3D Night-Window Studio Set:
+        # 1. Foreground Window Sill / Rooftop Ledge at Z = 0.0m
+        sill_mat = create_pbr_material("Env_WindowSill", "#1B2234", roughness=0.62, metallic=0.15)
+        frame_mat = create_pbr_material("Env_WindowFrame", "#0B0F1D", roughness=0.48, metallic=0.35)
+        sky_mat = create_pbr_material("Env_MidnightSky", "#141834", roughness=0.95, emission_hex="#141834", emission_strength=0.55)
+        bldg_mat = create_pbr_material("Env_SkylineBldg", "#1E1F3B", roughness=0.82, metallic=0.12)
+        win_warm_mat = create_pbr_material("Env_GoldenWindow", "#F59E0B", roughness=0.18, emission_hex="#FBBF24", emission_strength=4.2)
+        bokeh_mat = create_pbr_material("Env_BokehBulb", "#FEF3C7", roughness=0.10, emission_hex="#FDE68A", emission_strength=5.5)
+
+        bpy.ops.mesh.primitive_cube_add(size=1.0, location=(0, 0.0, -0.14))
+        sill = bpy.context.active_object
+        sill.name = "Env_WindowSillLedge"
+        sill.scale = (5.2, 2.2, 0.28)
+        sill.data.materials.append(sill_mat)
+
+        bpy.ops.mesh.primitive_cube_add(size=1.0, location=(0, -0.62, 0.015))
+        sill_lip = bpy.context.active_object
+        sill_lip.name = "Env_WindowSillLip"
+        sill_lip.scale = (5.2, 0.08, 0.03)
+        sill_lip.data.materials.append(frame_mat)
+
+        # 2. Cross-Paned Night Window Frame right behind Leo & Nemo (Y = +0.62m)
+        bpy.ops.mesh.primitive_cube_add(size=1.0, location=(0, 0.62, 1.45))
+        mullion_v = bpy.context.active_object
+        mullion_v.name = "Env_WindowMullionV"
+        mullion_v.scale = (0.09, 0.08, 3.6)
+        mullion_v.data.materials.append(frame_mat)
+
+        for hz_idx, hz in enumerate([1.22, 2.25]):
+            bpy.ops.mesh.primitive_cube_add(size=1.0, location=(0, 0.62, hz))
+            mullion_h = bpy.context.active_object
+            mullion_h.name = f"Env_WindowMullionH_{hz_idx + 1}"
+            mullion_h.scale = (4.6, 0.08, 0.08)
+            mullion_h.data.materials.append(frame_mat)
+
+        for side_idx, sx in enumerate([-1.75, 1.75]):
+            bpy.ops.mesh.primitive_cube_add(size=1.0, location=(sx, 0.62, 1.45))
+            pillar = bpy.context.active_object
+            pillar.name = f"Env_WindowOuterPillar_{side_idx + 1}"
+            pillar.scale = (0.28, 0.14, 3.6)
+            pillar.data.materials.append(frame_mat)
+
+        # 3. Deep Midnight-Indigo Night Sky Backdrop (Y = +4.8m)
+        bpy.ops.mesh.primitive_cube_add(size=1.0, location=(0, 4.8, 1.8))
+        sky_wall = bpy.context.active_object
+        sky_wall.name = "Env_NightSkyBackdrop"
+        sky_wall.scale = (14.0, 0.1, 9.0)
+        sky_wall.data.materials.append(sky_mat)
+
+        # 4. 3D City Skyline Silhouettes with Glowing Warm Golden-Amber Window Grids
+        bldg_configs = [
+            (-1.45, 2.35, 2.8, 0.72, 2, 6),
+            (-0.82, 2.75, 2.1, 0.64, 2, 4),
+            (-2.15, 2.95, 3.2, 0.78, 2, 6),
+            ( 0.85, 2.65, 2.4, 0.66, 2, 5),
+            ( 1.48, 2.30, 3.0, 0.76, 2, 6),
+            ( 2.18, 2.90, 2.6, 0.72, 2, 5),
+        ]
+        for b_idx, (bx, by, bh, bw, cols, rows) in enumerate(bldg_configs):
+            bpy.ops.mesh.primitive_cube_add(size=1.0, location=(bx, by, bh * 0.5 - 0.2))
+            bldg = bpy.context.active_object
+            bldg.name = f"Env_SkylineTower_{b_idx + 1}"
+            bldg.scale = (bw, 0.45, bh)
+            bldg.data.materials.append(bldg_mat)
+
+            for r in range(rows):
+                for c in range(cols):
+                    if (b_idx + r + c) % 4 == 0:
+                        continue
+                    wx = bx - bw * 0.22 + c * (bw * 0.44)
+                    wz = 0.28 + r * 0.34
+                    if wz > bh - 0.35:
+                        continue
+                    bpy.ops.mesh.primitive_cube_add(size=1.0, location=(wx, by - 0.23, wz))
+                    win = bpy.context.active_object
+                    win.name = f"Env_GoldenWin_{b_idx + 1}_{r}_{c}"
+                    win.scale = (bw * 0.22, 0.02, 0.18)
+                    win.data.materials.append(win_warm_mat)
+
+        # 5. Three Warm Glowing Circular Bokeh Bulbs at Top of Window
+        for k_idx, (kx, kz, kr) in enumerate([(-0.48, 1.98, 0.085), (0.02, 2.08, 0.095), (0.52, 1.96, 0.085)]):
+            bpy.ops.mesh.primitive_uv_sphere_add(segments=20, ring_count=12, radius=kr, location=(kx, 1.35, kz))
+            bulb = bpy.context.active_object
+            bulb.name = f"Env_BokehStreetLight_{k_idx + 1}"
+            bulb.data.materials.append(bokeh_mat)
+
+        # Warm Golden Key Light from Right + Cool Indigo Fill from Left
+        warm_light_data = bpy.data.lights.new(name="Env_MorphyWarmKey", type="POINT")
+        warm_light_data.energy = 260.0
+        warm_light_data.color = (1.0, 0.76, 0.38)
+        warm_light_obj = bpy.data.objects.new(name="Env_MorphyWarmKey", object_data=warm_light_data)
+        scene.collection.objects.link(warm_light_obj)
+        warm_light_obj.location = (1.45, -1.35, 1.45)
+        return
 
     # 1. Main Ground Courtyard Plaza (Top surface flush at Z = 0.0)
     bpy.ops.mesh.primitive_cylinder_add(vertices=64, radius=16.0, depth=0.20, location=(0, 0, -0.10))
@@ -143,20 +236,17 @@ def build_detailed_environment(scene: bpy.types.Scene, env_type: str, total_fram
         dist = 4.25
         px = math.sin(ang) * dist
         py = math.cos(ang) * dist + 0.8
-        # Pillar Base
         bpy.ops.mesh.primitive_cube_add(size=1.0, location=(px, py, 0.18))
         p_base = bpy.context.active_object
         p_base.name = f"Env_PillarBase_{idx + 1}"
         p_base.scale = (0.48, 0.48, 0.36)
         p_base.data.materials.append(dark_trim_mat)
 
-        # Fluted Column Shaft
         bpy.ops.mesh.primitive_cylinder_add(vertices=16, radius=0.18, depth=2.6, location=(px, py, 1.66))
         p_shaft = bpy.context.active_object
         p_shaft.name = f"Env_PillarShaft_{idx + 1}"
         p_shaft.data.materials.append(stone_mat)
 
-        # Gold Capital & Floating Crystal Lantern
         bpy.ops.mesh.primitive_cylinder_add(vertices=16, radius=0.24, depth=0.14, location=(px, py, 3.02))
         p_cap = bpy.context.active_object
         p_cap.name = f"Env_PillarCap_{idx + 1}"
@@ -204,7 +294,6 @@ def build_detailed_environment(scene: bpy.types.Scene, env_type: str, total_fram
         peak.name = f"Env_HorizonPeak_{m_idx + 1}"
         peak.data.materials.append(dark_trim_mat)
 
-    # Animated Floating Harmonic Motes in Midground
     for p_idx in range(14):
         angle = (p_idx / 14.0) * math.pi * 2.0
         rad = 1.4 + (p_idx % 4) * 0.55
@@ -309,8 +398,8 @@ def build_project_from_manifest(manifest_path: str, output_blend_path: str, insp
             "startFrame": cursor_f,
             "endFrame": end_f,
             "characterStaging": {
-                "char-leo":  {"x": -0.58, "y": 0.0},
-                "char-nemo": {"x":  0.58, "y": 0.0},
+                "char-leo":  {"x": -0.42, "y": 0.0},
+                "char-nemo": {"x":  0.42, "y": 0.0},
             },
         })
         cursor_f = end_f
@@ -320,7 +409,7 @@ def build_project_from_manifest(manifest_path: str, output_blend_path: str, insp
     for idx, cid in enumerate(rig_ids):
         partner_id = rig_ids[1 - idx] if len(rig_ids) > 1 else cid
         partner_positions = [
-            s["characterStaging"].get(partner_id, {"x": 0.58 if "leo" in cid else -0.58, "y": 0.0})
+            s["characterStaging"].get(partner_id, {"x": 0.42 if "leo" in cid else -0.42, "y": 0.0})
             for s in normalized_shots
         ]
         author_character_timeline_performance(

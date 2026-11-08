@@ -130,6 +130,7 @@ export function generateProjectWavBytes(
     "orchestral-wonder": [146.83, 220.0, 293.66, 369.99],
     "ambient-synth": [130.81, 196.0, 261.63, 311.13],
     "cinematic-pulse": [110, 164.81, 220, 277.18],
+    "cyber-synth": [110, 146.83, 196.0, 220.0],
     "lofi-warmth": [196.0, 246.94, 293.66, 392.0],
   };
 
@@ -148,9 +149,18 @@ export function generateProjectWavBytes(
   const voTrack = project.audioTracks.find((t) => t.type === "voiceover");
   const sfxTrack = project.audioTracks.find((t) => t.type === "sfx");
 
-  const bgmGain = isTrackAudible(bgmTrack) ? bgmTrack!.volume * 0.24 : 0;
-  const voGain = isTrackAudible(voTrack) ? voTrack!.volume * 0.92 : 0;
-  const sfxGain = isTrackAudible(sfxTrack) ? sfxTrack!.volume * 0.22 : 0;
+  const hasAnyRealDialogue = Boolean(
+    sceneDialoguePcmMap && sceneDialoguePcmMap.size > 0,
+  );
+
+  const bgmGain = isTrackAudible(bgmTrack)
+    ? bgmTrack!.volume * (hasAnyRealDialogue ? 0.032 : 0.12)
+    : 0;
+  const voGain = isTrackAudible(voTrack) ? voTrack!.volume * 1.0 : 0;
+  const sfxGain =
+    isTrackAudible(sfxTrack) && !hasAnyRealDialogue
+      ? sfxTrack!.volume * 0.08
+      : 0;
 
   const computeTrackEnvelope = (
     track: StudioProject["audioTracks"][0] | undefined,
@@ -184,9 +194,9 @@ export function generateProjectWavBytes(
       computeTrackEnvelope(bgmTrack, currentFrame);
 
     const bgmSample =
-      (Math.sin(2 * Math.PI * root * t) * 0.5 +
+      (Math.sin(2 * Math.PI * root * t) * 0.55 +
         Math.sin(2 * Math.PI * fifth * t) * 0.3 +
-        Math.sin(2 * Math.PI * octave * t + Math.sin(t * 3) * 0.2) * 0.2) *
+        Math.sin(2 * Math.PI * octave * t) * 0.15) *
       padEnvelope *
       bgmGain;
 
@@ -209,12 +219,12 @@ export function generateProjectWavBytes(
       const localSec =
         (currentFrame - activeTiming.startFrame) / project.brief.fps;
 
-      if (localSec < 0.45 && sfxGain > 0) {
-        const sweepFreq = 220 + (1 - localSec / 0.45) * 440;
+      if (localSec < 0.25 && sfxGain > 0) {
+        const sweepFreq = 180 + (1 - localSec / 0.25) * 160;
         const noise = seededRandom(i % 9973) * 2 - 1;
         sfxSample =
-          (Math.sin(2 * Math.PI * sweepFreq * localSec) * 0.7 + noise * 0.3) *
-          (1 - localSec / 0.45) *
+          (Math.sin(2 * Math.PI * sweepFreq * localSec) * 0.8 + noise * 0.1) *
+          (1 - localSec / 0.25) *
           sfxGain *
           computeTrackEnvelope(sfxTrack, currentFrame);
       }
@@ -236,8 +246,8 @@ export function generateProjectWavBytes(
       }
     }
 
-    // Duck BGM slightly when real character dialogue is speaking
-    const duckFactor = Math.abs(dialogueSample) > 0.02 ? 0.55 : 1.0;
+    // Duck BGM when real character dialogue is speaking
+    const duckFactor = Math.abs(dialogueSample) > 0.01 ? 0.25 : 1.0;
     const combined = Math.max(
       -0.98,
       Math.min(0.98, bgmSample * duckFactor + sfxSample + dialogueSample),

@@ -698,6 +698,132 @@ export function buildSharedEnvironment3D(
     return root;
   }
 
+  if (environment === "agent-command-desk") {
+    const pulse = 0.5 + 0.5 * Math.sin(timeSec * 2.8);
+
+    const warmFrontKey = new THREE.DirectionalLight("#FDE68A", 2.45);
+    warmFrontKey.position.set(2.6, 2.2, 4.2);
+    root.add(warmFrontKey);
+
+    const coolFrontFill = new THREE.DirectionalLight("#93C5FD", 1.55);
+    coolFrontFill.position.set(-2.6, 2.0, 3.8);
+    root.add(coolFrontFill);
+
+    const warmKeyLight = new THREE.PointLight("#FDBA74", 3.2, 9);
+    warmKeyLight.position.set(1.85, 1.05, 1.45);
+    root.add(warmKeyLight);
+
+    const coolFillLight = new THREE.PointLight("#6366F1", 1.8, 9);
+    coolFillLight.position.set(-1.85, 1.35, 1.45);
+    root.add(coolFillLight);
+
+    const skyBackdrop = new THREE.Mesh(
+      new THREE.PlaneGeometry(10, 7),
+      new THREE.MeshStandardMaterial({
+        color: "#141834",
+        emissive: "#171C3F",
+        emissiveIntensity: 0.75,
+        roughness: 0.95,
+      }),
+    );
+    skyBackdrop.position.set(0, 1.35, -2.5);
+    root.add(skyBackdrop);
+
+    const cityBuildings = [
+      { x: -1.25, w: 0.52, h: 0.88, z: -1.65, rows: 5, cols: 3 },
+      { x: -0.78, w: 0.44, h: 0.68, z: -1.75, rows: 4, cols: 3 },
+      { x: -0.38, w: 0.36, h: 0.48, z: -1.85, rows: 3, cols: 2 },
+      { x: 0.42, w: 0.38, h: 0.52, z: -1.82, rows: 3, cols: 2 },
+      { x: 0.84, w: 0.48, h: 0.76, z: -1.72, rows: 4, cols: 3 },
+      { x: 1.32, w: 0.54, h: 0.92, z: -1.62, rows: 5, cols: 3 },
+    ];
+
+    cityBuildings.forEach((b, bIdx) => {
+      const bGroup = new THREE.Group();
+      bGroup.position.set(b.x, b.h * 0.5 - 0.05, b.z);
+      const hull = new THREE.Mesh(
+        new THREE.BoxGeometry(b.w, b.h, 0.22),
+        new THREE.MeshStandardMaterial({ color: "#111428", roughness: 0.85 }),
+      );
+      bGroup.add(hull);
+      for (let rIdx = 0; rIdx < b.rows; rIdx++) {
+        for (let cIdx = 0; cIdx < b.cols; cIdx++) {
+          const litSeed = seededRandom(`win-${bIdx}-${rIdx}-${cIdx}`);
+          if (litSeed < 0.22) continue;
+          const wx = (cIdx - (b.cols - 1) / 2) * (b.w / (b.cols + 0.6));
+          const wy = b.h * 0.36 - rIdx * (b.h / (b.rows + 1.1));
+          const winColor = litSeed > 0.55 ? "#FBBF24" : "#F59E0B";
+          const winMesh = new THREE.Mesh(
+            new THREE.BoxGeometry(0.058, 0.044, 0.01),
+            new THREE.MeshStandardMaterial({
+              color: winColor,
+              emissive: winColor,
+              emissiveIntensity: 1.6,
+            }),
+          );
+          winMesh.position.set(wx, wy, 0.114);
+          bGroup.add(winMesh);
+        }
+      }
+      root.add(bGroup);
+    });
+
+    [
+      { x: -0.58, y: 1.88, z: -0.78, r: 0.065 },
+      { x: -0.22, y: 1.82, z: -0.78, r: 0.072 },
+      { x: 0.44, y: 1.86, z: -0.78, r: 0.068 },
+    ].forEach((bl) => {
+      const bulb = new THREE.Mesh(
+        new THREE.SphereGeometry(bl.r, 12, 12),
+        new THREE.MeshStandardMaterial({
+          color: "#FEF3C7",
+          emissive: "#FDE68A",
+          emissiveIntensity: 2.2 + pulse * 0.3,
+        }),
+      );
+      bulb.position.set(bl.x, bl.y, bl.z);
+      root.add(bulb);
+    });
+
+    const mullionV = new THREE.Mesh(
+      new THREE.BoxGeometry(0.105, 2.7, 0.14),
+      new THREE.MeshStandardMaterial({ color: "#15192E", roughness: 0.6 }),
+    );
+    mullionV.position.set(0, 1.15, -0.58);
+    root.add(mullionV);
+
+    const transomH = new THREE.Mesh(
+      new THREE.BoxGeometry(3.2, 0.09, 0.14),
+      new THREE.MeshStandardMaterial({ color: "#15192E", roughness: 0.6 }),
+    );
+    transomH.position.set(0, 1.18, -0.58);
+    root.add(transomH);
+
+    const sillCap = new THREE.Mesh(
+      new THREE.BoxGeometry(3.8, 0.045, 0.95),
+      new THREE.MeshStandardMaterial({
+        color: "#232846",
+        roughness: 0.45,
+        metalness: 0.18,
+      }),
+    );
+    sillCap.position.set(0, -0.02, 0.05);
+    root.add(sillCap);
+
+    const sillBody = new THREE.Mesh(
+      new THREE.BoxGeometry(3.7, 0.22, 0.88),
+      new THREE.MeshStandardMaterial({
+        color: "#15192C",
+        roughness: 0.55,
+        metalness: 0.15,
+      }),
+    );
+    sillBody.position.set(0, -0.14, 0.01);
+    root.add(sillBody);
+
+    return root;
+  }
+
   // minimal-studio
   const cyc = new THREE.Mesh(
     new THREE.CircleGeometry(24, 32),
@@ -751,7 +877,6 @@ export function buildSharedCharacterActor3D(
   shadowDisc.rotation.x = -Math.PI / 2;
   actorRoot.add(shadowDisc);
 
-  // Check if a GLB model is cached for this character
   if (config.glbUrl && gltfCache.has(config.glbUrl)) {
     const cached = gltfCache.get(config.glbUrl)!;
     const cloned = cached.scene.clone(true);
@@ -781,254 +906,248 @@ export function buildSharedCharacterActor3D(
     return actorRoot;
   }
 
-  const isVoxel = visualStyle === "voxel";
-  const segs =
-    visualStyle === "low-poly" || visualStyle === "isometric"
-      ? 6
-      : isVoxel
-        ? 4
-        : 14;
-
-  const primaryMat = getStyleMaterialProps(
-    visualStyle,
-    config.roughness,
-    config.metalness,
-  );
-  const secondaryMat = getStyleMaterialProps(
-    visualStyle,
-    Math.max(0.2, config.roughness - 0.2),
-    Math.min(0.65, config.metalness + 0.15),
-  );
-  const skinMat = getStyleMaterialProps(visualStyle, 0.65, 0.08);
-
   const eyeScaleY = Math.max(0.08, 1 - pose.eyeBlink * 0.92);
-  const mouthOpenHeight = 0.022 + pose.mouthOpenness * 0.105;
-  const mouthActualWidth = 0.085 + pose.mouthWidth * 0.085;
+  const mouthOpenHeight = 0.024 + pose.mouthOpenness * 0.115;
+  const mouthActualWidth = 0.088 + pose.mouthWidth * 0.09;
+  const isNemoAgent =
+    config.id === "char-nemo" || config.archetype === "robot-companion";
 
-  if (config.archetype === "avian-drone") {
-    const droneGroup = new THREE.Group();
-    droneGroup.scale.setScalar(config.scale);
-    droneGroup.position.set(0, 0.15 + pose.hipBobY, 0);
-    droneGroup.rotation.set(pose.torsoLeanX, pose.torsoTwistY, 0);
+  if (isNemoAgent) {
+    const nemoRoot = new THREE.Group();
+    nemoRoot.scale.setScalar(config.scale);
+    nemoRoot.position.set(0, 0.42 + pose.hipBobY * 1.2, 0);
 
-    const chassis = new THREE.Mesh(
-      isVoxel
-        ? new THREE.BoxGeometry(0.48, 0.42, 0.52)
-        : new THREE.DodecahedronGeometry(0.28, segs > 8 ? 1 : 0),
+    const cubeHead = new THREE.Group();
+    cubeHead.rotation.set(
+      pose.headPitchX * 0.65 + pose.torsoLeanX * 0.45,
+      pose.headYawY * 0.8 + pose.torsoTwistY * 0.45,
+      0,
+    );
+
+    const cubeBody = new THREE.Mesh(
+      new THREE.BoxGeometry(0.62, 0.46, 0.48),
       new THREE.MeshStandardMaterial({
-        color: config.primaryColor,
-        roughness: primaryMat.roughness,
-        metalness: primaryMat.metalness,
-        flatShading: primaryMat.flatShading,
+        color: "#E06D53",
+        roughness: 0.44,
+        metalness: 0.08,
       }),
     );
-    droneGroup.add(chassis);
+    cubeHead.add(cubeBody);
 
-    const lens = new THREE.Mesh(
-      new THREE.SphereGeometry(0.08, 10, 10),
-      new THREE.MeshStandardMaterial({
-        color: config.accentColor,
-        emissive: config.accentColor,
-        emissiveIntensity: 1.6,
-      }),
+    const rightBevel = new THREE.Mesh(
+      new THREE.BoxGeometry(0.018, 0.44, 0.46),
+      new THREE.MeshStandardMaterial({ color: "#F18F70", roughness: 0.38 }),
     );
-    lens.position.set(0, 0.08, 0.29);
-    lens.scale.set(1, eyeScaleY, 1);
-    droneGroup.add(lens);
+    rightBevel.position.set(0.306, 0, 0);
+    cubeHead.add(rightBevel);
 
-    const wingFlap = Math.sin(pose.hipBobY * 45) * 0.55;
-    const leftWing = new THREE.Mesh(
-      new THREE.BoxGeometry(0.44, 0.05, 0.26),
-      new THREE.MeshStandardMaterial({
-        color: config.secondaryColor,
-        roughness: secondaryMat.roughness,
-        metalness: secondaryMat.metalness,
-      }),
+    const eyeMat = new THREE.MeshStandardMaterial({
+      color: "#14141F",
+      roughness: 0.2,
+    });
+    const leftEye = new THREE.Mesh(
+      new THREE.BoxGeometry(0.056, 0.115, 0.024),
+      eyeMat,
     );
-    leftWing.position.set(-0.42, 0.05, 0);
-    leftWing.rotation.z = 0.25 + wingFlap;
-    droneGroup.add(leftWing);
+    leftEye.position.set(-0.135, 0.042, 0.242);
+    leftEye.scale.set(1, eyeScaleY, 1);
+    cubeHead.add(leftEye);
 
-    const rightWing = leftWing.clone();
-    rightWing.position.set(0.42, 0.05, 0);
-    rightWing.rotation.z = -0.25 - wingFlap;
-    droneGroup.add(rightWing);
+    const rightEye = leftEye.clone();
+    rightEye.position.set(0.135, 0.042, 0.242);
+    cubeHead.add(rightEye);
 
-    actorRoot.add(droneGroup);
+    const mouth = new THREE.Mesh(
+      new THREE.BoxGeometry(mouthActualWidth, mouthOpenHeight, 0.028),
+      new THREE.MeshStandardMaterial({ color: "#231014", roughness: 0.35 }),
+    );
+    mouth.position.set(0, -0.095 - pose.mouthOpenness * 0.022, 0.242);
+    cubeHead.add(mouth);
+
+    const leftFlap = new THREE.Mesh(
+      new THREE.BoxGeometry(0.12, 0.135, 0.15),
+      new THREE.MeshStandardMaterial({ color: "#E06D53", roughness: 0.44 }),
+    );
+    leftFlap.position.set(-0.37, -0.02, 0.02);
+    leftFlap.rotation.set(
+      pose.leftUpperArmX * 0.55,
+      0,
+      0.25 + Math.max(0, pose.leftUpperArmZ) * 0.65,
+    );
+    cubeHead.add(leftFlap);
+
+    const rightFlap = new THREE.Mesh(
+      new THREE.BoxGeometry(0.12, 0.135, 0.15),
+      new THREE.MeshStandardMaterial({ color: "#F18F70", roughness: 0.4 }),
+    );
+    rightFlap.position.set(0.37, -0.02, 0.02);
+    rightFlap.rotation.set(
+      pose.rightUpperArmX * 0.55,
+      0,
+      -0.25 + Math.min(0, pose.rightUpperArmZ) * 0.65,
+    );
+    cubeHead.add(rightFlap);
+
+    nemoRoot.add(cubeHead);
+
+    [
+      [-0.165, -0.325, 0.105],
+      [0.165, -0.325, 0.105],
+      [-0.165, -0.325, -0.105],
+      [0.165, -0.325, -0.105],
+    ].forEach(([lx, ly, lz]) => {
+      const leg = new THREE.Mesh(
+        new THREE.BoxGeometry(0.092, 0.21, 0.092),
+        new THREE.MeshStandardMaterial({ color: "#C8563D", roughness: 0.5 }),
+      );
+      leg.position.set(lx, ly, lz);
+      nemoRoot.add(leg);
+    });
+
+    actorRoot.add(nemoRoot);
     return actorRoot;
   }
 
-  // Humanoid / Scholar / Explorer / Guardian Rig
+  // Leo (@agentmorphy Blocky Chibi Developer)
   const rigRoot = new THREE.Group();
   rigRoot.scale.setScalar(config.scale);
 
   const pelvisGroup = new THREE.Group();
-  pelvisGroup.position.set(0, 0.72 + pose.hipBobY, 0);
+  pelvisGroup.position.set(0, 0.54 + pose.hipBobY, 0);
 
   const pelvisMesh = new THREE.Mesh(
-    isVoxel
-      ? new THREE.BoxGeometry(0.44, 0.16, 0.28)
-      : new THREE.CylinderGeometry(0.21, 0.19, 0.16, segs),
-    new THREE.MeshStandardMaterial({
-      color: config.secondaryColor,
-      roughness: secondaryMat.roughness,
-      metalness: secondaryMat.metalness,
-      flatShading: secondaryMat.flatShading,
-    }),
+    new THREE.BoxGeometry(0.42, 0.14, 0.28),
+    new THREE.MeshStandardMaterial({ color: "#324AB2", roughness: 0.5 }),
   );
   pelvisGroup.add(pelvisMesh);
 
   const torsoGroup = new THREE.Group();
-  torsoGroup.position.set(0, 0.08, 0);
+  torsoGroup.position.set(0, 0.06, 0);
   torsoGroup.rotation.set(pose.torsoLeanX, pose.torsoTwistY, 0);
 
   const torsoMesh = new THREE.Mesh(
-    isVoxel
-      ? new THREE.BoxGeometry(0.5, 0.54, 0.3)
-      : new THREE.CylinderGeometry(0.25, 0.21, 0.52, segs),
+    new THREE.BoxGeometry(0.45, 0.44, 0.29),
     new THREE.MeshStandardMaterial({
-      color: config.primaryColor,
-      roughness: primaryMat.roughness,
-      metalness: primaryMat.metalness,
-      flatShading: primaryMat.flatShading,
+      color: "#3B5BDB",
+      roughness: 0.46,
+      metalness: 0.08,
     }),
   );
-  torsoMesh.position.set(0, 0.26, 0);
+  torsoMesh.position.set(0, 0.22, 0);
   torsoGroup.add(torsoMesh);
 
-  if (config.archetype === "scholar-humanoid") {
-    const collar = new THREE.Mesh(
-      new THREE.TorusGeometry(0.16, 0.042, 8, segs),
-      new THREE.MeshStandardMaterial({
-        color: config.secondaryColor,
-        roughness: 0.45,
-        metalness: 0.2,
-      }),
+  [-0.088, 0.088].forEach((sx) => {
+    const stripe = new THREE.Mesh(
+      new THREE.BoxGeometry(0.062, 0.2, 0.018),
+      new THREE.MeshStandardMaterial({ color: "#F8FAFC", roughness: 0.35 }),
     );
-    collar.position.set(0, 0.49, 0.02);
-    collar.rotation.x = Math.PI / 2;
-    torsoGroup.add(collar);
-  }
+    stripe.position.set(sx, 0.34, 0.152);
+    torsoGroup.add(stripe);
+  });
 
-  const chestCore = new THREE.Mesh(
-    config.archetype === "guardian-bot"
-      ? new THREE.OctahedronGeometry(0.09, 0)
-      : new THREE.DodecahedronGeometry(0.065, 0),
-    new THREE.MeshStandardMaterial({
-      color: config.accentColor,
-      emissive: config.accentColor,
-      emissiveIntensity: config.archetype === "guardian-bot" ? 1.2 : 0.65,
-    }),
-  );
-  chestCore.position.set(0, 0.32, 0.17);
-  torsoGroup.add(chestCore);
-
-  // Head & Face
   const headGroup = new THREE.Group();
-  headGroup.position.set(0, 0.58, 0);
+  headGroup.position.set(0, 0.46, 0);
   headGroup.rotation.set(pose.headPitchX, pose.headYawY, 0);
 
   const headMesh = new THREE.Mesh(
-    isVoxel
-      ? new THREE.BoxGeometry(0.36, 0.36, 0.36)
-      : config.archetype === "guardian-bot"
-        ? new THREE.CylinderGeometry(0.17, 0.19, 0.32, 8)
-        : new THREE.SphereGeometry(0.2, segs, segs),
-    new THREE.MeshStandardMaterial({
-      color: config.skinOrChassisColor,
-      roughness: skinMat.roughness,
-      metalness: config.archetype === "guardian-bot" ? 0.55 : skinMat.metalness,
-      flatShading: skinMat.flatShading,
-    }),
+    new THREE.BoxGeometry(0.5, 0.4, 0.44),
+    new THREE.MeshStandardMaterial({ color: "#F2C2A5", roughness: 0.48 }),
   );
-  headMesh.position.set(0, 0.22, 0);
+  headMesh.position.set(0, 0.21, 0);
   headGroup.add(headMesh);
 
-  const capMesh = new THREE.Mesh(
-    config.archetype === "scholar-humanoid"
-      ? new THREE.CylinderGeometry(0.19, 0.21, 0.09, segs)
-      : new THREE.ConeGeometry(0.22, 0.22, segs),
+  const hairCap = new THREE.Mesh(
+    new THREE.BoxGeometry(0.53, 0.12, 0.47),
     new THREE.MeshStandardMaterial({
-      color: config.primaryColor,
-      roughness: primaryMat.roughness,
-      metalness: primaryMat.metalness,
-      flatShading: primaryMat.flatShading,
+      color: "#1E1B4B",
+      roughness: 0.55,
+      flatShading: true,
     }),
   );
-  capMesh.position.set(0, 0.34, -0.01);
-  headGroup.add(capMesh);
+  hairCap.position.set(0, 0.39, -0.01);
+  headGroup.add(hairCap);
+
+  [
+    [-0.16, 0.51, 0.06, 0.28],
+    [-0.07, 0.53, 0.1, 0.12],
+    [0.01, 0.54, 0.08, 0],
+    [0.09, 0.53, 0.1, -0.14],
+    [0.17, 0.5, 0.05, -0.3],
+  ].forEach(([sx, sy, sz, rz]) => {
+    const spike = new THREE.Mesh(
+      new THREE.ConeGeometry(0.118, 0.2, 4),
+      new THREE.MeshStandardMaterial({
+        color: "#1E1B4B",
+        roughness: 0.52,
+        flatShading: true,
+      }),
+    );
+    spike.position.set(sx, sy, sz);
+    spike.rotation.set(0.25, 0.2, rz);
+    headGroup.add(spike);
+  });
 
   const eyeMat = new THREE.MeshStandardMaterial({
-    color:
-      config.archetype === "guardian-bot" ? config.accentColor : "#0f172a",
-    emissive:
-      config.archetype === "guardian-bot" ? config.accentColor : "#000000",
-    emissiveIntensity: config.archetype === "guardian-bot" ? 1.5 : 0,
+    color: "#111827",
+    roughness: 0.2,
   });
-  const leftEye = new THREE.Mesh(new THREE.SphereGeometry(0.032, 10, 10), eyeMat);
-  leftEye.position.set(-0.07, 0.24, 0.175);
+  const leftEye = new THREE.Mesh(
+    new THREE.BoxGeometry(0.045, 0.085, 0.022),
+    eyeMat,
+  );
+  leftEye.position.set(-0.115, 0.215, 0.222);
   leftEye.scale.set(1, eyeScaleY, 1);
   headGroup.add(leftEye);
 
   const rightEye = leftEye.clone();
-  rightEye.position.set(0.07, 0.24, 0.175);
+  rightEye.position.set(0.115, 0.215, 0.222);
   headGroup.add(rightEye);
 
   const mouthMesh = new THREE.Mesh(
-    new THREE.BoxGeometry(mouthActualWidth, mouthOpenHeight, 0.032),
-    new THREE.MeshStandardMaterial({
-      color:
-        config.archetype === "guardian-bot" ? config.accentColor : "#7f1d1d",
-      emissive:
-        config.archetype === "guardian-bot" && pose.mouthOpenness > 0.08
-          ? config.accentColor
-          : pose.mouthOpenness > 0.2
-            ? "#f43f5e"
-            : "#000000",
-      emissiveIntensity: config.archetype === "guardian-bot" ? 1.3 : 0.35,
-    }),
+    new THREE.BoxGeometry(mouthActualWidth, mouthOpenHeight, 0.028),
+    new THREE.MeshStandardMaterial({ color: "#2A1215", roughness: 0.35 }),
   );
-  mouthMesh.position.set(0, 0.14 - pose.mouthOpenness * 0.022, 0.182);
+  mouthMesh.position.set(0, 0.105 - pose.mouthOpenness * 0.02, 0.222);
   headGroup.add(mouthMesh);
 
   torsoGroup.add(headGroup);
 
-  // Arms
   const buildArm = (isLeft: boolean) => {
     const armGroup = new THREE.Group();
-    armGroup.position.set(isLeft ? -0.3 : 0.3, 0.45, 0);
+    armGroup.position.set(isLeft ? -0.29 : 0.29, 0.39, 0);
     armGroup.rotation.set(
       isLeft ? pose.leftUpperArmX : pose.rightUpperArmX,
       0,
       isLeft ? pose.leftUpperArmZ : pose.rightUpperArmZ,
     );
     const upper = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.055, 0.05, 0.26, segs),
-      new THREE.MeshStandardMaterial({
-        color: config.primaryColor,
-        roughness: primaryMat.roughness,
-        metalness: primaryMat.metalness,
-      }),
+      new THREE.BoxGeometry(0.13, 0.23, 0.13),
+      new THREE.MeshStandardMaterial({ color: "#3B5BDB", roughness: 0.46 }),
     );
-    upper.position.set(0, -0.14, 0);
+    upper.position.set(0, -0.11, 0);
     armGroup.add(upper);
 
     const forearmGroup = new THREE.Group();
-    forearmGroup.position.set(0, -0.27, 0);
+    forearmGroup.position.set(0, -0.22, 0);
     forearmGroup.rotation.set(
       isLeft ? pose.leftForearmX : pose.rightForearmX,
       0,
       0,
     );
     const lower = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.05, 0.045, 0.24, segs),
-      new THREE.MeshStandardMaterial({
-        color: config.skinOrChassisColor,
-        roughness: skinMat.roughness,
-      }),
+      new THREE.BoxGeometry(0.12, 0.2, 0.12),
+      new THREE.MeshStandardMaterial({ color: "#3B5BDB", roughness: 0.46 }),
     );
-    lower.position.set(0, -0.12, 0);
+    lower.position.set(0, -0.1, 0);
     forearmGroup.add(lower);
+
+    const hand = new THREE.Mesh(
+      new THREE.BoxGeometry(0.11, 0.1, 0.11),
+      new THREE.MeshStandardMaterial({ color: "#F2C2A5", roughness: 0.48 }),
+    );
+    hand.position.set(0, -0.22, 0);
+    forearmGroup.add(hand);
+
     armGroup.add(forearmGroup);
     return armGroup;
   };
@@ -1037,34 +1156,35 @@ export function buildSharedCharacterActor3D(
   torsoGroup.add(buildArm(false));
   pelvisGroup.add(torsoGroup);
 
-  // Legs
   const buildLeg = (isLeft: boolean) => {
     const legGroup = new THREE.Group();
-    legGroup.position.set(isLeft ? -0.12 : 0.12, -0.04, 0);
+    legGroup.position.set(isLeft ? -0.115 : 0.115, -0.04, 0);
     legGroup.rotation.set(isLeft ? pose.leftThighX : pose.rightThighX, 0, 0);
 
     const thigh = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.075, 0.062, 0.34, segs),
-      new THREE.MeshStandardMaterial({
-        color: config.secondaryColor,
-        roughness: secondaryMat.roughness,
-      }),
+      new THREE.BoxGeometry(0.155, 0.26, 0.155),
+      new THREE.MeshStandardMaterial({ color: "#324AB2", roughness: 0.5 }),
     );
-    thigh.position.set(0, -0.17, 0);
+    thigh.position.set(0, -0.13, 0);
     legGroup.add(thigh);
 
     const shinGroup = new THREE.Group();
-    shinGroup.position.set(0, -0.34, 0);
+    shinGroup.position.set(0, -0.25, 0);
     shinGroup.rotation.set(isLeft ? pose.leftShinX : pose.rightShinX, 0, 0);
     const shin = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.06, 0.052, 0.32, segs),
-      new THREE.MeshStandardMaterial({
-        color: config.primaryColor,
-        roughness: primaryMat.roughness,
-      }),
+      new THREE.BoxGeometry(0.145, 0.24, 0.145),
+      new THREE.MeshStandardMaterial({ color: "#324AB2", roughness: 0.5 }),
     );
-    shin.position.set(0, -0.16, 0);
+    shin.position.set(0, -0.12, 0);
     shinGroup.add(shin);
+
+    const shoe = new THREE.Mesh(
+      new THREE.BoxGeometry(0.165, 0.11, 0.23),
+      new THREE.MeshStandardMaterial({ color: "#F8FAFC", roughness: 0.35 }),
+    );
+    shoe.position.set(0, -0.24, 0.035);
+    shinGroup.add(shoe);
+
     legGroup.add(shinGroup);
     return legGroup;
   };

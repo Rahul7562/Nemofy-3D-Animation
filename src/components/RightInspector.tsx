@@ -477,6 +477,45 @@ export const RightInspector: React.FC<RightInspectorProps> = ({
           </div>
         </div>
 
+        <div className="grid grid-cols-2 gap-1.5 text-xs">
+          <div>
+            <label className="text-[10px] text-slate-400 block mb-0.5">
+              Caption Style
+            </label>
+            <select
+              value={selectedScene.captionStyle || "cinematic"}
+              onChange={(e) =>
+                onUpdateScene({
+                  ...selectedScene,
+                  captionStyle: e.target.value as "cinematic" | "viral-reels",
+                })
+              }
+              className="w-full px-2 py-1 rounded bg-slate-950 border border-slate-800 text-xs text-cyan-300 font-mono"
+            >
+              <option value="viral-reels">Viral Reels (Word-by-Word)</option>
+              <option value="cinematic">Cinematic Lower-Third</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="text-[10px] text-slate-400 block mb-0.5">
+              Top Status Badge
+            </label>
+            <input
+              type="text"
+              value={selectedScene.statusBadgeText || ""}
+              onChange={(e) =>
+                onUpdateScene({
+                  ...selectedScene,
+                  statusBadgeText: e.target.value,
+                })
+              }
+              placeholder="⚠️ 98% USAGE LIMIT"
+              className="w-full px-2 py-1 rounded bg-slate-950 border border-slate-800 text-xs text-slate-100 font-mono"
+            />
+          </div>
+        </div>
+
         <textarea
           rows={3}
           value={selectedScene.narrationText}

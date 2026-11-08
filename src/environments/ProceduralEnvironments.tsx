@@ -540,6 +540,246 @@ export const ProceduralEnvironments: React.FC<ProceduralEnvironmentProps> = ({
     );
   }
 
+  if (environment === "agent-command-desk") {
+    const pulse = 0.5 + 0.5 * Math.sin(timeSec * 2.8);
+
+    const cityBuildings = [
+      { x: -1.25, w: 0.52, h: 0.88, z: -1.65, rows: 5, cols: 3 },
+      { x: -0.78, w: 0.44, h: 0.68, z: -1.75, rows: 4, cols: 3 },
+      { x: -0.38, w: 0.36, h: 0.48, z: -1.85, rows: 3, cols: 2 },
+      { x: 0.42, w: 0.38, h: 0.52, z: -1.82, rows: 3, cols: 2 },
+      { x: 0.84, w: 0.48, h: 0.76, z: -1.72, rows: 4, cols: 3 },
+      { x: 1.32, w: 0.54, h: 0.92, z: -1.62, rows: 5, cols: 3 },
+    ];
+
+    const bokehLights = [
+      { x: -0.58, y: 1.88, z: -0.78, r: 0.065 },
+      { x: -0.22, y: 1.82, z: -0.78, r: 0.072 },
+      { x: 0.44, y: 1.86, z: -0.78, r: 0.068 },
+    ];
+
+    const starDots = [
+      { x: -0.95, y: 1.55, z: -2.1, c: "#E2E8F0", s: 0.016 },
+      { x: -0.48, y: 1.28, z: -2.1, c: "#F8FAFC", s: 0.018 },
+      { x: -0.24, y: 1.62, z: -2.1, c: "#CBD5E1", s: 0.014 },
+      { x: 0.16, y: 1.24, z: -2.05, c: "#FB7185", s: 0.024 },
+      { x: 0.58, y: 1.18, z: -2.1, c: "#E2E8F0", s: 0.015 },
+      { x: 0.88, y: 1.52, z: -2.1, c: "#F8FAFC", s: 0.017 },
+      { x: 0.32, y: 1.66, z: -2.1, c: "#CBD5E1", s: 0.015 },
+    ];
+
+    return (
+      <group>
+        {/* Signature @agentmorphy Dual-Tone Warm Right Key Light + Cool Indigo Left Fill */}
+        <directionalLight
+          position={[2.6, 2.2, 4.2]}
+          intensity={2.45}
+          color="#FDE68A"
+        />
+        <directionalLight
+          position={[-2.6, 2.0, 3.8]}
+          intensity={1.55}
+          color="#93C5FD"
+        />
+        <pointLight
+          position={[1.85, 1.05, 1.45]}
+          intensity={3.2}
+          distance={9}
+          color="#FDBA74"
+        />
+        <pointLight
+          position={[-1.85, 1.35, 1.45]}
+          intensity={1.8}
+          distance={9}
+          color="#6366F1"
+        />
+
+        {/* Deep Midnight Indigo Night Sky Backdrop */}
+        <mesh position={[0, 1.35, -2.5]}>
+          <planeGeometry args={[10, 7]} />
+          <meshStandardMaterial
+            color="#141834"
+            emissive="#171C3F"
+            emissiveIntensity={0.75}
+            roughness={0.95}
+          />
+        </mesh>
+
+        {/* Distant Twilight Horizon Glow Behind City Skyline */}
+        <mesh position={[0, 0.42, -2.35]}>
+          <planeGeometry args={[5.5, 1.35]} />
+          <meshStandardMaterial
+            color="#252152"
+            emissive="#312A6B"
+            emissiveIntensity={0.65}
+            roughness={0.9}
+          />
+        </mesh>
+
+        {/* Starlight Dots & Subtle Coral Beacon in Upper Window Sky */}
+        {starDots.map((st, idx) => (
+          <mesh key={idx} position={[st.x, st.y, st.z]}>
+            <sphereGeometry args={[st.s, 8, 8]} />
+            <meshStandardMaterial
+              color={st.c}
+              emissive={st.c}
+              emissiveIntensity={1.8}
+            />
+          </mesh>
+        ))}
+
+        {/* 3D City Skyline Silhouettes + Warm Golden Window Grids */}
+        {cityBuildings.map((b, bIdx) => (
+          <group key={bIdx} position={[b.x, b.h * 0.5 - 0.05, b.z]}>
+            <mesh>
+              <boxGeometry args={[b.w, b.h, 0.22]} />
+              <meshStandardMaterial color="#111428" roughness={0.85} />
+            </mesh>
+            {Array.from({ length: b.rows }).map((_, rIdx) =>
+              Array.from({ length: b.cols }).map((__, cIdx) => {
+                const litSeed = seededRandom(
+                  `win-${bIdx}-${rIdx}-${cIdx}`,
+                );
+                if (litSeed < 0.22) return null;
+                const wx =
+                  (cIdx - (b.cols - 1) / 2) * (b.w / (b.cols + 0.6));
+                const wy =
+                  b.h * 0.36 - rIdx * (b.h / (b.rows + 1.1));
+                const isAmber = litSeed > 0.55;
+                const winColor = isAmber ? "#FBBF24" : "#F59E0B";
+                return (
+                  <mesh key={`${rIdx}-${cIdx}`} position={[wx, wy, 0.114]}>
+                    <boxGeometry args={[0.058, 0.044, 0.01]} />
+                    <meshStandardMaterial
+                      color={winColor}
+                      emissive={winColor}
+                      emissiveIntensity={1.6 + (rIdx % 2) * 0.35}
+                    />
+                  </mesh>
+                );
+              }),
+            )}
+          </group>
+        ))}
+
+        {/* Overhead Warm Bokeh String / Street Lights at Top of Window */}
+        {bokehLights.map((bl, idx) => (
+          <group key={idx} position={[bl.x, bl.y, bl.z]}>
+            <mesh>
+              <sphereGeometry args={[bl.r, 14, 14]} />
+              <meshStandardMaterial
+                color="#FEF3C7"
+                emissive="#FDE68A"
+                emissiveIntensity={2.2 + pulse * 0.3}
+              />
+            </mesh>
+            <mesh>
+              <sphereGeometry args={[bl.r * 2.2, 14, 14]} />
+              <meshStandardMaterial
+                color="#F59E0B"
+                emissive="#F59E0B"
+                emissiveIntensity={1.1}
+                transparent
+                opacity={0.22}
+              />
+            </mesh>
+          </group>
+        ))}
+
+        {/* Tall Cross-Paned Night Window Frame (Behind Leo & Nemo) */}
+        <group position={[0, 0, -0.58]}>
+          {/* Center Vertical Window Mullion */}
+          <mesh position={[0, 1.15, 0]} castShadow receiveShadow>
+            <boxGeometry args={[0.105, 2.7, 0.14]} />
+            <meshStandardMaterial color="#15192E" roughness={0.6} />
+          </mesh>
+          {/* Warm Rim Highlight Strip on Center Mullion */}
+          <mesh position={[0.054, 1.15, 0.01]}>
+            <boxGeometry args={[0.012, 2.7, 0.13]} />
+            <meshStandardMaterial color="#2E365F" roughness={0.5} />
+          </mesh>
+
+          {/* Horizontal Window Transom Bar */}
+          <mesh position={[0, 1.18, 0]} castShadow receiveShadow>
+            <boxGeometry args={[3.2, 0.09, 0.14]} />
+            <meshStandardMaterial color="#15192E" roughness={0.6} />
+          </mesh>
+
+          {/* Left & Right Outer Window Casings */}
+          <mesh position={[-1.48, 1.15, 0.02]} castShadow receiveShadow>
+            <boxGeometry args={[0.26, 2.8, 0.24]} />
+            <meshStandardMaterial color="#101325" roughness={0.65} />
+          </mesh>
+          <mesh position={[1.48, 1.15, 0.02]} castShadow receiveShadow>
+            <boxGeometry args={[0.26, 2.8, 0.24]} />
+            <meshStandardMaterial color="#171C36" roughness={0.6} />
+          </mesh>
+
+          {/* Top Window Header Lintel */}
+          <mesh position={[0, 2.48, 0.04]} castShadow>
+            <boxGeometry args={[3.4, 0.24, 0.26]} />
+            <meshStandardMaterial color="#101325" roughness={0.7} />
+          </mesh>
+
+          {/* Left & Right Dark Interior Studio Walls */}
+          <mesh position={[-2.8, 1.15, 0.05]}>
+            <boxGeometry args={[2.5, 3.2, 0.2]} />
+            <meshStandardMaterial color="#0C0F1D" roughness={0.8} />
+          </mesh>
+          <mesh position={[2.8, 1.15, 0.05]}>
+            <boxGeometry args={[2.5, 3.2, 0.2]} />
+            <meshStandardMaterial color="#0C0F1D" roughness={0.8} />
+          </mesh>
+        </group>
+
+        {/* Foreground Window Sill Ledge (y = 0 stage surface where Leo & Nemo stand/sit) */}
+        <group position={[0, 0, 0.05]}>
+          {/* Top Sill Cap */}
+          <mesh position={[0, -0.02, 0]} receiveShadow castShadow>
+            <boxGeometry args={[3.8, 0.045, 0.95]} />
+            <meshStandardMaterial
+              color="#232846"
+              roughness={0.45}
+              metalness={0.18}
+            />
+          </mesh>
+          {/* Main Sill Ledge Block */}
+          <mesh position={[0, -0.14, -0.04]} receiveShadow castShadow>
+            <boxGeometry args={[3.7, 0.22, 0.88]} />
+            <meshStandardMaterial
+              color="#15192C"
+              roughness={0.55}
+              metalness={0.15}
+            />
+          </mesh>
+
+          {/* Lower Developer Workspace / Agent Prompt Console Strip (matches bottom of @agentmorphy frame) */}
+          <mesh position={[0, -0.62, -0.10]} receiveShadow>
+            <boxGeometry args={[3.7, 0.76, 0.78]} />
+            <meshStandardMaterial color="#0D101D" roughness={0.7} />
+          </mesh>
+          {/* Glowing Agent Prompt Input Bar on Lower Console */}
+          <mesh position={[0, -0.44, 0.30]}>
+            <boxGeometry args={[1.35, 0.09, 0.02]} />
+            <meshStandardMaterial
+              color="#1B2138"
+              emissive="#1E293B"
+              emissiveIntensity={0.8}
+            />
+          </mesh>
+          <mesh position={[-0.12, -0.44, 0.312]}>
+            <boxGeometry args={[0.78, 0.022, 0.01]} />
+            <meshStandardMaterial
+              color="#94A3B8"
+              emissive="#CBD5E1"
+              emissiveIntensity={1.1}
+            />
+          </mesh>
+        </group>
+      </group>
+    );
+  }
+
   return (
     <group>
       <mesh

@@ -22,6 +22,7 @@ export type FpsPreset = 30 | 60;
 export type PreviewQualityProfile = "draft" | "medium" | "high";
 
 export type EnvironmentType =
+  | "agent-command-desk"
   | "observatory-citadel"
   | "bioluminescent-forest"
   | "cyber-harbor"
@@ -37,6 +38,8 @@ export type CameraMovementType =
   | "tracking"
   | "crane-up"
   | "close-up"
+  | "crash-zoom"
+  | "shot-reverse-shot"
   | "static";
 
 export type LightingPreset =
@@ -60,7 +63,10 @@ export type CharacterAction =
   | "run"
   | "talk"
   | "gesture"
-  | "sit";
+  | "sit"
+  | "type-code"
+  | "panic-react"
+  | "celebrate";
 
 export type CharacterExpression =
   | "neutral"
@@ -80,13 +86,15 @@ export type BgmMood =
   | "orchestral-wonder"
   | "ambient-synth"
   | "cinematic-pulse"
+  | "cyber-synth"
   | "lofi-warmth";
 
 export type CharacterArchetype =
   | "explorer"
   | "guardian-bot"
   | "avian-drone"
-  | "scholar-humanoid";
+  | "scholar-humanoid"
+  | "robot-companion";
 
 export type OmniVoiceGender = "male" | "female";
 export type OmniVoiceAge =
@@ -226,6 +234,8 @@ export interface StoryboardScene {
   soundEffects: string[];
   transitionToNext: TransitionType;
   transitionDurationFrames: number;
+  statusBadgeText?: string;
+  captionStyle?: "cinematic" | "viral-reels";
 }
 
 export interface ReferenceImageItem {
