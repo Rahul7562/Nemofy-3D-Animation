@@ -23,6 +23,7 @@ import {
   BlenderProjectManifest,
   serializeProjectToBlenderManifest,
 } from "./project-serializer";
+import { archiveAnimationToWorkspace } from "../server/animation-archive";
 
 const execFileAsync = promisify(execFile);
 const PUBLIC_RENDERS_DIR = path.resolve("./public/renders");
@@ -106,12 +107,12 @@ function buildSubtitleFilterChain(manifest: BlenderProjectManifest): string {
   if (!manifest.subtitlesEnabled) return "";
   const filters: string[] = [];
   const isVertical = manifest.height > manifest.width;
-  const maxLineChars = isVertical ? 42 : 64;
+  const maxLineChars = isVertical ? 38 : 62;
   const fontSize = Math.max(
-    22,
-    Math.round(manifest.width * (isVertical ? 0.025 : 0.022)),
+    20,
+    Math.round(manifest.width * (isVertical ? 0.022 : 0.021)),
   );
-  const boxY = Math.round(manifest.height * (isVertical ? 0.13 : 0.82));
+  const boxY = Math.round(manifest.height * (isVertical ? 0.11 : 0.80));
 
   for (const shot of manifest.shots) {
     if (!shot.narrationText || !shot.narrationText.trim()) continue;
@@ -120,7 +121,7 @@ function buildSubtitleFilterChain(manifest: BlenderProjectManifest): string {
     const speaker = (shot.dialogueSpeaker || "Narrator").toUpperCase();
     const fullText = `${speaker}: ${shot.narrationText.trim()}`;
 
-    // Split into up to 2 balanced lines so no words are ever cut off with '...'
+    // Split into up to 3 balanced lines so longer commercial dialogue never overflows horizontally
     const words = fullText.split(/\s+/);
     const lines: string[] = [];
     let currentLine = "";
@@ -129,7 +130,7 @@ function buildSubtitleFilterChain(manifest: BlenderProjectManifest): string {
         currentLine = w;
       } else if (
         currentLine.length + 1 + w.length <= maxLineChars ||
-        lines.length >= 1
+        lines.length >= 2
       ) {
         currentLine += " " + w;
       } else {
@@ -145,9 +146,9 @@ function buildSubtitleFilterChain(manifest: BlenderProjectManifest): string {
         .replace(/:/g, "\\:")
         .replace(/'/g, "")
         .replace(/"/g, "");
-      const lineY = boxY + lineIdx * Math.round(fontSize * 1.48);
+      const lineY = boxY + lineIdx * Math.round(fontSize * 1.46);
       filters.push(
-        `drawtext=text='${escapedText}':fontcolor=white:fontsize=${fontSize}:box=1:boxcolor=0x0B0F1Dbb:boxborderw=10:x=(w-text_w)/2:y=${lineY}:enable='between(t,${tStart},${tEnd})'`,
+        `drawtext=text='${escapedText}':fontcolor=white:fontsize=${fontSize}:box=1:boxcolor=0x0B0F1Dcc:boxborderw=10:x=(w-text_w)/2:y=${lineY}:enable='between(t,${tStart},${tEnd})'`,
       );
     });
   }
@@ -365,21 +366,22 @@ async function runBlenderJobPipeline(
       const durSec = Number((manifest.totalFrames / manifest.fps).toFixed(2));
       const padPath = path.join(job.workDir, "score_pad.wav");
 
-      // 1. Generate clean silent studio bed of exact timeline duration so dialogue is 100% pure
+      // 1. Generate warm, subtle stereo-style ambient harmonic chord bed (220Hz A3 + 277.18Hz C#4 + 329.63Hz E4)
+      // kept at ultra-clean 4% background level so dialogue clarity is 100% front-and-center
       await execFileAsync("ffmpeg", [
         "-y",
         "-f",
         "lavfi",
         "-i",
-        "anullsrc=r=24000:cl=mono",
-        "-t",
-        String(durSec),
+        `aevalsrc='0.014*sin(2*PI*220*t)+0.011*sin(2*PI*277.18*t)+0.012*sin(2*PI*329.63*t)+0.008*sin(2*PI*440*t)':s=24000:d=${durSec}`,
+        "-af",
+        `afade=t=in:st=0:d=1.2,afade=t=out:st=${Math.max(0.5, durSec - 1.8).toFixed(2)}:d=1.6,lowpass=f=900`,
         padPath,
       ]);
 
       // 2. Synthesize character dialogue per shot via VoiceStudio / OmniVoice
       const inputArgs: string[] = ["-i", padPath];
-      const filterParts: string[] = ["[0:a]volume=0.0[bg]"];
+      const filterParts: string[] = ["[0:a]volume=0.85[bg]"];
       const mixLabels: string[] = ["[bg]"];
       let inputIdx = 1;
 
@@ -387,38 +389,56 @@ async function runBlenderJobPipeline(
         if (!shot.narrationText || !shot.narrationText.trim()) continue;
         try {
           const speakerLower = (shot.dialogueSpeaker || "nemo").toLowerCase();
-          const voiceId = speakerLower.includes("leo")
-            ? "leo"
-            : speakerLower.includes("kaelen")
-              ? "kaelen"
-              : speakerLower.includes("aria")
-                ? "aria"
-                : "nemo";
+          const voiceId =
+            shot.dialogueVoiceId ||
+            (speakerLower.includes("leo")
+              ? "leo"
+              : speakerLower.includes("kaelen")
+                ? "kaelen"
+                : speakerLower.includes("aria")
+                  ? "aria"
+                  : "nemo");
+
+          const shotSpeed = shot.dialogueSpeed || 1.05;
+          const shotInstruct =
+            shot.dialogueInstruct ||
+            (voiceId === "leo"
+              ? "male, young adult, moderate pitch, american accent"
+              : "female, young adult, moderate pitch, american accent");
+
           const voRes = await synthesizeSceneSpeechWithOmniVoice({
             sceneId: shot.id,
             text: shot.narrationText,
             voiceId,
             language: "en",
-            speed: 1.08,
-            instruct:
-              voiceId === "leo"
-                ? "male, young adult, moderate pitch, american accent"
-                : "female, young adult, moderate pitch, american accent",
+            speed: shotSpeed,
+            instruct: shotInstruct,
           });
           const localVoPath = path.resolve(`./public${voRes.audioUrl}`);
           if (fs.existsSync(localVoPath)) {
+            if (shot.dialogueAudioUrl) {
+              const canonicalVoPath = path.resolve(
+                `./public${shot.dialogueAudioUrl}`,
+              );
+              if (canonicalVoPath !== localVoPath) {
+                fs.mkdirSync(path.dirname(canonicalVoPath), {
+                  recursive: true,
+                });
+                fs.copyFileSync(localVoPath, canonicalVoPath);
+              }
+            }
             const delayMs = Math.max(
               0,
               Math.round(((shot.startFrame - 1) / manifest.fps + 0.04) * 1000),
             );
             const maxShotDur = Math.max(
               0.5,
-              (shot.endFrame - shot.startFrame) / manifest.fps + 0.15,
+              (shot.endFrame - shot.startFrame) / manifest.fps + 0.18,
             ).toFixed(2);
             inputArgs.push("-i", localVoPath);
             const lbl = `[vo${inputIdx}]`;
             filterParts.push(
-              `[${inputIdx}:a]atrim=0:${maxShotDur},asetpts=PTS-STARTPTS,volume=1.08,adelay=${delayMs}|${delayMs}${lbl}`,
+              `[${inputIdx}:a]atrim=0:${maxShotDur},asetpts=PTS-STARTPTS,volume=1.14,adelay=${delayMs}|${delayMs}${lbl}`,
             );
             mixLabels.push(lbl);
             inputIdx++;
@@ -432,7 +452,7 @@ async function runBlenderJobPipeline(
 
       if (mixLabels.length > 1) {
         filterParts.push(
-          `${mixLabels.join("")}amix=inputs=${mixLabels.length}:duration=first:normalize=0,alimiter=limit=0.94[outa]`,
+          `${mixLabels.join("")}amix=inputs=${mixLabels.length}:duration=first:normalize=0,alimiter=limit=0.96[outa]`,
         );
         await execFileAsync("ffmpeg", [
           "-y",
@@ -526,6 +546,31 @@ async function runBlenderJobPipeline(
       manifest.totalFrames,
       contactSheetUrl,
     );
+
+    // Stage 5: Automatically Archive Completed Animation into /saved-animations/ in Workspace
+    try {
+      const archived = archiveAnimationToWorkspace({
+        slugPrefix: `${manifest.projectId}-${job.jobId.slice(-6)}`,
+        title: manifest.projectName,
+        description: `Rendered ${manifest.aspectRatio} 3D animation (${verification.durationSeconds}s, ${verification.frameCount} frames @ ${verification.fps} FPS)`,
+        mp4SourcePath: outputMp4Path,
+        blendSourcePath: blendFilePath,
+        contactSheetSourcePath: fs.existsSync(contactSheetPath)
+          ? contactSheetPath
+          : null,
+        width: manifest.width,
+        height: manifest.height,
+        fps: manifest.fps,
+        totalFrames: manifest.totalFrames,
+        aspectRatio: manifest.aspectRatio,
+        verification,
+      });
+      job.logs.push(
+        `Saved animation to workspace archive: /${archived.folderPath}`,
+      );
+    } catch {
+      // ignore non-fatal archive copy error
+    }
 
     job.outputMp4Url = outputMp4Url;
     job.contactSheetUrl = contactSheetUrl;

@@ -333,6 +333,9 @@ export async function synthesizeSceneSpeechWithOmniVoice(
   if (sanitizedInstruct) {
     payload.instruct = sanitizedInstruct;
   }
+  if (req.instruct) {
+    payload.raw_instruct = req.instruct;
+  }
 
   let response: Response;
   try {

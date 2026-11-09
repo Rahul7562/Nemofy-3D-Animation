@@ -151,6 +151,34 @@ def build_detailed_environment(scene: bpy.types.Scene, env_type: str, total_fram
             bulb.name = f"Env_BokehStreetLight_{k_idx + 1}"
             bulb.data.materials.append(bokeh_mat)
 
+        # 6. Centerpiece 3D Nemofy Holo-Projector Dock between Leo & Nemo (X=0.0, Y=0.22, Z=0.0..0.30)
+        signal_mat = create_pbr_material("Env_NemofySignal", "#473BF0", roughness=0.20, metallic=0.35, emission_hex="#473BF0", emission_strength=3.2)
+        jade_mat = create_pbr_material("Env_NemofyJade", "#10B981", roughness=0.18, metallic=0.25, emission_hex="#34D399", emission_strength=3.8)
+        bpy.ops.mesh.primitive_cylinder_add(vertices=24, radius=0.11, depth=0.03, location=(0.0, 0.22, 0.015))
+        holo_base = bpy.context.active_object
+        holo_base.name = "Env_NemofyHoloBase"
+        holo_base.data.materials.append(frame_mat)
+
+        bpy.ops.mesh.primitive_torus_add(major_radius=0.095, minor_radius=0.010, major_segments=32, minor_segments=12, location=(0.0, 0.22, 0.032))
+        holo_ring = bpy.context.active_object
+        holo_ring.name = "Env_NemofyHoloRing"
+        holo_ring.data.materials.append(signal_mat)
+
+        bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=1, radius=0.048, location=(0.0, 0.22, 0.16))
+        holo_gem = bpy.context.active_object
+        holo_gem.name = "Env_NemofyHoloCore"
+        holo_gem.data.materials.append(jade_mat)
+        holo_gem.keyframe_insert(data_path="location", frame=1)
+        holo_gem.keyframe_insert(data_path="rotation_euler", frame=1)
+        holo_gem.location = (0.0, 0.22, 0.20)
+        holo_gem.rotation_euler = (0.3, 0.5, 3.14)
+        holo_gem.keyframe_insert(data_path="location", frame=max(2, total_frames // 2))
+        holo_gem.keyframe_insert(data_path="rotation_euler", frame=max(2, total_frames // 2))
+        holo_gem.location = (0.0, 0.22, 0.16)
+        holo_gem.rotation_euler = (0.6, 1.0, 6.28)
+        holo_gem.keyframe_insert(data_path="location", frame=total_frames)
+        holo_gem.keyframe_insert(data_path="rotation_euler", frame=total_frames)
+
         # Warm Golden Key Light from Right + Cool Indigo Fill from Left
         warm_light_data = bpy.data.lights.new(name="Env_MorphyWarmKey", type="POINT")
         warm_light_data.energy = 260.0

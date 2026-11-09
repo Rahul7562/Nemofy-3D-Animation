@@ -50,8 +50,8 @@ def render_full_sequence(frames_dir: str, start_frame: int = None, end_frame: in
     markers_sorted = sorted(scene.timeline_markers, key=lambda m: m.frame)
     marker_cut_frames = {m.frame for m in markers_sorted}
 
-    # In software-GL draft mode, step by 2 on non-cut frames so full sequences complete rapidly on CPU
-    use_frame_step = is_software_gl and quality_preset == "draft"
+    # In software-GL draft mode, step by 2 (or 3 for 600+ frame long-form videos) on non-cut frames so full sequences complete rapidly on CPU
+    step_size = (3 if total_frames > 600 else 2) if (is_software_gl and quality_preset == "draft") else 1
     frame = f_start
     while frame <= f_end:
         scene.frame_set(frame)
@@ -70,21 +70,26 @@ def render_full_sequence(frames_dir: str, start_frame: int = None, end_frame: in
             flush=True,
         )
 
-        next_frame = frame + 1
-        if (
-            use_frame_step
-            and next_frame <= f_end
-            and next_frame not in marker_cut_frames
-            and next_frame != f_end
-        ):
-            next_seq_index = next_frame - scene.frame_start + 1
-            next_out_file = os.path.join(frames_dir, f"frame_{next_seq_index:05d}.jpg")
-            shutil.copyfile(out_file, next_out_file)
-            print(
-                f"AETHERFRAME_PROGRESS frame={next_seq_index} total={total_frames} blender_frame={next_frame}",
-                flush=True,
-            )
-            frame += 2
+        if step_size > 1:
+            advanced = 1
+            for offset in range(1, step_size):
+                cand_frame = frame + offset
+                if (
+                    cand_frame <= f_end
+                    and cand_frame not in marker_cut_frames
+                    and cand_frame != f_end
+                ):
+                    cand_seq_index = cand_frame - scene.frame_start + 1
+                    cand_out_file = os.path.join(frames_dir, f"frame_{cand_seq_index:05d}.jpg")
+                    shutil.copyfile(out_file, cand_out_file)
+                    print(
+                        f"AETHERFRAME_PROGRESS frame={cand_seq_index} total={total_frames} blender_frame={cand_frame}",
+                        flush=True,
+                    )
+                    advanced += 1
+                else:
+                    break
+            frame += advanced
         else:
             frame += 1
 

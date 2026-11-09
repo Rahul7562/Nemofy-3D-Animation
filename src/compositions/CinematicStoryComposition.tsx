@@ -185,45 +185,52 @@ export const CinematicStoryComposition: React.FC<
         </div>
       )}
 
-      {/* Top-Center @agentmorphy Status Callout Pill */}
-      {currentTiming.scene.statusBadgeText && (
-        <div
-          style={{
-            position: "absolute",
-            top: 22,
-            left: "6%",
-            right: "6%",
-            display: "flex",
-            justifyContent: "center",
-            opacity: subtitleOpacity,
-            pointerEvents: "none",
-          }}
-        >
+      {/* Top-Center @agentmorphy Status Callout Pill (only standalone when subtitles are off or lower-third) */}
+      {currentTiming.scene.statusBadgeText &&
+        (!showSubtitles ||
+          !(
+            currentTiming.scene.captionStyle === "viral-reels" ||
+            currentTiming.scene.environment === "agent-command-desk"
+          )) && (
           <div
             style={{
-              backgroundColor: "rgba(11, 15, 29, 0.82)",
-              border:
-                currentTiming.scene.statusBadgeText.includes("98%") ||
-                currentTiming.scene.statusBadgeText.includes("🚨") ||
-                currentTiming.scene.statusBadgeText.includes("🛑")
-                  ? "1.5px solid rgba(244, 63, 94, 0.78)"
-                  : "1.5px solid rgba(251, 191, 36, 0.72)",
-              boxShadow: "0 8px 24px rgba(0, 0, 0, 0.55)",
-              borderRadius: 999,
-              padding: "6px 16px",
-              color: "#F8FAFC",
-              fontFamily: "JetBrains Mono, monospace",
-              fontSize: Math.max(11, Math.round(width * 0.019)),
-              fontWeight: 700,
-              letterSpacing: "0.05em",
-              textTransform: "uppercase",
-              textAlign: "center",
+              position: "absolute",
+              top: 18,
+              left: "6%",
+              right: "6%",
+              display: "flex",
+              justifyContent: "center",
+              opacity: subtitleOpacity,
+              pointerEvents: "none",
             }}
           >
-            {currentTiming.scene.statusBadgeText}
+            <div
+              style={{
+                backgroundColor: "rgba(11, 15, 29, 0.86)",
+                border:
+                  currentTiming.scene.statusBadgeText.includes("98%") ||
+                  currentTiming.scene.statusBadgeText.includes("🚨") ||
+                  currentTiming.scene.statusBadgeText.includes("🛑") ||
+                  currentTiming.scene.statusBadgeText.includes("🔥")
+                    ? "1.5px solid rgba(244, 63, 94, 0.78)"
+                    : "1.5px solid rgba(251, 191, 36, 0.72)",
+                boxShadow: "0 8px 24px rgba(0, 0, 0, 0.55)",
+                borderRadius: 999,
+                padding: "5px 14px",
+                color: "#F8FAFC",
+                fontFamily: "JetBrains Mono, monospace",
+                fontSize: Math.max(10, Math.round(width * 0.016)),
+                fontWeight: 700,
+                letterSpacing: "0.04em",
+                textTransform: "uppercase",
+                textAlign: "center",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {currentTiming.scene.statusBadgeText}
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
       {/* Synchronized Burned-in Subtitles / @agentmorphy Clean Floating Upper-Middle Captions */}
       {showSubtitles &&
@@ -257,17 +264,45 @@ export const CinematicStoryComposition: React.FC<
               <div
                 style={{
                   position: "absolute",
-                  top: currentTiming.scene.statusBadgeText ? "9.5%" : "7.5%",
-                  left: "6%",
-                  right: "6%",
+                  top: 16,
+                  left: "5%",
+                  right: "5%",
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "center",
-                  justifyContent: "center",
+                  justifyContent: "flex-start",
+                  gap: 6,
                   opacity: subtitleOpacity,
                   pointerEvents: "none",
                 }}
               >
+                {currentTiming.scene.statusBadgeText && (
+                  <div
+                    style={{
+                      backgroundColor: "rgba(11, 15, 29, 0.86)",
+                      border:
+                        currentTiming.scene.statusBadgeText.includes("98%") ||
+                        currentTiming.scene.statusBadgeText.includes("🚨") ||
+                        currentTiming.scene.statusBadgeText.includes("🛑") ||
+                        currentTiming.scene.statusBadgeText.includes("🔥")
+                          ? "1.5px solid rgba(244, 63, 94, 0.78)"
+                          : "1.5px solid rgba(251, 191, 36, 0.72)",
+                      boxShadow: "0 6px 18px rgba(0, 0, 0, 0.55)",
+                      borderRadius: 999,
+                      padding: "4px 12px",
+                      color: "#F8FAFC",
+                      fontFamily: "JetBrains Mono, monospace",
+                      fontSize: Math.max(9, Math.round(width * 0.015)),
+                      fontWeight: 700,
+                      letterSpacing: "0.04em",
+                      textTransform: "uppercase",
+                      textAlign: "center",
+                      maxWidth: "96%",
+                    }}
+                  >
+                    {currentTiming.scene.statusBadgeText}
+                  </div>
+                )}
                 <div
                   style={{
                     display: "inline-flex",

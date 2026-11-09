@@ -14,6 +14,7 @@ import {
 import {
   AGENTMORPHY_SKIT_PROJECT,
   DEFAULT_STUDIO_PROJECT,
+  NEMOFY_TECH_COMMERCIAL_PROJECT,
   STUDIO_PRESET_PROJECTS,
   VERTICAL_SHOWCASE_PROJECT,
 } from "./default-project";
@@ -26,6 +27,7 @@ import {
 import { serializeProjectToBlenderManifest } from "../blender/project-serializer";
 import { getAssetCatalogueSummary, resolveCharacterAsset } from "../blender/asset-manager";
 import { getBlenderDiagnostics } from "../blender/blender-diagnostics";
+import { listSavedAnimations } from "../server/animation-archive";
 
 test("seededRandom is 100% deterministic for identical seeds", () => {
   const a1 = seededRandom("aetherframe-seed-101");
@@ -343,4 +345,27 @@ test("Blender asset catalogue and diagnostics verify Rain, Snow, Security Bot, M
   assert.equal(diag.ffmpegAvailable, true);
   assert.equal(diag.ffprobeAvailable, true);
 });
+
+test("NEMOFY_TECH_COMMERCIAL_PROJECT has 7 shots, >= 38.5s duration (1,155 frames @ 30fps), emotional acting states, and workspace archive support", () => {
+  const manifest = serializeProjectToBlenderManifest({
+    project: NEMOFY_TECH_COMMERCIAL_PROJECT,
+    aspectRatio: "9:16",
+    fps: 30,
+    renderPreset: "draft",
+    renderEngine: "EEVEE",
+  });
+
+  assert.equal(manifest.shots.length, 7);
+  assert.ok(manifest.totalFrames >= 1155);
+  assert.equal(manifest.shots[0].emotion, "panic-despair");
+  assert.equal(manifest.shots[1].emotion, "witty-confident");
+  assert.equal(manifest.shots[2].emotion, "stunned-disbelief");
+  assert.equal(manifest.shots[4].emotion, "emotional-relief");
+  assert.equal(manifest.shots[5].emotion, "heroic-proud");
+  assert.equal(manifest.shots[6].emotion, "triumphant-joy");
+
+  const saved = listSavedAnimations();
+  assert.ok(Array.isArray(saved));
+});
+
 

@@ -264,42 +264,144 @@ def author_character_timeline_performance(
                 _keyframe_bone_rot(arm_obj, f"foot.{side}", f_lock, 0.0, 0.0, 0.0)
 
         f_ant = min(f_end - 2, f_start + 7)
-        f_b1 = f_start + int(dur * 0.32)
-        f_b2 = f_start + int(dur * 0.68)
+        f_b1 = f_start + int(dur * 0.28)
+        f_b2 = f_start + int(dur * 0.56)
+        f_b3 = f_start + int(dur * 0.80)
         f_settle = max(f_start + 2, f_end - 5)
 
+        speaker_action = str(shot.get("speakerAction", "talk")).lower()
+        listener_action = str(shot.get("listenerAction", "idle")).lower()
+        is_panic = "panic" in emotion or speaker_action == "panic-react"
+        is_stunned = "stunned" in emotion or "disbelief" in emotion or "surprised" in emotion
+        is_relief = "relief" in emotion or "grateful" in emotion or "emotional" in emotion
+        is_triumphant = (
+            "triumphant" in emotion
+            or "heroic" in emotion
+            or speaker_action == "celebrate"
+            or listener_action == "celebrate"
+        )
+
         if is_speaking:
-            # --- SPEAKER PERFORMANCE: Grounded Lower Body, Smooth Head Gaze & Expressive Arm Arcs ---
+            # --- SPEAKER PERFORMANCE: Emotion-Driven Upper Body, Head & Arm Acting ---
             if not is_nemo:
-                # Subtle chest breathing/twist for Leo (Nemo's cube body rotates purely from 'head' to prevent stacked wobble)
-                for f_c, c_pitch, c_twist_y, c_tilt_z in [
-                    (f_start, 0.01, 0.02 * turn_dir, 0.0),
-                    (f_ant, 0.025, 0.0, -0.015 * turn_dir),
-                    (f_b1, -0.02, 0.06 * turn_dir, 0.02 * turn_dir),
-                    (f_b2, -0.01, 0.04 * turn_dir, -0.015 * turn_dir),
-                    (f_settle, 0.01, 0.02 * turn_dir, 0.0),
-                ]:
+                if is_panic:
+                    chest_keys = [
+                        (f_start, 0.03, 0.02 * turn_dir, 0.0),
+                        (f_ant, 0.06, -0.04 * turn_dir, -0.03 * turn_dir),
+                        (f_b1, -0.03, 0.08 * turn_dir, 0.035 * turn_dir),
+                        (f_b2, 0.05, -0.03 * turn_dir, -0.025 * turn_dir),
+                        (f_b3, -0.02, 0.07 * turn_dir, 0.02 * turn_dir),
+                        (f_settle, 0.01, 0.02 * turn_dir, 0.0),
+                    ]
+                elif is_relief:
+                    # Deep exhale and warm forward lean of gratitude
+                    chest_keys = [
+                        (f_start, -0.03, 0.02 * turn_dir, 0.0),
+                        (f_ant + 4, 0.045, 0.05 * turn_dir, 0.015 * turn_dir),
+                        (f_b1 + 4, 0.03, 0.07 * turn_dir, 0.02 * turn_dir),
+                        (f_b2, 0.01, 0.06 * turn_dir, -0.01 * turn_dir),
+                        (f_b3, -0.015, 0.05 * turn_dir, 0.01 * turn_dir),
+                        (f_settle, 0.01, 0.03 * turn_dir, 0.0),
+                    ]
+                else:
+                    chest_keys = [
+                        (f_start, 0.01, 0.02 * turn_dir, 0.0),
+                        (f_ant, 0.025, 0.0, -0.015 * turn_dir),
+                        (f_b1, -0.025, 0.065 * turn_dir, 0.02 * turn_dir),
+                        (f_b2, -0.01, 0.045 * turn_dir, -0.018 * turn_dir),
+                        (f_b3, -0.02, 0.06 * turn_dir, 0.015 * turn_dir),
+                        (f_settle, 0.01, 0.02 * turn_dir, 0.0),
+                    ]
+                for f_c, c_pitch, c_twist_y, c_tilt_z in chest_keys:
                     _keyframe_bone_rot(arm_obj, "chest", min(f_end - 1, f_c), c_pitch, c_twist_y, c_tilt_z)
 
-            # Smooth, readable head phrasing (ry > 0 * turn_dir turns gaze toward partner)
-            h_scale = 0.65 if is_nemo else 1.0
-            for f_h, h_pitch, h_twist_y, h_tilt_z in [
-                (f_start, 0.0, 0.08 * turn_dir * h_scale, 0.0),
-                (f_ant, 0.035 * h_scale, 0.05 * turn_dir * h_scale, -0.025 * turn_dir * h_scale),
-                (f_b1, -0.035 * h_scale, 0.14 * turn_dir * h_scale, 0.035 * turn_dir * h_scale),
-                (f_b2, -0.015 * h_scale, 0.11 * turn_dir * h_scale, -0.030 * turn_dir * h_scale),
-                (f_settle, 0.0, 0.08 * turn_dir * h_scale, 0.0),
-            ]:
+            # Head acting tailored to emotion
+            h_scale = 0.68 if is_nemo else 1.0
+            if is_panic:
+                head_keys = [
+                    (f_start, 0.02 * h_scale, 0.06 * turn_dir * h_scale, 0.0),
+                    (f_ant, -0.05 * h_scale, -0.06 * turn_dir * h_scale, -0.05 * turn_dir * h_scale),
+                    (f_b1, 0.04 * h_scale, 0.16 * turn_dir * h_scale, 0.05 * turn_dir * h_scale),
+                    (f_b2, -0.04 * h_scale, 0.04 * turn_dir * h_scale, -0.04 * turn_dir * h_scale),
+                    (f_b3, 0.03 * h_scale, 0.15 * turn_dir * h_scale, 0.03 * turn_dir * h_scale),
+                    (f_settle, 0.0, 0.08 * turn_dir * h_scale, 0.0),
+                ]
+            elif is_stunned:
+                # Comedic Double-Take: quick pull back at f_ant, then lean in amazed
+                head_keys = [
+                    (f_start, 0.0, 0.08 * turn_dir * h_scale, 0.0),
+                    (f_ant, -0.06 * h_scale, 0.02 * turn_dir * h_scale, -0.04 * turn_dir * h_scale),
+                    (min(f_end - 2, f_ant + 7), 0.045 * h_scale, 0.17 * turn_dir * h_scale, 0.04 * turn_dir * h_scale),
+                    (f_b1, -0.03 * h_scale, 0.15 * turn_dir * h_scale, 0.03 * turn_dir * h_scale),
+                    (f_b2, 0.03 * h_scale, 0.12 * turn_dir * h_scale, -0.03 * turn_dir * h_scale),
+                    (f_b3, -0.025 * h_scale, 0.15 * turn_dir * h_scale, 0.025 * turn_dir * h_scale),
+                    (f_settle, 0.0, 0.09 * turn_dir * h_scale, 0.0),
+                ]
+            elif is_relief:
+                # Warm heartfelt nod and gentle grateful head tilt
+                head_keys = [
+                    (f_start, 0.04 * h_scale, 0.08 * turn_dir * h_scale, 0.0),
+                    (f_ant + 3, 0.06 * h_scale, 0.12 * turn_dir * h_scale, 0.045 * turn_dir * h_scale),
+                    (f_b1, -0.02 * h_scale, 0.14 * turn_dir * h_scale, 0.035 * turn_dir * h_scale),
+                    (f_b2, 0.025 * h_scale, 0.13 * turn_dir * h_scale, -0.02 * turn_dir * h_scale),
+                    (f_b3, -0.015 * h_scale, 0.14 * turn_dir * h_scale, 0.02 * turn_dir * h_scale),
+                    (f_settle, 0.0, 0.09 * turn_dir * h_scale, 0.0),
+                ]
+            else:
+                head_keys = [
+                    (f_start, 0.0, 0.08 * turn_dir * h_scale, 0.0),
+                    (f_ant, 0.035 * h_scale, 0.05 * turn_dir * h_scale, -0.025 * turn_dir * h_scale),
+                    (f_b1, -0.04 * h_scale, 0.15 * turn_dir * h_scale, 0.035 * turn_dir * h_scale),
+                    (f_b2, 0.025 * h_scale, 0.11 * turn_dir * h_scale, -0.030 * turn_dir * h_scale),
+                    (f_b3, -0.03 * h_scale, 0.14 * turn_dir * h_scale, 0.025 * turn_dir * h_scale),
+                    (f_settle, 0.0, 0.08 * turn_dir * h_scale, 0.0),
+                ]
+            for f_h, h_pitch, h_twist_y, h_tilt_z in head_keys:
                 _keyframe_bone_rot(arm_obj, "head", min(f_end - 1, f_h), h_pitch, h_twist_y, h_tilt_z)
 
-            # Expressive Forward-Lifting Conversational Arm Gestures (rx < 0 lifts arm forward toward camera -Y)
-            for f_base, ua_l, fa_l, h_l, ua_r, fa_r, h_r in [
-                (f_start, (-0.16, 0.0, -0.05), (-0.42, 0.0, 0.06), (-0.04, 0.0, 0.0), (-0.16, 0.0, 0.05), (-0.42, 0.0, -0.06), (-0.04, 0.0, 0.0)),
-                (f_ant, (-0.24, 0.0, -0.08), (-0.64, 0.0, 0.12), (-0.08, 0.0, 0.0), (-0.22, 0.0, 0.08), (-0.60, 0.0, -0.12), (-0.08, 0.0, 0.0)),
-                (f_b1, (-0.52, 0.14, -0.16), (-0.88, 0.15, 0.14), (-0.12, 0.08, 0.0), (-0.28, -0.06, 0.10), (-0.55, -0.08, -0.10), (-0.06, -0.05, 0.0)),
-                (f_b2, (-0.28, 0.08, -0.10), (-0.54, 0.08, 0.10), (-0.06, 0.04, 0.0), (-0.54, -0.15, 0.18), (-0.90, -0.15, -0.16), (-0.14, -0.10, 0.0)),
-                (f_settle, (-0.16, 0.0, -0.05), (-0.42, 0.0, 0.06), (-0.04, 0.0, 0.0), (-0.16, 0.0, 0.05), (-0.42, 0.0, -0.06), (-0.04, 0.0, 0.0)),
-            ]:
+            # Arm Choreography tailored to comedic & emotional beats
+            if is_panic:
+                # Comedic "Hands up by temples in developer panic" silhouette
+                arm_keys = [
+                    (f_start, (-0.18, 0.0, -0.06), (-0.45, 0.0, 0.08), (-0.05, 0.0, 0.0), (-0.18, 0.0, 0.06), (-0.45, 0.0, -0.08), (-0.05, 0.0, 0.0)),
+                    (f_ant, (-0.78, 0.18, -0.22), (-1.05, 0.22, 0.25), (-0.16, 0.10, 0.0), (-0.76, -0.18, 0.22), (-1.02, -0.22, -0.25), (-0.16, -0.10, 0.0)),
+                    (f_b1, (-0.86, 0.22, -0.26), (-1.12, 0.25, 0.28), (-0.18, 0.12, 0.0), (-0.64, -0.14, 0.18), (-0.88, -0.18, -0.20), (-0.12, -0.08, 0.0)),
+                    (f_b2, (-0.62, 0.14, -0.18), (-0.86, 0.16, 0.18), (-0.12, 0.08, 0.0), (-0.84, -0.22, 0.25), (-1.10, -0.24, -0.26), (-0.18, -0.12, 0.0)),
+                    (f_b3, (-0.74, 0.18, -0.20), (-0.98, 0.20, 0.22), (-0.14, 0.08, 0.0), (-0.72, -0.18, 0.20), (-0.96, -0.20, -0.22), (-0.14, -0.08, 0.0)),
+                    (f_settle, (-0.18, 0.0, -0.06), (-0.44, 0.0, 0.06), (-0.04, 0.0, 0.0), (-0.18, 0.0, 0.06), (-0.44, 0.0, -0.06), (-0.04, 0.0, 0.0)),
+                ]
+            elif is_relief:
+                # Heartfelt "Hand to chest in genuine relief, then open gesture to partner"
+                arm_keys = [
+                    (f_start, (-0.14, 0.0, -0.04), (-0.36, 0.0, 0.05), (-0.04, 0.0, 0.0), (-0.14, 0.0, 0.04), (-0.36, 0.0, -0.05), (-0.04, 0.0, 0.0)),
+                    (f_ant + 2, (-0.22, 0.06, -0.06), (-0.48, 0.08, 0.08), (-0.06, 0.0, 0.0), (-0.48, 0.22, -0.18), (-0.98, 0.28, -0.32), (-0.12, 0.10, 0.0)),
+                    (f_b1, (-0.26, 0.08, -0.08), (-0.54, 0.10, 0.10), (-0.08, 0.0, 0.0), (-0.52, 0.25, -0.20), (-1.04, 0.30, -0.35), (-0.14, 0.12, 0.0)),
+                    (f_b2, (-0.56, 0.16, -0.18), (-0.88, 0.16, 0.16), (-0.12, 0.08, 0.0), (-0.32, -0.08, 0.10), (-0.64, -0.10, -0.12), (-0.08, -0.06, 0.0)),
+                    (f_b3, (-0.44, 0.12, -0.14), (-0.74, 0.12, 0.12), (-0.10, 0.06, 0.0), (-0.46, -0.12, 0.14), (-0.76, -0.12, -0.14), (-0.10, -0.06, 0.0)),
+                    (f_settle, (-0.16, 0.0, -0.05), (-0.42, 0.0, 0.06), (-0.04, 0.0, 0.0), (-0.16, 0.0, 0.05), (-0.42, 0.0, -0.06), (-0.04, 0.0, 0.0)),
+                ]
+            elif is_triumphant:
+                # Heroic / Celebratory double-arm V-lift
+                arm_keys = [
+                    (f_start, (-0.20, 0.0, -0.06), (-0.46, 0.0, 0.08), (-0.05, 0.0, 0.0), (-0.20, 0.0, 0.06), (-0.46, 0.0, -0.08), (-0.05, 0.0, 0.0)),
+                    (f_ant, (-0.58, 0.16, -0.20), (-0.86, 0.18, 0.18), (-0.12, 0.08, 0.0), (-0.58, -0.16, 0.20), (-0.86, -0.18, -0.18), (-0.12, -0.08, 0.0)),
+                    (f_b1, (-0.82, 0.22, -0.26), (-0.94, 0.22, 0.22), (-0.16, 0.10, 0.0), (-0.76, -0.20, 0.24), (-0.90, -0.20, -0.20), (-0.14, -0.10, 0.0)),
+                    (f_b2, (-0.70, 0.18, -0.22), (-0.84, 0.18, 0.18), (-0.12, 0.08, 0.0), (-0.84, -0.22, 0.26), (-0.96, -0.22, -0.22), (-0.16, -0.10, 0.0)),
+                    (f_b3, (-0.86, 0.24, -0.28), (-0.98, 0.24, 0.24), (-0.18, 0.12, 0.0), (-0.86, -0.24, 0.28), (-0.98, -0.24, -0.24), (-0.18, -0.12, 0.0)),
+                    (f_settle, (-0.22, 0.0, -0.08), (-0.48, 0.0, 0.08), (-0.06, 0.0, 0.0), (-0.22, 0.0, 0.08), (-0.48, 0.0, -0.08), (-0.06, 0.0, 0.0)),
+                ]
+            else:
+                # Expressive alternating conversational presentation arcs
+                arm_keys = [
+                    (f_start, (-0.16, 0.0, -0.05), (-0.42, 0.0, 0.06), (-0.04, 0.0, 0.0), (-0.16, 0.0, 0.05), (-0.42, 0.0, -0.06), (-0.04, 0.0, 0.0)),
+                    (f_ant, (-0.28, 0.06, -0.10), (-0.66, 0.08, 0.12), (-0.08, 0.04, 0.0), (-0.24, -0.06, 0.08), (-0.60, -0.08, -0.12), (-0.08, -0.04, 0.0)),
+                    (f_b1, (-0.58, 0.16, -0.18), (-0.92, 0.16, 0.16), (-0.14, 0.08, 0.0), (-0.30, -0.08, 0.10), (-0.58, -0.08, -0.10), (-0.06, -0.05, 0.0)),
+                    (f_b2, (-0.30, 0.08, -0.10), (-0.56, 0.08, 0.10), (-0.06, 0.04, 0.0), (-0.60, -0.16, 0.18), (-0.94, -0.16, -0.16), (-0.14, -0.10, 0.0)),
+                    (f_b3, (-0.50, 0.14, -0.16), (-0.84, 0.14, 0.14), (-0.12, 0.08, 0.0), (-0.48, -0.14, 0.16), (-0.82, -0.14, -0.14), (-0.12, -0.08, 0.0)),
+                    (f_settle, (-0.16, 0.0, -0.05), (-0.42, 0.0, 0.06), (-0.04, 0.0, 0.0), (-0.16, 0.0, 0.05), (-0.42, 0.0, -0.06), (-0.04, 0.0, 0.0)),
+                ]
+
+            for f_base, ua_l, fa_l, h_l, ua_r, fa_r, h_r in arm_keys:
                 fc_arm = min(f_end - 1, f_base)
                 fc_fore = min(f_end - 1, f_base + 2)
                 fc_hand = min(f_end - 1, f_base + 3)
@@ -310,48 +412,84 @@ def author_character_timeline_performance(
                 _keyframe_bone_rot(arm_obj, "forearm.R", fc_fore, *fa_r)
                 _keyframe_bone_rot(arm_obj, "hand.R", fc_hand, *h_r)
 
-            # Phrase-level eyebrow expression (smooth, non-jittery)
-            brow_lift = 0.014 if ("excited" in emotion or "awe" in emotion or "Panic" in shot.get("title", "")) else 0.008
-            brow_tilt = 0.05 if ("excited" in emotion or "awe" in emotion) else -0.03
-            for f_br, b_mult in [(f_start, 0.4), (f_ant, 0.9), (f_b1, 1.0), (f_b2, 0.85), (f_settle, 0.3)]:
+            # Phrase-level eyebrow expression (worried slant for panic, high arch for stunned, warm lift for relief/joy)
+            if is_panic:
+                brow_lift = 0.016
+                brow_tilt = -0.11
+            elif is_stunned:
+                brow_lift = 0.018
+                brow_tilt = 0.06
+            elif is_relief:
+                brow_lift = 0.011
+                brow_tilt = -0.05
+            elif is_triumphant:
+                brow_lift = 0.016
+                brow_tilt = 0.05
+            else:
+                brow_lift = 0.012
+                brow_tilt = 0.03
+
+            for f_br, b_mult in [
+                (f_start, 0.4),
+                (f_ant, 0.95),
+                (f_b1, 1.0),
+                (f_b2, 0.85),
+                (f_b3, 0.95),
+                (f_settle, 0.35),
+            ]:
                 _keyframe_bone_loc(arm_obj, "brow.L", min(f_end - 1, f_br), 0.0, brow_lift * b_mult, 0.0)
                 _keyframe_bone_loc(arm_obj, "brow.R", min(f_end - 1, f_br), 0.0, brow_lift * b_mult, 0.0)
                 _keyframe_bone_rot(arm_obj, "brow.L", min(f_end - 1, f_br), 0.0, 0.0, brow_tilt * b_mult)
                 _keyframe_bone_rot(arm_obj, "brow.R", min(f_end - 1, f_br), 0.0, 0.0, -brow_tilt * b_mult)
 
         else:
-            # --- LISTENER PERFORMANCE: Calm Attentive Gaze Toward Speaker & Subtle Agreement Nods ---
+            # --- LISTENER PERFORMANCE: Active Comedic & Emotional Reactions ---
             if not is_nemo:
                 _keyframe_bone_rot(arm_obj, "chest", f_start, 0.01, 0.04 * turn_dir, 0.0)
-                _keyframe_bone_rot(arm_obj, "chest", f_b1 + 6, -0.01, 0.06 * turn_dir, 0.01 * turn_dir)
+                _keyframe_bone_rot(arm_obj, "chest", f_b1 + 5, -0.015, 0.07 * turn_dir, 0.015 * turn_dir)
+                _keyframe_bone_rot(arm_obj, "chest", f_b2 + 5, 0.01, 0.06 * turn_dir, -0.01 * turn_dir)
                 _keyframe_bone_rot(arm_obj, "chest", f_settle, 0.01, 0.04 * turn_dir, 0.0)
 
-            h_scale = 0.65 if is_nemo else 1.0
+            h_scale = 0.68 if is_nemo else 1.0
             f_turn = min(f_end - 2, f_start + 8)
-            f_nod1 = min(f_end - 4, f_b1 + 8)
+            f_nod1 = min(f_end - 4, f_b1 + 6)
             f_nod2 = min(f_end - 3, f_b2 + 6)
+            f_nod3 = min(f_end - 2, f_b3 + 4)
             for f_h, hp, h_twist_y, h_tilt_z in [
                 (f_start, 0.0, 0.08 * turn_dir * h_scale, 0.0),
-                (f_turn, -0.01 * h_scale, 0.16 * turn_dir * h_scale, 0.02 * turn_dir * h_scale),
-                (f_nod1, 0.055 * h_scale, 0.16 * turn_dir * h_scale, 0.025 * turn_dir * h_scale),
+                (f_turn, -0.015 * h_scale, 0.16 * turn_dir * h_scale, 0.025 * turn_dir * h_scale),
+                (f_nod1, 0.060 * h_scale, 0.16 * turn_dir * h_scale, 0.030 * turn_dir * h_scale),
                 (min(f_end - 2, f_nod1 + 7), -0.015 * h_scale, 0.15 * turn_dir * h_scale, 0.015 * turn_dir * h_scale),
-                (f_nod2, 0.045 * h_scale, 0.15 * turn_dir * h_scale, -0.02 * turn_dir * h_scale),
+                (f_nod2, 0.050 * h_scale, 0.15 * turn_dir * h_scale, -0.025 * turn_dir * h_scale),
+                (f_nod3, 0.045 * h_scale, 0.16 * turn_dir * h_scale, 0.020 * turn_dir * h_scale),
                 (f_settle, 0.0, 0.12 * turn_dir * h_scale, 0.01 * turn_dir * h_scale),
             ]:
                 _keyframe_bone_rot(arm_obj, "head", f_h, hp, h_twist_y, h_tilt_z)
 
-            # Calm attentive listening arms
-            for f_a, ua_l, fa_l, ua_r, fa_r in [
-                (f_start, (-0.12, 0.0, -0.04), (-0.34, 0.0, 0.06), (-0.14, 0.0, 0.04), (-0.38, 0.0, -0.06)),
-                (f_b1 + 6, (-0.18, 0.0, -0.06), (-0.44, 0.0, 0.08), (-0.20, 0.0, 0.06), (-0.48, 0.0, -0.08)),
-                (f_settle, (-0.12, 0.0, -0.04), (-0.34, 0.0, 0.06), (-0.14, 0.0, 0.04), (-0.38, 0.0, -0.06)),
-            ]:
-                _keyframe_bone_rot(arm_obj, "upper_arm.L", f_a, *ua_l)
-                _keyframe_bone_rot(arm_obj, "forearm.L", f_a, *fa_l)
-                _keyframe_bone_rot(arm_obj, "upper_arm.R", f_a, *ua_r)
-                _keyframe_bone_rot(arm_obj, "forearm.R", f_a, *fa_r)
+            if listener_action == "celebrate" or is_triumphant:
+                # Listener joins the celebration!
+                listener_arms = [
+                    (f_start, (-0.16, 0.0, -0.05), (-0.40, 0.0, 0.06), (-0.16, 0.0, 0.05), (-0.40, 0.0, -0.06)),
+                    (f_b1, (-0.68, 0.18, -0.20), (-0.86, 0.18, 0.18), (-0.68, -0.18, 0.20), (-0.86, -0.18, -0.18)),
+                    (f_b2, (-0.54, 0.14, -0.16), (-0.76, 0.14, 0.14), (-0.54, -0.14, 0.16), (-0.76, -0.14, -0.14)),
+                    (f_b3, (-0.74, 0.20, -0.22), (-0.90, 0.20, 0.20), (-0.74, -0.20, 0.22), (-0.90, -0.20, -0.20)),
+                    (f_settle, (-0.18, 0.0, -0.06), (-0.42, 0.0, 0.06), (-0.18, 0.0, 0.06), (-0.42, 0.0, -0.06)),
+                ]
+            else:
+                # Expressive attentive listening arms
+                listener_arms = [
+                    (f_start, (-0.12, 0.0, -0.04), (-0.34, 0.0, 0.06), (-0.14, 0.0, 0.04), (-0.38, 0.0, -0.06)),
+                    (f_b1 + 5, (-0.22, 0.04, -0.08), (-0.50, 0.06, 0.10), (-0.24, -0.04, 0.08), (-0.52, -0.06, -0.10)),
+                    (f_b2 + 5, (-0.16, 0.02, -0.05), (-0.40, 0.04, 0.07), (-0.28, -0.06, 0.10), (-0.58, -0.08, -0.12)),
+                    (f_settle, (-0.12, 0.0, -0.04), (-0.34, 0.0, 0.06), (-0.14, 0.0, 0.04), (-0.38, 0.0, -0.06)),
+                ]
+            for f_a, ua_l, fa_l, ua_r, fa_r in listener_arms:
+                _keyframe_bone_rot(arm_obj, "upper_arm.L", min(f_end - 1, f_a), *ua_l)
+                _keyframe_bone_rot(arm_obj, "forearm.L", min(f_end - 1, f_a), *fa_l)
+                _keyframe_bone_rot(arm_obj, "upper_arm.R", min(f_end - 1, f_a), *ua_r)
+                _keyframe_bone_rot(arm_obj, "forearm.R", min(f_end - 1, f_a), *fa_r)
 
-            for f_br, b_lift in [(f_start, 0.002), (f_b1 + 8, 0.010), (f_b2 + 6, 0.008), (f_settle, 0.002)]:
+            for f_br, b_lift in [(f_start, 0.003), (f_b1 + 6, 0.012), (f_b2 + 6, 0.010), (f_b3 + 4, 0.012), (f_settle, 0.003)]:
                 _keyframe_bone_loc(arm_obj, "brow.L", min(f_end - 1, f_br), 0.0, b_lift, 0.0)
                 _keyframe_bone_loc(arm_obj, "brow.R", min(f_end - 1, f_br), 0.0, b_lift, 0.0)
                 _keyframe_bone_rot(arm_obj, "brow.L", min(f_end - 1, f_br), 0.0, 0.0, 0.0)
@@ -386,8 +524,10 @@ def author_character_timeline_performance(
                 _keyframe_bone_loc(arm_obj, "lip_upper", f_sil, 0.0, 0.0, 0.0)
                 _keyframe_bone_scale(arm_obj, "lip_upper", f_sil, 0.96, 1.0, 1.0)
 
-        # --- NATURAL 5-FRAME ASYMMETRIC EYE BLINKS (local +Y = World +Z) ---
-        blink_frames = [f_start + 11, f_start + int(dur * 0.58)]
+        # --- NATURAL 5-FRAME ASYMMETRIC EYE BLINKS (plus Double-Take Blink on Stunned Shots) ---
+        blink_frames = [f_start + 11, f_start + int(dur * 0.60)]
+        if is_speaking and is_stunned:
+            blink_frames.insert(1, f_start + 18)
         for bf in blink_frames:
             if bf + 5 >= f_end:
                 continue

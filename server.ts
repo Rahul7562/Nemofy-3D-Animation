@@ -26,8 +26,14 @@ import {
   getBlenderRenderJobStatus,
   startFullBlenderRenderJob,
 } from "./src/blender/render-job-manager";
+import {
+  ensureSavedAnimationsDirectory,
+  listSavedAnimations,
+  SAVED_ANIMATIONS_ROOT,
+} from "./src/server/animation-archive";
 
 async function startServer() {
+  ensureSavedAnimationsDirectory();
   await ensureLocalVoiceStudioService();
   const app = express();
   const PORT = Number(process.env.PORT) || 3000;
@@ -38,6 +44,11 @@ async function startServer() {
     express.static(path.resolve("./public/generated-audio")),
   );
   app.use("/renders", express.static(path.resolve("./public/renders")));
+  app.use("/saved-animations", express.static(SAVED_ANIMATIONS_ROOT));
+
+  app.get("/api/saved-animations", (_req, res) => {
+    return res.json({ animations: listSavedAnimations() });
+  });
 
   // ---------------------------------------------------------------------------
   // 1. AI Storyboard Generation (Gemini 3.8 Flash + deterministic fallback)
@@ -481,12 +492,23 @@ Rules:
     try {
       const rawFile = String(req.query.file || "").trim();
       const customName = String(req.query.name || "").trim();
-      if (!rawFile || (!rawFile.startsWith("/renders/") && !rawFile.startsWith("/generated-audio/"))) {
+      if (
+        !rawFile ||
+        (!rawFile.startsWith("/renders/") &&
+          !rawFile.startsWith("/generated-audio/") &&
+          !rawFile.startsWith("/saved-animations/"))
+      ) {
         return res.status(400).json({ error: "Invalid download file path" });
       }
-      const publicRoot = path.resolve("./public");
-      const targetPath = path.resolve(publicRoot, "." + rawFile);
-      if (!targetPath.startsWith(publicRoot) || !fs.existsSync(targetPath)) {
+      const isSavedArchive = rawFile.startsWith("/saved-animations/");
+      const baseRoot = isSavedArchive
+        ? SAVED_ANIMATIONS_ROOT
+        : path.resolve("./public");
+      const relativeSubpath = isSavedArchive
+        ? "." + rawFile.replace(/^\/saved-animations/, "")
+        : "." + rawFile;
+      const targetPath = path.resolve(baseRoot, relativeSubpath);
+      if (!targetPath.startsWith(baseRoot) || !fs.existsSync(targetPath)) {
         return res.status(404).json({ error: "Requested render file not found on disk" });
       }
       const downloadFilename = (customName || path.basename(targetPath)).replace(/[^a-zA-Z0-9._-]/g, "_");

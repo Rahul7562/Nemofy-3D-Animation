@@ -33,53 +33,6 @@ function isPortListening(port: number): Promise<boolean> {
   });
 }
 
-function synthesizeWithPiperOnnx(params: {
-  text: string;
-  modelPath: string;
-  outputWavPath: string;
-  lengthScale: number;
-  noiseScale?: number;
-  noiseW?: number;
-}): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const args = [
-      "--model",
-      params.modelPath,
-      "--output_file",
-      params.outputWavPath,
-      "--length_scale",
-      params.lengthScale.toFixed(3),
-      "--noise_scale",
-      (params.noiseScale ?? 0.45).toFixed(3),
-      "--noise_w",
-      (params.noiseW ?? 0.6).toFixed(3),
-      "--sentence_silence",
-      "0.22",
-    ];
-    const child = spawn("piper", args, {
-      stdio: ["pipe", "pipe", "pipe"],
-    });
-    let stderr = "";
-    child.stderr.on("data", (chunk) => {
-      stderr += String(chunk);
-    });
-    child.on("error", (err) => reject(err));
-    child.on("close", (code) => {
-      if (code === 0 && fs.existsSync(params.outputWavPath)) {
-        resolve();
-      } else {
-        reject(
-          new Error(
-            `Piper ONNX exited with code ${code}: ${stderr.slice(0, 240)}`,
-          ),
-        );
-      }
-    });
-    child.stdin.write(params.text + "\n");
-    child.stdin.end();
-  });
-}
-
 /**
  * Selects the best neural ONNX voice model & prosody parameters based on
  * character voiceId, language, and OmniVoice instruct tags.
@@ -187,6 +140,7 @@ export async function ensureLocalVoiceStudioService(
         language = "en",
         speed = 1.0,
         instruct = "",
+        raw_instruct = "",
       } = req.body || {};
 
       const text = String(input || "").trim();
@@ -197,24 +151,76 @@ export async function ensureLocalVoiceStudioService(
       const cfg = selectVoiceConfig(
         String(voice),
         String(language),
-        String(instruct),
+        String(raw_instruct || instruct),
       );
-      const numericSpeed = Math.max(0.75, Math.min(1.25, Number(speed) || 1.0));
+      const numericSpeed = Math.max(0.75, Math.min(1.45, Number(speed) || 1.0));
 
       let synthesizedWithNeural = false;
       let sourceSampleRate = 22050;
 
       if (cfg.onnxModelPath) {
         try {
-          // Slightly relaxed lengthScale (1.02 / speed) prevents rushed/cranky cadence
-          const lengthScale = Math.max(0.92, Math.min(1.18, 1.02 / numericSpeed));
-          await synthesizeWithPiperOnnx({
-            text,
-            modelPath: cfg.onnxModelPath,
-            outputWavPath: rawWav,
-            lengthScale,
-            noiseScale: 0.45,
-            noiseW: 0.6,
+          const instLower = String(raw_instruct || instruct || "").toLowerCase();
+          // Emotion-aware neural prosody tuning for comedic timing, emotional warmth, and crisp articulation
+          let baseScale = 0.92;
+          let noiseScale = 0.50;
+          let noiseW = 0.65;
+          let sentenceSilence = "0.14";
+
+          if (instLower.includes("panic") || instLower.includes("urgent") || instLower.includes("stunned")) {
+            baseScale = 0.88;
+            noiseScale = 0.58;
+            noiseW = 0.70;
+            sentenceSilence = "0.12";
+          } else if (instLower.includes("relief") || instLower.includes("grateful") || instLower.includes("emotional")) {
+            baseScale = 0.96;
+            noiseScale = 0.48;
+            noiseW = 0.60;
+            sentenceSilence = "0.18";
+          } else if (instLower.includes("witty") || instLower.includes("confident") || instLower.includes("triumphant") || instLower.includes("heroic")) {
+            baseScale = 0.90;
+            noiseScale = 0.54;
+            noiseW = 0.66;
+            sentenceSilence = "0.14";
+          }
+
+          const lengthScale = Math.max(0.72, Math.min(1.16, baseScale / numericSpeed));
+          await new Promise<void>((resolve, reject) => {
+            const args = [
+              "--model",
+              cfg.onnxModelPath!,
+              "--output_file",
+              rawWav,
+              "--length_scale",
+              lengthScale.toFixed(3),
+              "--noise_scale",
+              noiseScale.toFixed(3),
+              "--noise_w",
+              noiseW.toFixed(3),
+              "--sentence_silence",
+              sentenceSilence,
+            ];
+            const child = spawn("piper", args, {
+              stdio: ["pipe", "pipe", "pipe"],
+            });
+            let stderr = "";
+            child.stderr.on("data", (chunk) => {
+              stderr += String(chunk);
+            });
+            child.on("error", (err) => reject(err));
+            child.on("close", (code) => {
+              if (code === 0 && fs.existsSync(rawWav)) {
+                resolve();
+              } else {
+                reject(
+                  new Error(
+                    `Piper ONNX exited with code ${code}: ${stderr.slice(0, 240)}`,
+                  ),
+                );
+              }
+            });
+            child.stdin.write(text + "\n");
+            child.stdin.end();
           });
           synthesizedWithNeural = true;
           sourceSampleRate = 22050;
@@ -252,7 +258,12 @@ export async function ensureLocalVoiceStudioService(
         }
       }
 
-      // Warm studio mastering: gentle chest warmth at 180Hz, smooth de-harsh cut at 3.8kHz, soft lowpass at 8.2kHz
+      // Broadcast studio vocal clarity mastering:
+      // 1. High-pass at 85Hz to remove rumble
+      // 2. Warm chest body at 195Hz (+1.8dB)
+      // 3. Mud cut at 380Hz (-1.5dB) for clean vowel separation
+      // 4. Articulation & consonant clarity boost at 3.1kHz (+2.4dB) and air at 6.8kHz (+1.4dB)
+      // 5. Gentle broadcast compressor + brickwall limiter at 0.95
       const afParts: string[] = [];
       if (Math.abs(cfg.pitchShiftSemitones) > 0.05) {
         const pitchFactor = Math.pow(2, cfg.pitchShiftSemitones / 12).toFixed(4);
@@ -260,12 +271,14 @@ export async function ensureLocalVoiceStudioService(
       }
       afParts.push(
         "aresample=24000",
-        "highpass=f=80",
-        "equalizer=f=180:t=q:w=1.2:g=2.0",
-        "equalizer=f=3800:t=q:w=1.8:g=-3.2",
-        "lowpass=f=8200",
-        "alimiter=limit=0.92",
-        "apad=pad_dur=0.12",
+        "highpass=f=85",
+        "equalizer=f=195:t=q:w=1.3:g=1.8",
+        "equalizer=f=380:t=q:w=1.6:g=-1.5",
+        "equalizer=f=3100:t=q:w=1.4:g=2.4",
+        "equalizer=f=6800:t=q:w=1.8:g=1.4",
+        "acompressor=threshold=-18dB:ratio=2.4:attack=10:release=90:makeup=2.2dB",
+        "alimiter=limit=0.95",
+        "apad=pad_dur=0.16",
       );
       const afChain = afParts.join(",");
 

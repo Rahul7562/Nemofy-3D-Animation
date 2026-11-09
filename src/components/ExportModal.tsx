@@ -94,6 +94,26 @@ interface BlenderSceneInspection {
   }>;
 }
 
+interface SavedAnimationItem {
+  id: string;
+  slug: string;
+  title: string;
+  description: string;
+  folderPath: string;
+  mp4Url: string;
+  blendUrl: string | null;
+  contactSheetUrl: string | null;
+  projectJsonUrl: string;
+  durationSeconds: number;
+  totalFrames: number;
+  fps: number;
+  width: number;
+  height: number;
+  aspectRatio: string;
+  createdAt: string;
+  verification: MediaVerificationReport | null;
+}
+
 interface BlenderJobResponse {
   jobId: string;
   projectName: string;
@@ -125,6 +145,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   const [renderPreset, setRenderPreset] = useState<"draft" | "standard" | "final">("draft");
   const [diagnostics, setDiagnostics] = useState<BlenderDiagnosticsPayload | null>(null);
   const [assets, setAssets] = useState<AssetCatalogueItem[]>([]);
+  const [savedAnimations, setSavedAnimations] = useState<SavedAnimationItem[]>([]);
   const [isRendering, setIsRendering] = useState(false);
   const [isPreviewing, setIsPreviewing] = useState(false);
   const [jobState, setJobState] = useState<BlenderJobResponse | null>(null);
@@ -136,7 +157,19 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   const { totalFrames } = computeSceneTimeline(project.scenes, fps);
   const totalDurationSec = Number((totalFrames / fps).toFixed(1));
 
+  const refreshSavedAnimations = () => {
+    fetch("/api/saved-animations")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data && Array.isArray(data.animations)) {
+          setSavedAnimations(data.animations);
+        }
+      })
+      .catch(() => {});
+  };
+
   useEffect(() => {
+    refreshSavedAnimations();
     fetch("/api/blender/diagnostics")
       .then((r) => r.json())
       .then((data) => {
@@ -152,10 +185,12 @@ export const ExportModal: React.FC<ExportModalProps> = ({
       .then((r) => (r.ok ? r.json() : null))
       .then((refData) => {
         if (refData && refData.mp4Url) {
-          const refFrames = refData.verification?.frameCount || 540;
+          const refFrames = refData.verification?.frameCount || 1155;
           setJobState({
             jobId: refData.jobId || "reference-encounter",
-            projectName: refData.projectName || "Nemo & Leo — @agentmorphy Viral AI Agent Skit",
+            projectName:
+              refData.projectName ||
+              "Nemofy.tech — Build, Test & Ship in One Place (38.5s 3D Ad)",
             status: "completed",
             progressPercent: 100,
             framesCompleted: refFrames,
@@ -163,7 +198,8 @@ export const ExportModal: React.FC<ExportModalProps> = ({
             fps: 30,
             width: 1080,
             height: 1920,
-            blendFileUrl: refData.blendUrl || "/renders/reference-encounter/encounter.blend",
+            blendFileUrl:
+              refData.blendUrl || "/renders/reference-encounter/encounter.blend",
             previewImageUrls: [
               { frame: 1, url: "/renders/reference-encounter/previews/preview_01_f0001.jpg" },
               { frame: 115, url: "/renders/reference-encounter/previews/preview_02_f0115.jpg" },
@@ -171,14 +207,16 @@ export const ExportModal: React.FC<ExportModalProps> = ({
               { frame: 300, url: "/renders/reference-encounter/previews/preview_04_f0300.jpg" },
             ],
             outputMp4Url: refData.mp4Url,
-            contactSheetUrl: refData.contactSheetUrl || "/renders/reference-encounter/contact-sheet.jpg",
+            contactSheetUrl:
+              refData.contactSheetUrl ||
+              "/renders/reference-encounter/contact-sheet.jpg",
             sceneInspection: refData.sceneInspection || null,
             verification: refData.verification || null,
             logs: [
               "Blender 3.4.1 background engine verified.",
-              "Built encounter.blend with Leo_Rig (31 bones, 75 F-curves) and Nemo_Rig (31 bones, 75 F-curves).",
-              "Phoneme-to-viseme lip-sync and mutual character acting baked to Blender Actions.",
-              "Rendered 300 frames at 1080×1920 @ 30 FPS and encoded H.264 + AAC MP4 via FFmpeg.",
+              "Built encounter.blend with Leo_Rig (31 bones) and Nemo_Rig (31 bones).",
+              "Phoneme-to-viseme lip-sync, comedic & emotional acting, and Piper ONNX neural VO baked.",
+              `Rendered ${refFrames} frames at 1080×1920 @ 30 FPS and archived to /saved-animations/.`,
             ],
             errorMessage: null,
           });
@@ -899,6 +937,111 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                 )}
               </div>
             )}
+          </div>
+        )}
+
+        {/* Workspace Saved Animations Archive (/saved-animations/) */}
+        {savedAnimations.length > 0 && (
+          <div className="p-4 rounded-lg bg-slate-950 border border-indigo-500/40 space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-xs font-semibold text-indigo-300">
+                <Film className="w-4 h-4 text-indigo-400" />
+                <span>
+                  Workspace Saved Animations Archive (<code className="text-cyan-300">/saved-animations/</code>)
+                </span>
+              </div>
+              <span className="text-[11px] font-mono text-emerald-400">
+                {savedAnimations.length} Archived Animations Saved in Workspace
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {savedAnimations.map((anim) => (
+                <div
+                  key={anim.id}
+                  className="p-3.5 rounded-lg bg-slate-900/90 border border-slate-800 flex flex-col justify-between gap-2.5"
+                >
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-xs font-bold text-slate-100">
+                        {anim.title}
+                      </span>
+                      <span className="px-2 py-0.5 rounded bg-indigo-950/90 border border-indigo-500/40 text-indigo-300 font-mono text-[10px] shrink-0">
+                        {anim.durationSeconds}s • {anim.totalFrames}f @ {anim.fps}fps
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-400">
+                      {anim.description}
+                    </p>
+                    <div className="text-[10px] font-mono text-cyan-400">
+                      Folder: /{anim.folderPath}/
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2 pt-1">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setJobState((prev) => ({
+                          jobId: anim.id,
+                          projectName: anim.title,
+                          status: "completed",
+                          progressPercent: 100,
+                          framesCompleted: anim.totalFrames,
+                          totalFrames: anim.totalFrames,
+                          fps: anim.fps,
+                          width: anim.width,
+                          height: anim.height,
+                          blendFileUrl: anim.blendUrl,
+                          previewImageUrls: prev?.previewImageUrls || [],
+                          outputMp4Url: anim.mp4Url,
+                          contactSheetUrl: anim.contactSheetUrl,
+                          sceneInspection: prev?.sceneInspection || null,
+                          verification: anim.verification,
+                          logs: [
+                            `Loaded archived animation from /${anim.folderPath}`,
+                          ],
+                          errorMessage: null,
+                        }))
+                      }
+                      className="px-2.5 py-1.5 rounded bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-semibold cursor-pointer"
+                    >
+                      Play in Inspector
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        handleDownloadAsset(
+                          anim.mp4Url,
+                          `${anim.slug}.mp4`,
+                          "mp4",
+                        )
+                      }
+                      className="px-2.5 py-1.5 rounded bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-semibold cursor-pointer"
+                    >
+                      Download .MP4
+                    </button>
+
+                    {anim.blendUrl && (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleDownloadAsset(
+                            anim.blendUrl!,
+                            `${anim.slug}.blend`,
+                            "blend",
+                          )
+                        }
+                        className="px-2.5 py-1.5 rounded bg-slate-800 hover:bg-slate-700 text-amber-300 text-[11px] font-semibold cursor-pointer"
+                      >
+                        Download .BLEND
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 
