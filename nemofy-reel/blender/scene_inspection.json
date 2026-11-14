@@ -1,0 +1,93 @@
+{
+  "valid": true,
+  "blenderVersion": "3.4.1",
+  "frameStart": 1,
+  "frameEnd": 1109,
+  "fps": 30,
+  "resolution": [
+    1080,
+    1920
+  ],
+  "armatureCount": 2,
+  "meshCount": 156,
+  "lightCount": 5,
+  "cameraCount": 13,
+  "missingMaterialCount": 0,
+  "charactersNonIntersecting": true,
+  "characters": [
+    {
+      "rigName": "Leo_Rig",
+      "boneCount": 31,
+      "fcurveCount": 96,
+      "childMeshCount": 41,
+      "minFootZ": -0.0,
+      "maxHeadZ": 1.5458,
+      "groundContactValid": true,
+      "hasFacialRig": true
+    },
+    {
+      "rigName": "Nemo_Rig",
+      "boneCount": 31,
+      "fcurveCount": 90,
+      "childMeshCount": 24,
+      "minFootZ": -0.0014,
+      "maxHeadZ": 0.7364,
+      "groundContactValid": true,
+      "hasFacialRig": true
+    }
+  ],
+  "framingChecks": [
+    {
+      "frame": 1,
+      "camera": "ShotCam_01",
+      "allSubjectsInSafeFrustum": true,
+      "subjectNdcCoords": {
+        "Leo_Rig": [
+          0.339,
+          0.731,
+          1.875
+        ],
+        "Nemo_Rig": [
+          0.841,
+          0.732,
+          1.86
+        ]
+      }
+    },
+    {
+      "frame": 555,
+      "camera": "ShotCam_08",
+      "allSubjectsInSafeFrustum": true,
+      "subjectNdcCoords": {
+        "Leo_Rig": [
+          0.325,
+          0.751,
+          1.868
+        ],
+        "Nemo_Rig": [
+          0.871,
+          0.753,
+          1.853
+        ]
+      }
+    },
+    {
+      "frame": 1109,
+      "camera": "ShotCam_13",
+      "allSubjectsInSafeFrustum": true,
+      "subjectNdcCoords": {
+        "Leo_Rig": [
+          0.339,
+          0.655,
+          1.94
+        ],
+        "Nemo_Rig": [
+          0.661,
+          0.655,
+          1.94
+        ]
+      }
+    }
+  ],
+  "savedBlendPath": "/app/applet/nemofy-reel/blender/project.blend"
+}

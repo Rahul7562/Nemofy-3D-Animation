@@ -1,33 +1,53 @@
 {
-  "jobId": "blender-job-1794161741657-6083140e",
-  "projectName": "Nemo & Leo — 98% Usage Limit Panic",
+  "jobId": "blender-job-1794330701779-04d11174",
+  "projectName": "Nemo & Leo — Playful Code Roast",
   "mp4Url": "/renders/reference-encounter/nemo-and-leo-cinematic-encounter.mp4",
+  "savedArchiveMp4Url": "/saved-animations/03-nemo-and-leo-playful-code-roast/03-nemo-and-leo-playful-code-roast.mp4",
+  "savedArchiveFolderPath": "saved-animations/03-nemo-and-leo-playful-code-roast",
   "blendUrl": "/renders/reference-encounter/encounter.blend",
   "contactSheetUrl": "/renders/reference-encounter/contact-sheet.jpg",
+  "previewImageUrls": [
+    {
+      "frame": 15,
+      "url": "/renders/reference-encounter/previews/keyframe_00015.jpg"
+    },
+    {
+      "frame": 336,
+      "url": "/renders/reference-encounter/previews/keyframe_00336.jpg"
+    },
+    {
+      "frame": 636,
+      "url": "/renders/reference-encounter/previews/keyframe_00636.jpg"
+    },
+    {
+      "frame": 928,
+      "url": "/renders/reference-encounter/previews/keyframe_00928.jpg"
+    }
+  ],
   "sceneInspection": {
     "valid": true,
     "blenderVersion": "3.4.1",
     "frameStart": 1,
-    "frameEnd": 564,
+    "frameEnd": 936,
     "fps": 30,
     "resolution": [
       1080,
       1920
     ],
     "armatureCount": 2,
-    "meshCount": 130,
+    "meshCount": 133,
     "lightCount": 5,
-    "cameraCount": 4,
+    "cameraCount": 5,
     "missingMaterialCount": 0,
     "charactersNonIntersecting": true,
     "characters": [
       {
         "rigName": "Nemo_Rig",
         "boneCount": 31,
-        "fcurveCount": 96,
+        "fcurveCount": 90,
         "childMeshCount": 24,
-        "minFootZ": 0,
-        "maxHeadZ": 0.7134,
+        "minFootZ": -0.0014,
+        "maxHeadZ": 0.739,
         "groundContactValid": true,
         "hasFacialRig": true
       },
@@ -37,7 +57,7 @@
         "fcurveCount": 96,
         "childMeshCount": 41,
         "minFootZ": 0,
-        "maxHeadZ": 1.547,
+        "maxHeadZ": 1.5511,
         "groundContactValid": true,
         "hasFacialRig": true
       }
@@ -61,25 +81,25 @@
         }
       },
       {
-        "frame": 282,
-        "camera": "ShotCam_02",
+        "frame": 468,
+        "camera": "ShotCam_03",
         "allSubjectsInSafeFrustum": true,
         "subjectNdcCoords": {
           "Nemo_Rig": [
-            0.641,
-            0.804,
-            1.752
+            0.839,
+            0.761,
+            1.793
           ],
           "Leo_Rig": [
-            0.151,
-            0.805,
-            1.745
+            0.362,
+            0.76,
+            1.802
           ]
         }
       },
       {
-        "frame": 564,
-        "camera": "ShotCam_04",
+        "frame": 936,
+        "camera": "ShotCam_05",
         "allSubjectsInSafeFrustum": true,
         "subjectNdcCoords": {
           "Nemo_Rig": [
@@ -95,7 +115,7 @@
         }
       }
     ],
-    "savedBlendPath": "/app/applet/public/renders/blender-job-1794161741657-6083140e/project.blend"
+    "savedBlendPath": "/app/applet/public/renders/blender-job-1794330701779-04d11174/project.blend"
   },
   "verification": {
     "valid": true,
@@ -105,10 +125,42 @@
     "width": 1080,
     "height": 1920,
     "fps": 30,
-    "durationSeconds": 18.8,
-    "frameCount": 564,
-    "fileSizeBytes": 8875816,
+    "durationSeconds": 31.13,
+    "frameCount": 934,
+    "fileSizeBytes": 10586400,
     "hasAudioStream": true,
-    "contactSheetUrl": "/renders/blender-job-1794161741657-6083140e/contact-sheet.jpg"
-  }
+    "contactSheetUrl": "/renders/blender-job-1794330701779-04d11174/contact-sheet.jpg"
+  },
+  "shotDurations": [
+    {
+      "id": "roast-shot-1",
+      "speaker": "Leo",
+      "audioSec": 4.62,
+      "shotSec": 5.2
+    },
+    {
+      "id": "roast-shot-2",
+      "speaker": "Nemo",
+      "audioSec": 6.26,
+      "shotSec": 6.8
+    },
+    {
+      "id": "roast-shot-3",
+      "speaker": "Leo",
+      "audioSec": 5.93,
+      "shotSec": 6.5
+    },
+    {
+      "id": "roast-shot-4",
+      "speaker": "Nemo",
+      "audioSec": 5.9,
+      "shotSec": 6.5
+    },
+    {
+      "id": "roast-shot-5",
+      "speaker": "Leo",
+      "audioSec": 5.66,
+      "shotSec": 6.2
+    }
+  ]
 }

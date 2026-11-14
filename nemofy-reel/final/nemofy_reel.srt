@@ -1,0 +1,51 @@
+1
+00:00:00,000 --> 00:00:02,760
+[LEO] Stop wasting 3 hours installing broken Verilog tools.
+
+2
+00:00:02,900 --> 00:00:05,697
+[LEO] Wait a second. Why does my laptop sound like a jet?
+
+3
+00:00:05,833 --> 00:00:08,414
+[NEMO] Leo, you downloaded 40GB for an AND gate.
+
+4
+00:00:08,567 --> 00:00:09,620
+[LEO] My TA insisted.
+
+5
+00:00:09,767 --> 00:00:13,237
+[NEMO] Wait. That 40GB installer freezes before 11:59?
+
+6
+00:00:13,367 --> 00:00:15,294
+[LEO] I'm totally cooked. What else works?
+
+7
+00:00:15,467 --> 00:00:17,983
+[NEMO] Open Nemofy.tech. Tap StudentHub.
+
+8
+00:00:18,133 --> 00:00:20,228
+[LEO] Wait, no setup? Zero install.
+
+9
+00:00:20,367 --> 00:00:24,065
+[NEMO] 100% free in Chrome — live Verilog waveforms & Python.
+
+10
+00:00:24,200 --> 00:00:27,900
+[NEMO] Runs C++, Java, binary math, and Word to PDF too.
+
+11
+00:00:28,167 --> 00:00:30,495
+[LEO] You fixed my 3-hour panic in 12 seconds?
+
+12
+00:00:30,633 --> 00:00:33,219
+[NEMO] 12 for Verilog. 2 hours to forgive yourself.
+
+13
+00:00:33,367 --> 00:00:36,601
+[LEO] Save this tonight. Stop wasting time on broken tools.

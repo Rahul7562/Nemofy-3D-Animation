@@ -792,21 +792,220 @@ export function computeCharacterPoseAtFrame(
       sceneLipSyncData,
     );
 
-  let hipBobY = Math.sin(timeSec * 2.2 + phaseOffset) * 0.025;
+  const isNemo = placement.characterId.toLowerCase().includes("nemo");
+  const isLeo = placement.characterId.toLowerCase().includes("leo");
+
+  let hipBobY = Math.sin(timeSec * 2.2 + phaseOffset) * (isNemo ? 0.048 : 0.025);
   let torsoLeanX = 0;
-  let torsoTwistY = Math.sin(timeSec * 1.5 + phaseOffset) * 0.05;
+  let torsoTwistY = Math.sin(timeSec * 1.5 + phaseOffset) * (isNemo ? 0.09 : 0.05);
+  let torsoRollZ = Math.sin(timeSec * 1.3 + phaseOffset) * (isNemo ? 0.06 : 0.02);
+  let headRollZ = Math.cos(timeSec * 1.4 + phaseOffset) * (isNemo ? 0.05 : 0.025);
+  let bodySquashY = 1.0;
   let leftThighX = 0;
   let leftShinX = 0;
   let rightThighX = 0;
   let rightShinX = 0;
   let leftUpperArmX = 0;
+  let leftUpperArmY = 0;
   let leftUpperArmZ = 0.12;
   let leftForearmX = -0.18;
+  const leftForearmY = 0;
+  let leftForearmZ = 0;
+  let leftHandX = 0;
+  const leftHandZ = 0;
   let rightUpperArmX = 0;
+  let rightUpperArmY = 0;
   let rightUpperArmZ = -0.12;
   let rightForearmX = -0.18;
+  const rightForearmY = 0;
+  let rightForearmZ = 0;
+  let rightHandX = 0;
+  const rightHandZ = 0;
 
   switch (placement.action) {
+    case "chin-think": {
+      const cycle = timeSec * 2.2 + phaseOffset;
+      if (isNemo) {
+        hipBobY = Math.abs(Math.sin(cycle * 1.3)) * 0.068 - 0.012;
+        bodySquashY = 1 + Math.sin(cycle * 2.6) * 0.05;
+        torsoLeanX = 0.06 + Math.sin(cycle * 0.8) * 0.05;
+        torsoTwistY = Math.sin(cycle * 0.9) * 0.14;
+        torsoRollZ = Math.cos(cycle * 1.1) * 0.11;
+        headRollZ = -0.08 + Math.sin(cycle * 0.9) * 0.06;
+        leftUpperArmX = -0.95 + Math.sin(cycle * 1.4) * 0.38;
+        rightUpperArmX = -1.15 + Math.cos(cycle * 1.2) * 0.35;
+        leftUpperArmZ = 0.42 + Math.sin(cycle) * 0.22;
+        rightUpperArmZ = -0.45 - Math.cos(cycle) * 0.22;
+        leftForearmX = -0.55 + Math.sin(cycle * 1.6) * 0.25;
+        rightForearmX = -0.65 + Math.cos(cycle * 1.6) * 0.25;
+      } else {
+        // Leo smoothly brings his right hand to his chin to stroke it thoughtfully while his left hand gestures freely
+        hipBobY = Math.sin(cycle * 0.85) * 0.02 + Math.cos(cycle * 1.7) * 0.006;
+        torsoLeanX = 0.04 + Math.sin(cycle * 0.55) * 0.03;
+        torsoTwistY = -0.06 + Math.sin(cycle * 0.65) * 0.07;
+        torsoRollZ = -0.03 + Math.cos(cycle * 0.6) * 0.025;
+        headRollZ = -0.09 + Math.sin(cycle * 0.55) * 0.04;
+        // Right arm: raised & angled inward so hand meets the chin smoothly
+        rightUpperArmX = -1.18 + Math.sin(cycle * 0.75) * 0.07;
+        rightUpperArmY = -0.26 + Math.cos(cycle * 0.75) * 0.05;
+        rightUpperArmZ = -0.36 + Math.sin(cycle * 0.9) * 0.04;
+        rightForearmX = -1.38 + Math.sin(cycle * 1.8) * 0.09;
+        rightForearmZ = -0.52 + Math.cos(cycle * 1.8) * 0.06;
+        rightHandX = 0.24 + Math.sin(cycle * 2.6) * 0.12;
+        // Left arm: completely free conversational gesture
+        leftUpperArmX =
+          -0.58 + Math.sin(cycle * 0.95) * (0.24 + speechEnergy * 0.22);
+        leftUpperArmY = 0.14 + Math.cos(cycle * 0.8) * 0.1;
+        leftUpperArmZ = 0.26 + Math.sin(cycle * 0.7) * 0.12;
+        leftForearmX =
+          -0.82 + Math.cos(cycle * 1.15) * (0.24 + speechEnergy * 0.15);
+        leftForearmZ = 0.18 + Math.sin(cycle * 1.1) * 0.08;
+        leftHandX = Math.sin(cycle * 1.5) * 0.18;
+      }
+      break;
+    }
+    case "head-scratch": {
+      const cycle = timeSec * 2.3 + phaseOffset;
+      if (isNemo) {
+        hipBobY = Math.abs(Math.sin(cycle * 1.4)) * 0.075 - 0.015;
+        bodySquashY = 1 + Math.cos(cycle * 2.8) * 0.06;
+        torsoRollZ = Math.sin(cycle * 1.2) * 0.14;
+        headRollZ = 0.12 * Math.sin(cycle * 1.1);
+        leftUpperArmX = -1.35 + Math.sin(cycle * 1.5) * 0.42;
+        rightUpperArmX = -0.95 + Math.cos(cycle * 1.5) * 0.42;
+        leftUpperArmZ = 0.48 + Math.sin(cycle) * 0.24;
+        rightUpperArmZ = -0.38 - Math.cos(cycle) * 0.22;
+      } else {
+        // Leo brings his left hand up to touch/scratch his head/temple while his right hand gestures freely toward Nemo
+        hipBobY = Math.sin(cycle * 0.9) * 0.022;
+        torsoLeanX = -0.03 + Math.sin(cycle * 0.6) * 0.03;
+        torsoTwistY = 0.07 + Math.cos(cycle * 0.7) * 0.07;
+        torsoRollZ = 0.045 + Math.sin(cycle * 0.65) * 0.03;
+        headRollZ = 0.11 + Math.sin(cycle * 0.75) * 0.045;
+        // Left hand up to temple / crown of head
+        leftUpperArmX = -1.76 + Math.sin(cycle * 1.3) * 0.09;
+        leftUpperArmY = 0.22 + Math.cos(cycle * 1.1) * 0.06;
+        leftUpperArmZ = 0.22 + Math.sin(cycle * 0.9) * 0.05;
+        leftForearmX = -1.36 + Math.sin(cycle * 2.4) * 0.11;
+        leftForearmZ = 0.46 + Math.cos(cycle * 2.4) * 0.07;
+        leftHandX = 0.28 + Math.sin(cycle * 3.0) * 0.14;
+        // Right hand free, expressive open-palm banter toward Nemo
+        rightUpperArmX =
+          -0.78 + Math.cos(cycle * 1.05) * (0.26 + speechEnergy * 0.2);
+        rightUpperArmY = -0.18 + Math.sin(cycle * 0.9) * 0.12;
+        rightUpperArmZ = -0.3 + Math.cos(cycle * 0.85) * 0.14;
+        rightForearmX =
+          -0.72 + Math.sin(cycle * 1.25) * (0.24 + speechEnergy * 0.16);
+        rightForearmZ = -0.16 + Math.cos(cycle * 1.1) * 0.1;
+        rightHandX = Math.cos(cycle * 1.6) * 0.2;
+      }
+      break;
+    }
+    case "facepalm-react": {
+      const cycle = timeSec * 2.4 + phaseOffset;
+      hipBobY = Math.sin(cycle * 0.95) * (isNemo ? 0.065 : 0.022);
+      torsoLeanX = -0.06 + Math.sin(cycle * 0.7) * 0.04;
+      torsoTwistY = Math.sin(cycle * 1.4) * 0.09;
+      torsoRollZ = Math.cos(cycle * 0.8) * (isNemo ? 0.12 : 0.045);
+      headRollZ = -0.1 + Math.sin(cycle * 1.2) * 0.06;
+      // Right hand arcs to forehead / facepalm
+      rightUpperArmX = -1.66 + Math.sin(cycle * 0.9) * 0.08;
+      rightUpperArmY = -0.24;
+      rightUpperArmZ = -0.28 + Math.cos(cycle * 0.9) * 0.05;
+      rightForearmX = -1.42 + Math.sin(cycle * 1.5) * 0.08;
+      rightForearmZ = -0.48 + Math.cos(cycle * 1.5) * 0.06;
+      rightHandX = 0.22;
+      // Left hand free side reaction
+      leftUpperArmX = -0.64 + Math.cos(cycle * 1.1) * 0.22;
+      leftUpperArmZ = 0.36 + Math.sin(cycle * 0.9) * 0.12;
+      leftForearmX = -0.68 + Math.sin(cycle * 1.3) * 0.2;
+      leftForearmZ = 0.18;
+      break;
+    }
+    case "playful-roast": {
+      const cycle = timeSec * 2.8 + phaseOffset;
+      if (isNemo) {
+        // Nemo is super energetic, hopping, tilting, and waving/pointing both arms freely
+        hipBobY = Math.abs(Math.sin(cycle * 1.35)) * 0.088 - 0.014;
+        bodySquashY = 1 + Math.cos(cycle * 2.7) * 0.068;
+        torsoLeanX = 0.07 + Math.sin(cycle * 1.1) * 0.06;
+        torsoTwistY = Math.sin(cycle * 0.95) * 0.18;
+        torsoRollZ = Math.cos(cycle * 1.15) * 0.15;
+        headRollZ = Math.sin(cycle * 1.3) * 0.11;
+        leftThighX = Math.sin(cycle * 1.35) * 0.38;
+        rightThighX = -Math.sin(cycle * 1.35) * 0.38;
+        leftUpperArmX =
+          -1.12 + Math.sin(cycle * 1.35) * (0.48 + speechEnergy * 0.2);
+        rightUpperArmX =
+          -1.22 + Math.cos(cycle * 1.25) * (0.48 + speechEnergy * 0.2);
+        leftUpperArmY = 0.22 * Math.cos(cycle * 1.1);
+        rightUpperArmY = -0.22 * Math.sin(cycle * 1.1);
+        leftUpperArmZ = 0.48 + Math.sin(cycle * 1.1) * 0.28;
+        rightUpperArmZ = -0.48 - Math.cos(cycle * 1.1) * 0.28;
+        leftForearmX = -0.68 + Math.sin(cycle * 1.7) * 0.34;
+        rightForearmX = -0.68 + Math.cos(cycle * 1.7) * 0.34;
+        leftForearmZ = 0.25 * Math.sin(cycle * 1.4);
+        rightForearmZ = -0.25 * Math.cos(cycle * 1.4);
+      } else {
+        // Leo playfully roasts Nemo with smooth alternating chin-touch and wide free-hand gestures
+        const chinBlend = 0.5 + 0.5 * Math.sin(cycle * 0.45);
+        hipBobY = Math.sin(cycle * 0.9) * 0.024;
+        torsoLeanX = 0.05 + Math.sin(cycle * 0.65) * 0.035;
+        torsoTwistY = Math.sin(cycle * 0.75) * 0.1;
+        torsoRollZ = Math.cos(cycle * 0.7) * 0.04;
+        headRollZ = Math.sin(cycle * 0.8) * 0.07;
+        rightUpperArmX = lerp(
+          -0.82 + Math.sin(cycle * 1.1) * (0.28 + speechEnergy * 0.18),
+          -1.18 + Math.sin(cycle * 0.8) * 0.06,
+          chinBlend,
+        );
+        rightUpperArmY = lerp(-0.18, -0.26, chinBlend);
+        rightUpperArmZ = lerp(
+          -0.32 + Math.cos(cycle * 0.9) * 0.14,
+          -0.36,
+          chinBlend,
+        );
+        rightForearmX = lerp(
+          -0.68 + Math.sin(cycle * 1.3) * 0.24,
+          -1.38 + Math.sin(cycle * 1.8) * 0.08,
+          chinBlend,
+        );
+        rightForearmZ = lerp(-0.14, -0.52, chinBlend);
+        rightHandX = lerp(0.15 * Math.sin(cycle * 1.5), 0.24, chinBlend);
+
+        leftUpperArmX =
+          -0.68 + Math.cos(cycle * 1.0) * (0.28 + speechEnergy * 0.2);
+        leftUpperArmY = 0.16 * Math.sin(cycle * 0.85);
+        leftUpperArmZ = 0.28 + Math.sin(cycle * 0.85) * 0.14;
+        leftForearmX =
+          -0.76 + Math.sin(cycle * 1.2) * (0.26 + speechEnergy * 0.16);
+        leftForearmZ = 0.2 + Math.cos(cycle * 1.1) * 0.08;
+        leftHandX = Math.cos(cycle * 1.6) * 0.18;
+      }
+      break;
+    }
+    case "energetic-wave": {
+      const cycle = timeSec * 3.1 + phaseOffset;
+      hipBobY = Math.abs(Math.sin(cycle * 1.45)) * (isNemo ? 0.096 : 0.045) - 0.012;
+      bodySquashY = 1 + Math.cos(cycle * 2.9) * (isNemo ? 0.075 : 0.03);
+      torsoLeanX = 0.06 + Math.sin(cycle * 1.1) * 0.06;
+      torsoTwistY = Math.sin(cycle * 1.0) * (isNemo ? 0.2 : 0.11);
+      torsoRollZ = Math.sin(cycle * 1.25) * (isNemo ? 0.16 : 0.06);
+      headRollZ = Math.cos(cycle * 1.25) * (isNemo ? 0.11 : 0.06);
+      leftThighX = Math.sin(cycle * 1.45) * 0.42;
+      rightThighX = -Math.sin(cycle * 1.45) * 0.42;
+      leftUpperArmX = -1.42 + Math.sin(cycle * 1.65) * 0.5;
+      rightUpperArmX = -1.42 + Math.cos(cycle * 1.65) * 0.5;
+      leftUpperArmY = 0.24 * Math.sin(cycle * 1.3);
+      rightUpperArmY = -0.24 * Math.cos(cycle * 1.3);
+      leftUpperArmZ = 0.54 + Math.sin(cycle * 1.35) * 0.3;
+      rightUpperArmZ = -0.54 - Math.cos(cycle * 1.35) * 0.3;
+      leftForearmX = -0.58 + Math.sin(cycle * 2.1) * 0.36;
+      rightForearmX = -0.58 + Math.cos(cycle * 2.1) * 0.36;
+      leftForearmZ = 0.28 * Math.cos(cycle * 1.6);
+      rightForearmZ = -0.28 * Math.sin(cycle * 1.6);
+      break;
+    }
     case "walk": {
       const freq = 5.4;
       const cycle = timeSec * freq + phaseOffset;
@@ -853,35 +1052,102 @@ export function computeCharacterPoseAtFrame(
       break;
     }
     case "talk": {
-      const cycle = timeSec * 2.4 + phaseOffset;
-      hipBobY = Math.sin(cycle) * 0.015;
-      torsoTwistY = Math.sin(cycle * 0.65) * 0.06;
-      leftUpperArmX =
-        -0.32 + Math.sin(cycle * 0.9) * (0.14 + speechEnergy * 0.12);
-      rightUpperArmX =
-        -0.38 + Math.cos(cycle * 0.85) * (0.16 + speechEnergy * 0.14);
-      leftUpperArmZ = 0.18 + Math.sin(cycle) * 0.05;
-      rightUpperArmZ = -0.20 - Math.cos(cycle) * 0.06;
-      leftForearmX = -0.55 + Math.sin(cycle * 1.1) * 0.16;
-      rightForearmX = -0.60 + Math.cos(cycle * 1.0) * 0.18;
+      const cycle = timeSec * 2.5 + phaseOffset;
+      if (isNemo) {
+        hipBobY = Math.abs(Math.sin(cycle * 1.25)) * 0.072 - 0.012;
+        bodySquashY = 1 + Math.sin(cycle * 2.5) * 0.055;
+        torsoLeanX = 0.05 + Math.sin(cycle * 0.8) * 0.05;
+        torsoTwistY = Math.sin(cycle * 0.85) * 0.15;
+        torsoRollZ = Math.cos(cycle * 1.05) * 0.12;
+        headRollZ = Math.sin(cycle * 1.1) * 0.08;
+        leftUpperArmX =
+          -0.88 + Math.sin(cycle * 1.2) * (0.38 + speechEnergy * 0.22);
+        rightUpperArmX =
+          -0.96 + Math.cos(cycle * 1.15) * (0.42 + speechEnergy * 0.22);
+        leftUpperArmZ = 0.38 + Math.sin(cycle) * 0.22;
+        rightUpperArmZ = -0.4 - Math.cos(cycle) * 0.22;
+        leftForearmX = -0.58 + Math.sin(cycle * 1.4) * 0.28;
+        rightForearmX = -0.62 + Math.cos(cycle * 1.4) * 0.28;
+      } else {
+        const chinTouchWave = Math.max(0, Math.sin(cycle * 0.42));
+        hipBobY = Math.sin(cycle * 0.9) * 0.022;
+        torsoLeanX = 0.03 + Math.sin(cycle * 0.6) * 0.025;
+        torsoTwistY = Math.sin(cycle * 0.65) * 0.085;
+        torsoRollZ = Math.cos(cycle * 0.6) * 0.03;
+        headRollZ = Math.sin(cycle * 0.7) * 0.055;
+        leftUpperArmX =
+          -0.54 + Math.sin(cycle * 0.95) * (0.24 + speechEnergy * 0.18);
+        rightUpperArmX = lerp(
+          -0.62 + Math.cos(cycle * 0.9) * (0.26 + speechEnergy * 0.2),
+          -1.15 + Math.sin(cycle * 0.8) * 0.06,
+          chinTouchWave * 0.75,
+        );
+        leftUpperArmY = 0.12 * Math.cos(cycle * 0.8);
+        rightUpperArmY = lerp(-0.12, -0.25, chinTouchWave * 0.75);
+        leftUpperArmZ = 0.22 + Math.sin(cycle * 0.85) * 0.1;
+        rightUpperArmZ = lerp(
+          -0.24 - Math.cos(cycle * 0.85) * 0.1,
+          -0.35,
+          chinTouchWave * 0.75,
+        );
+        leftForearmX = -0.72 + Math.sin(cycle * 1.15) * 0.22;
+        rightForearmX = lerp(
+          -0.76 + Math.cos(cycle * 1.05) * 0.24,
+          -1.36,
+          chinTouchWave * 0.75,
+        );
+        leftForearmZ = 0.16;
+        rightForearmZ = lerp(-0.16, -0.5, chinTouchWave * 0.75);
+        rightHandX = 0.18 * chinTouchWave;
+      }
       break;
     }
     case "gesture": {
       const cycle = timeSec * 2.6 + phaseOffset;
-      hipBobY = Math.sin(cycle) * 0.018;
-      torsoTwistY = Math.sin(cycle * 0.7) * 0.08;
-      rightUpperArmX =
-        -0.85 + Math.sin(cycle) * (0.20 + speechEnergy * 0.12);
-      rightUpperArmZ = -0.32 + Math.cos(cycle) * 0.12;
-      rightForearmX = -0.45 + Math.sin(cycle * 1.1) * 0.22;
-      leftUpperArmX = -0.24 + Math.cos(cycle * 0.8) * 0.12;
-      leftForearmX = -0.45;
+      if (isNemo) {
+        hipBobY = Math.abs(Math.sin(cycle * 1.3)) * 0.08 - 0.012;
+        bodySquashY = 1 + Math.cos(cycle * 2.6) * 0.06;
+        torsoLeanX = 0.06 + Math.sin(cycle * 0.9) * 0.05;
+        torsoTwistY = Math.sin(cycle * 0.9) * 0.16;
+        torsoRollZ = Math.sin(cycle * 1.1) * 0.13;
+        headRollZ = Math.cos(cycle * 1.1) * 0.09;
+        rightUpperArmX =
+          -1.18 + Math.sin(cycle * 1.3) * (0.45 + speechEnergy * 0.2);
+        rightUpperArmZ = -0.46 - Math.cos(cycle * 1.1) * 0.26;
+        rightForearmX = -0.62 + Math.sin(cycle * 1.5) * 0.32;
+        leftUpperArmX =
+          -0.96 + Math.cos(cycle * 1.2) * (0.42 + speechEnergy * 0.18);
+        leftUpperArmZ = 0.44 + Math.sin(cycle * 1.1) * 0.24;
+        leftForearmX = -0.58 + Math.cos(cycle * 1.5) * 0.3;
+      } else {
+        const templeWave = Math.max(0, Math.sin(cycle * 0.45 + 1.1));
+        hipBobY = Math.sin(cycle * 0.9) * 0.022;
+        torsoLeanX = 0.04 + Math.sin(cycle * 0.6) * 0.03;
+        torsoTwistY = Math.sin(cycle * 0.7) * 0.095;
+        torsoRollZ = Math.cos(cycle * 0.65) * 0.035;
+        headRollZ = Math.sin(cycle * 0.75) * 0.06;
+        rightUpperArmX =
+          -0.92 + Math.sin(cycle) * (0.28 + speechEnergy * 0.18);
+        rightUpperArmY = -0.18 * Math.cos(cycle * 0.85);
+        rightUpperArmZ = -0.34 + Math.cos(cycle) * 0.15;
+        rightForearmX = -0.72 + Math.sin(cycle * 1.15) * 0.26;
+        rightForearmZ = -0.22 + Math.cos(cycle * 1.1) * 0.1;
+        leftUpperArmX = lerp(
+          -0.48 + Math.cos(cycle * 0.85) * 0.22,
+          -1.68 + Math.sin(cycle * 1.1) * 0.08,
+          templeWave * 0.65,
+        );
+        leftUpperArmY = lerp(0.1, 0.22, templeWave * 0.65);
+        leftUpperArmZ = 0.24 + Math.sin(cycle * 0.8) * 0.1;
+        leftForearmX = lerp(-0.68, -1.34, templeWave * 0.65);
+        leftForearmZ = lerp(0.15, 0.44, templeWave * 0.65);
+      }
       break;
     }
     case "type-code": {
       const cycle = timeSec * 8.0 + phaseOffset;
       hipBobY = Math.sin(timeSec * 2.5) * 0.012;
-      torsoLeanX = 0.10;
+      torsoLeanX = 0.1;
       torsoTwistY = Math.sin(timeSec * 1.8) * 0.04;
       leftUpperArmX = -0.62 + Math.sin(cycle) * 0.06;
       rightUpperArmX = -0.62 + Math.cos(cycle * 1.1) * 0.06;
@@ -892,39 +1158,89 @@ export function computeCharacterPoseAtFrame(
       break;
     }
     case "panic-react": {
-      const cycle = timeSec * 3.4 + phaseOffset;
-      hipBobY = Math.abs(Math.sin(cycle * 0.7)) * 0.022;
-      torsoLeanX = -0.06 + Math.sin(cycle * 0.5) * 0.03;
-      torsoTwistY = Math.sin(cycle * 0.7) * 0.08;
-      leftUpperArmX = -1.35 + Math.sin(cycle) * 0.16;
-      rightUpperArmX = -1.35 + Math.cos(cycle) * 0.16;
-      leftUpperArmZ = 0.32;
-      rightUpperArmZ = -0.32;
-      leftForearmX = -0.78;
-      rightForearmX = -0.78;
+      const cycle = timeSec * 3.0 + phaseOffset;
+      hipBobY = Math.abs(Math.sin(cycle * 0.8)) * 0.026;
+      torsoLeanX = -0.06 + Math.sin(cycle * 0.55) * 0.035;
+      torsoTwistY = Math.sin(cycle * 0.75) * 0.09;
+      torsoRollZ = Math.cos(cycle * 0.7) * 0.04;
+      headRollZ = Math.sin(cycle * 0.85) * 0.065;
+      // Both hands brought up to the sides of the head / temples smoothly
+      leftUpperArmX = -1.48 + Math.sin(cycle * 0.9) * 0.16;
+      rightUpperArmX = -1.48 + Math.cos(cycle * 0.9) * 0.16;
+      leftUpperArmY = 0.2;
+      rightUpperArmY = -0.2;
+      leftUpperArmZ = 0.26;
+      rightUpperArmZ = -0.26;
+      leftForearmX = -1.18 + Math.sin(cycle * 1.3) * 0.12;
+      rightForearmX = -1.18 + Math.cos(cycle * 1.3) * 0.12;
+      leftForearmZ = 0.38;
+      rightForearmZ = -0.38;
       break;
     }
     case "celebrate": {
       const cycle = timeSec * 3.2 + phaseOffset;
-      hipBobY = Math.abs(Math.sin(cycle)) * 0.03;
-      torsoLeanX = -0.05;
-      torsoTwistY = Math.sin(cycle * 0.5) * 0.08;
-      leftUpperArmX = -1.85 + Math.sin(cycle) * 0.18;
-      rightUpperArmX = -1.85 - Math.sin(cycle) * 0.18;
-      leftUpperArmZ = 0.28;
-      rightUpperArmZ = -0.28;
-      leftForearmX = -0.35;
-      rightForearmX = -0.35;
-      leftThighX = 0;
-      rightThighX = 0;
+      hipBobY = Math.abs(Math.sin(cycle * 1.25)) * (isNemo ? 0.092 : 0.038);
+      bodySquashY = 1 + Math.cos(cycle * 2.5) * (isNemo ? 0.07 : 0.025);
+      torsoLeanX = -0.05 + Math.sin(cycle * 0.8) * 0.04;
+      torsoTwistY = Math.sin(cycle * 0.65) * (isNemo ? 0.16 : 0.09);
+      torsoRollZ = Math.sin(cycle * 1.1) * (isNemo ? 0.14 : 0.045);
+      headRollZ = Math.cos(cycle * 1.1) * (isNemo ? 0.09 : 0.05);
+      leftUpperArmX = -1.92 + Math.sin(cycle) * 0.22;
+      rightUpperArmX = -1.92 - Math.sin(cycle) * 0.22;
+      leftUpperArmZ = 0.34 + Math.sin(cycle * 1.2) * 0.14;
+      rightUpperArmZ = -0.34 - Math.cos(cycle * 1.2) * 0.14;
+      leftForearmX = -0.42 + Math.sin(cycle * 1.5) * 0.18;
+      rightForearmX = -0.42 + Math.cos(cycle * 1.5) * 0.18;
+      leftThighX = isNemo ? Math.sin(cycle * 1.25) * 0.35 : 0;
+      rightThighX = isNemo ? -Math.sin(cycle * 1.25) * 0.35 : 0;
       break;
     }
     case "idle":
     default: {
-      const cycle = timeSec * 1.8 + phaseOffset;
-      hipBobY = Math.sin(cycle) * 0.015;
-      leftUpperArmX = Math.sin(cycle) * 0.04 - speechEnergy * 0.12;
-      rightUpperArmX = -Math.sin(cycle) * 0.04 - speechEnergy * 0.14;
+      const cycle = timeSec * 2.1 + phaseOffset;
+      if (isNemo) {
+        // Energetic, lively idle for Nemo so he is never dull or static
+        hipBobY = Math.abs(Math.sin(cycle * 1.2)) * 0.058 - 0.01;
+        bodySquashY = 1 + Math.cos(cycle * 2.4) * 0.045;
+        torsoLeanX = Math.sin(cycle * 0.75) * 0.045;
+        torsoTwistY = Math.sin(cycle * 0.85) * 0.12;
+        torsoRollZ = Math.cos(cycle * 0.95) * 0.095;
+        headRollZ = Math.sin(cycle * 1.05) * 0.075;
+        leftUpperArmX =
+          -0.55 + Math.sin(cycle * 1.25) * 0.32 - speechEnergy * 0.18;
+        rightUpperArmX =
+          -0.55 - Math.sin(cycle * 1.25) * 0.32 - speechEnergy * 0.18;
+        leftUpperArmZ = 0.32 + Math.sin(cycle * 0.95) * 0.18;
+        rightUpperArmZ = -0.32 - Math.cos(cycle * 0.95) * 0.18;
+        leftForearmX = -0.45 + Math.sin(cycle * 1.5) * 0.22;
+        rightForearmX = -0.45 + Math.cos(cycle * 1.5) * 0.22;
+      } else if (isLeo) {
+        // Natural, thoughtful listening for Leo with subtle free-hand chin rest & weight shift
+        const thoughtfulChin = 0.5 + 0.5 * Math.sin(cycle * 0.48);
+        hipBobY = Math.sin(cycle * 0.85) * 0.018;
+        torsoLeanX = Math.sin(cycle * 0.55) * 0.025;
+        torsoTwistY = Math.sin(cycle * 0.6) * 0.065;
+        torsoRollZ = Math.cos(cycle * 0.55) * 0.025;
+        headRollZ = Math.sin(cycle * 0.65) * 0.05;
+        rightUpperArmX = lerp(
+          -0.28 + Math.sin(cycle * 0.8) * 0.12,
+          -1.12 + Math.sin(cycle * 0.7) * 0.05,
+          thoughtfulChin * 0.7,
+        );
+        rightUpperArmY = lerp(-0.08, -0.24, thoughtfulChin * 0.7);
+        rightUpperArmZ = lerp(-0.18, -0.34, thoughtfulChin * 0.7);
+        rightForearmX = lerp(-0.48, -1.32, thoughtfulChin * 0.7);
+        rightForearmZ = lerp(-0.12, -0.48, thoughtfulChin * 0.7);
+        leftUpperArmX =
+          -0.26 + Math.cos(cycle * 0.75) * 0.14 - speechEnergy * 0.14;
+        leftUpperArmZ = 0.18 + Math.sin(cycle * 0.7) * 0.06;
+        leftForearmX = -0.52 + Math.sin(cycle * 0.9) * 0.14;
+        leftForearmZ = 0.14;
+      } else {
+        hipBobY = Math.sin(cycle) * 0.015;
+        leftUpperArmX = Math.sin(cycle) * 0.04 - speechEnergy * 0.12;
+        rightUpperArmX = -Math.sin(cycle) * 0.04 - speechEnergy * 0.14;
+      }
       break;
     }
   }
@@ -934,26 +1250,33 @@ export function computeCharacterPoseAtFrame(
   const targetYaw = Math.atan2(lookDx, lookDz) - worldRotationY * 0.5;
   const normalizedYaw = Math.atan2(Math.sin(targetYaw), Math.cos(targetYaw));
   const headYawY =
-    clamp(normalizedYaw * 0.22, -0.22, 0.22) +
-    Math.sin(timeSec * 1.7 + phaseOffset) * 0.04;
+    clamp(normalizedYaw * 0.25, -0.26, 0.26) +
+    Math.sin(timeSec * 1.7 + phaseOffset) * (isNemo ? 0.065 : 0.045);
   const headPitchX =
     clamp((wx - placement.headLookAt[1]) * -0.02, -0.08, 0.08) +
     (placement.speaking
-      ? Math.sin(timeSec * 5.2) * 0.03 + speechEnergy * 0.04
-      : 0);
+      ? Math.sin(timeSec * 5.2) * 0.038 + speechEnergy * 0.048
+      : Math.sin(timeSec * 2.1 + phaseOffset) * 0.025);
 
   const blinkCycle = (timeSec + seededRandom(seedKey + "-blink") * 3.2) % 3.2;
   const eyeBlink =
     blinkCycle > 3.04 ? Math.sin(((blinkCycle - 3.04) / 0.16) * Math.PI) : 0;
 
   const browRaise =
-    placement.expression === "surprised"
+    placement.expression === "surprised" ||
+    placement.action === "panic-react" ||
+    placement.action === "facepalm-react"
       ? 0.65
-      : placement.expression === "happy"
-        ? 0.35
-        : placement.speaking
-          ? speechEnergy * 0.4
-          : 0.1;
+      : placement.expression === "happy" ||
+          placement.action === "energetic-wave" ||
+          placement.action === "playful-roast"
+        ? 0.42
+        : placement.action === "chin-think" ||
+            placement.action === "head-scratch"
+          ? 0.36
+          : placement.speaking
+            ? speechEnergy * 0.45
+            : 0.14;
 
   return {
     worldPosition: [wx, wy, wz],
@@ -961,18 +1284,31 @@ export function computeCharacterPoseAtFrame(
     hipBobY,
     torsoLeanX,
     torsoTwistY,
+    torsoRollZ,
     headYawY,
     headPitchX,
+    headRollZ,
+    bodySquashY,
     leftThighX,
     leftShinX,
     rightThighX,
     rightShinX,
     leftUpperArmX,
+    leftUpperArmY,
     leftUpperArmZ,
     leftForearmX,
+    leftForearmY,
+    leftForearmZ,
+    leftHandX,
+    leftHandZ,
     rightUpperArmX,
+    rightUpperArmY,
     rightUpperArmZ,
     rightForearmX,
+    rightForearmY,
+    rightForearmZ,
+    rightHandX,
+    rightHandZ,
     mouthOpenness,
     mouthWidth,
     eyeBlink: clamp(eyeBlink, 0, 1),

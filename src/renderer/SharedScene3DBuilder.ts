@@ -917,12 +917,16 @@ export function buildSharedCharacterActor3D(
     nemoRoot.scale.setScalar(config.scale);
     nemoRoot.position.set(0, 0.42, 0);
 
+    const squashY = pose.bodySquashY ?? 1.0;
+    const invSquashXZ = 1 / Math.sqrt(Math.max(0.7, squashY));
+
     const cubeHead = new THREE.Group();
-    cubeHead.position.set(0, pose.hipBobY * 0.45, 0);
+    cubeHead.position.set(0, pose.hipBobY * 0.95, 0);
+    cubeHead.scale.set(invSquashXZ, squashY, invSquashXZ);
     cubeHead.rotation.set(
-      pose.headPitchX * 0.65 + pose.torsoLeanX * 0.45,
-      pose.headYawY * 0.8 + pose.torsoTwistY * 0.45,
-      0,
+      pose.headPitchX * 0.85 + pose.torsoLeanX * 0.85,
+      pose.headYawY * 0.95 + pose.torsoTwistY * 0.85,
+      (pose.torsoRollZ ?? 0) + (pose.headRollZ ?? 0) * 0.65,
     );
 
     const cubeBody = new THREE.Mesh(
@@ -965,29 +969,47 @@ export function buildSharedCharacterActor3D(
     mouth.position.set(0, -0.095 - pose.mouthOpenness * 0.022, 0.242);
     cubeHead.add(mouth);
 
+    const leftArmGroup = new THREE.Group();
+    leftArmGroup.position.set(-0.32, -0.01, 0.02);
+    leftArmGroup.rotation.set(
+      pose.leftUpperArmX * 0.85,
+      pose.leftUpperArmY ?? 0,
+      0.22 + pose.leftUpperArmZ * 0.85,
+    );
     const leftFlap = new THREE.Mesh(
-      new THREE.BoxGeometry(0.12, 0.135, 0.15),
+      new THREE.BoxGeometry(0.105, 0.125, 0.135),
       new THREE.MeshStandardMaterial({ color: "#E06D53", roughness: 0.44 }),
     );
-    leftFlap.position.set(-0.37, -0.02, 0.02);
-    leftFlap.rotation.set(
-      pose.leftUpperArmX * 0.55,
-      0,
-      0.25 + Math.max(0, pose.leftUpperArmZ) * 0.65,
-    );
-    cubeHead.add(leftFlap);
-
-    const rightFlap = new THREE.Mesh(
-      new THREE.BoxGeometry(0.12, 0.135, 0.15),
+    leftFlap.position.set(-0.048, -0.02, 0);
+    leftArmGroup.add(leftFlap);
+    const leftTip = new THREE.Mesh(
+      new THREE.BoxGeometry(0.09, 0.095, 0.115),
       new THREE.MeshStandardMaterial({ color: "#F18F70", roughness: 0.4 }),
     );
-    rightFlap.position.set(0.37, -0.02, 0.02);
-    rightFlap.rotation.set(
-      pose.rightUpperArmX * 0.55,
-      0,
-      -0.25 + Math.min(0, pose.rightUpperArmZ) * 0.65,
+    leftTip.position.set(-0.095, -0.08, 0);
+    leftArmGroup.add(leftTip);
+    cubeHead.add(leftArmGroup);
+
+    const rightArmGroup = new THREE.Group();
+    rightArmGroup.position.set(0.32, -0.01, 0.02);
+    rightArmGroup.rotation.set(
+      pose.rightUpperArmX * 0.85,
+      pose.rightUpperArmY ?? 0,
+      -0.22 + pose.rightUpperArmZ * 0.85,
     );
-    cubeHead.add(rightFlap);
+    const rightFlap = new THREE.Mesh(
+      new THREE.BoxGeometry(0.105, 0.125, 0.135),
+      new THREE.MeshStandardMaterial({ color: "#F18F70", roughness: 0.4 }),
+    );
+    rightFlap.position.set(0.048, -0.02, 0);
+    rightArmGroup.add(rightFlap);
+    const rightTip = new THREE.Mesh(
+      new THREE.BoxGeometry(0.09, 0.095, 0.115),
+      new THREE.MeshStandardMaterial({ color: "#F18F70", roughness: 0.38 }),
+    );
+    rightTip.position.set(0.095, -0.08, 0);
+    rightArmGroup.add(rightTip);
+    cubeHead.add(rightArmGroup);
 
     nemoRoot.add(cubeHead);
 
@@ -1023,8 +1045,12 @@ export function buildSharedCharacterActor3D(
   pelvisGroup.add(pelvisMesh);
 
   const torsoGroup = new THREE.Group();
-  torsoGroup.position.set(0, 0.06 + pose.hipBobY * 0.45, 0);
-  torsoGroup.rotation.set(pose.torsoLeanX, pose.torsoTwistY, 0);
+  torsoGroup.position.set(0, 0.06 + pose.hipBobY * 0.55, 0);
+  torsoGroup.rotation.set(
+    pose.torsoLeanX,
+    pose.torsoTwistY,
+    pose.torsoRollZ ?? 0,
+  );
 
   const torsoMesh = new THREE.Mesh(
     new THREE.BoxGeometry(0.45, 0.44, 0.29),
@@ -1048,7 +1074,11 @@ export function buildSharedCharacterActor3D(
 
   const headGroup = new THREE.Group();
   headGroup.position.set(0, 0.46, 0);
-  headGroup.rotation.set(pose.headPitchX, pose.headYawY, 0);
+  headGroup.rotation.set(
+    pose.headPitchX,
+    pose.headYawY,
+    pose.headRollZ ?? 0,
+  );
 
   const headMesh = new THREE.Mesh(
     new THREE.BoxGeometry(0.5, 0.4, 0.44),
@@ -1118,7 +1148,7 @@ export function buildSharedCharacterActor3D(
     armGroup.position.set(isLeft ? -0.29 : 0.29, 0.39, 0);
     armGroup.rotation.set(
       isLeft ? pose.leftUpperArmX : pose.rightUpperArmX,
-      0,
+      isLeft ? (pose.leftUpperArmY ?? 0) : (pose.rightUpperArmY ?? 0),
       isLeft ? pose.leftUpperArmZ : pose.rightUpperArmZ,
     );
     const upper = new THREE.Mesh(
@@ -1132,8 +1162,8 @@ export function buildSharedCharacterActor3D(
     forearmGroup.position.set(0, -0.22, 0);
     forearmGroup.rotation.set(
       isLeft ? pose.leftForearmX : pose.rightForearmX,
-      0,
-      0,
+      isLeft ? (pose.leftForearmY ?? 0) : (pose.rightForearmY ?? 0),
+      isLeft ? (pose.leftForearmZ ?? 0) : (pose.rightForearmZ ?? 0),
     );
     const lower = new THREE.Mesh(
       new THREE.BoxGeometry(0.12, 0.2, 0.12),
@@ -1147,6 +1177,11 @@ export function buildSharedCharacterActor3D(
       new THREE.MeshStandardMaterial({ color: "#F2C2A5", roughness: 0.48 }),
     );
     hand.position.set(0, -0.22, 0);
+    hand.rotation.set(
+      isLeft ? (pose.leftHandX ?? 0) : (pose.rightHandX ?? 0),
+      0,
+      isLeft ? (pose.leftHandZ ?? 0) : (pose.rightHandZ ?? 0),
+    );
     forearmGroup.add(hand);
 
     armGroup.add(forearmGroup);

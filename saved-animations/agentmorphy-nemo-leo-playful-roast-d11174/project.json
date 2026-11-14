@@ -1,0 +1,35 @@
+{
+  "archiveMetadata": {
+    "id": "agentmorphy-nemo-leo-playful-roast-d11174",
+    "slug": "agentmorphy-nemo-leo-playful-roast-d11174",
+    "title": "Nemo & Leo — Playful Code Roast",
+    "description": "Rendered 9:16 3D animation (31.13s, 934 frames @ 30 FPS)",
+    "folderPath": "saved-animations/agentmorphy-nemo-leo-playful-roast-d11174",
+    "mp4Url": "/saved-animations/agentmorphy-nemo-leo-playful-roast-d11174/agentmorphy-nemo-leo-playful-roast-d11174.mp4",
+    "blendUrl": "/saved-animations/agentmorphy-nemo-leo-playful-roast-d11174/agentmorphy-nemo-leo-playful-roast-d11174.blend",
+    "contactSheetUrl": "/saved-animations/agentmorphy-nemo-leo-playful-roast-d11174/contact-sheet.jpg",
+    "projectJsonUrl": "/saved-animations/agentmorphy-nemo-leo-playful-roast-d11174/project.json",
+    "durationSeconds": 31.13,
+    "totalFrames": 936,
+    "fps": 30,
+    "width": 1080,
+    "height": 1920,
+    "aspectRatio": "9:16",
+    "createdAt": "2026-11-10T17:14:19.382Z",
+    "verification": {
+      "valid": true,
+      "containerFormat": "mov,mp4,m4a,3gp,3g2,mj2",
+      "videoCodec": "h264",
+      "audioCodec": "aac",
+      "width": 1080,
+      "height": 1920,
+      "fps": 30,
+      "durationSeconds": 31.13,
+      "frameCount": 934,
+      "fileSizeBytes": 10586400,
+      "hasAudioStream": true,
+      "contactSheetUrl": "/renders/blender-job-1794330701779-04d11174/contact-sheet.jpg"
+    }
+  },
+  "project": null
+}

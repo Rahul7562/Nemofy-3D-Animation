@@ -11,31 +11,39 @@ import sys
 import json
 import bpy
 
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+if SCRIPT_DIR not in sys.path:
+    sys.path.insert(0, SCRIPT_DIR)
 
-def render_preview_frames(output_dir: str, preview_scale: float = 0.5):
+from render_final import configure_vibrant_studio_shading
+
+
+def render_preview_frames(output_dir: str, preview_scale: float = 0.65):
     scene = bpy.context.scene
     os.makedirs(output_dir, exist_ok=True)
 
+    is_software_gl = os.environ.get("LIBGL_ALWAYS_SOFTWARE") == "1"
+    configure_vibrant_studio_shading(scene, is_software_gl, "final")
+
     orig_x = scene.render.resolution_x
     orig_y = scene.render.resolution_y
-    scene.render.resolution_x = max(240, int(round(orig_x * preview_scale)) // 2 * 2)
-    scene.render.resolution_y = max(240, int(round(orig_y * preview_scale)) // 2 * 2)
+    scene.render.resolution_x = max(360, int(round(orig_x * preview_scale)) // 2 * 2)
+    scene.render.resolution_y = max(360, int(round(orig_y * preview_scale)) // 2 * 2)
     scene.render.resolution_percentage = 100
     scene.render.image_settings.file_format = "JPEG"
-    scene.render.image_settings.quality = 90
+    scene.render.image_settings.quality = 94
 
     total = max(1, scene.frame_end - scene.frame_start + 1)
     sample_frames = sorted(list({
-        scene.frame_start,
-        scene.frame_start + int(total * 0.38),
-        scene.frame_start + int(total * 0.72),
-        scene.frame_end,
+        scene.frame_start + min(12, total // 10),
+        scene.frame_start + int(total * 0.36),
+        scene.frame_start + int(total * 0.68),
+        max(scene.frame_start, scene.frame_end - 8),
     }))
 
     rendered_files = []
     for idx, f in enumerate(sample_frames):
         scene.frame_set(f)
-        # Ensure active camera matches timeline markers
         for marker in sorted(scene.timeline_markers, key=lambda m: m.frame):
             if marker.frame <= f and marker.camera:
                 scene.camera = marker.camera
@@ -53,5 +61,5 @@ if __name__ == "__main__":
     argv = sys.argv
     args = argv[argv.index("--") + 1 :] if "--" in argv else []
     out_dir = args[0] if len(args) >= 1 else "/tmp/aetherframe-previews"
-    scale = float(args[1]) if len(args) >= 2 else 0.5
+    scale = float(args[1]) if len(args) >= 2 else 0.65
     render_preview_frames(out_dir, scale)

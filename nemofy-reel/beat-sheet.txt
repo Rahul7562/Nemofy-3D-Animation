@@ -1,0 +1,71 @@
+NEMOFY STUDENTHUB REEL — TIMED BEAT SHEET & VISUAL/AUDIO CUES (TARGET: 35s @ 30 FPS)
+====================================================================================
+
+[BEAT 01 | 0:00.0 - 0:02.9] HOOK — Leo (Close-Up Crash Zoom)
+  Spoken  : "Stop wasting 3 hours installing broken Verilog tools."
+  Card    : "3 HOURS WASTED INSTALLING" (Frame 1, IG safe zone y=260)
+  Action  : Leo facepalm-react in panic; Nemo shakes head teasingly.
+  Audio   : Impact thump + subtle laptop fan whine; music drops in.
+
+[BEAT 02 | 0:02.9 - 0:06.2] PROBLEM — Leo (Establishing Two-Shot)
+  Spoken  : "Wait a second. Why does my laptop sound like a jet?"
+  Action  : Leo gestures wildly at overheating desk; Nemo bounces amused.
+  Audio   : Whoosh cut to wide; fan whir spikes softly.
+
+[BEAT 03 | 0:06.2 - 0:09.4] NEMO ENTERS — Nemo (Close-Up Tease)
+  Spoken  : "Leo, you downloaded 40 gigabytes for an AND gate."
+  Action  : Nemo playful-roast squint & dual-arm wave; Leo winces.
+  Audio   : Playful synth pluck accent.
+
+[BEAT 04 | 0:09.4 - 0:11.3] EXCUSE — Leo (Close-Up Reaction)
+  Spoken  : "My TA insisted."
+  Action  : Leo head-scratch sheepishly looking aside; Nemo tilts cube skeptically.
+  Audio   : Quick comedic record-scratch pop.
+
+[BEAT 05 | 0:11.3 - 0:13.8] DEADLINE STAKES — Nemo (Two-Shot Push-In)
+  Spoken  : "Wait. That 40GB installer freezes before 11:59?"
+  Action  : Nemo points toward glowing dock; Leo freezes in shock.
+  Audio   : Clock tick urgency pulse.
+
+[BEAT 06 | 0:13.8 - 0:15.6] DESPERATION — Leo (Close-Up)
+  Spoken  : "I'm totally cooked. What else works?"
+  Action  : Leo chin-think pleading look; Nemo grins smugly.
+  Audio   : Brief musical drop before reveal.
+
+[BEAT 07 | 0:15.6 - 0:17.8] NEMOFY REVEAL — Nemo (Dolly-In on Holo Console)
+  Spoken  : "Open Nemofy dot tech. Tap StudentHub."
+  Card    : "NEMOFY.TECH -> STUDENTHUB" (y=260)
+  Action  : Nemo energetic-wave; 3D Nemofy Verilog Waveform Holo Screen rises between them.
+  Audio   : Crisp UI chime + rising synth whoosh.
+
+[BEAT 08 | 0:17.8 - 0:19.6] REACTION — Leo (Close-Up Skepticism)
+  Spoken  : "Wait, no setup? Zero install."
+  Action  : Leo leans forward eyebrows raised; Nemo nods smugly.
+  Audio   : Clean pop accent.
+
+[BEAT 09 | 0:19.6 - 0:23.6] FEATURE PROOF — Nemo (Hero Push-In on Verilog Waveforms)
+  Spoken  : "It's 100% free inside Chrome, with live Verilog waveforms and Python."
+  Card    : "LIVE VERILOG IN CHROME" (y=260)
+  Action  : Holographic Verilog waveform bars pulse high/low; Nemo celebrates.
+  Audio   : Harmonic UI confirmation chimes.
+
+[BEAT 10 | 0:23.6 - 0:27.6] WORKBENCH SCOPE — Nemo (Dynamic Orbit Two-Shot)
+  Spoken  : "It runs C++, Java, binary math, and Word to PDF too."
+  Action  : Leo points excitedly at multi-tool holo cards; Nemo hops energetically.
+  Audio   : Energetic upbeat synth groove.
+
+[BEAT 11 | 0:27.6 - 0:30.5] COMEDIC PAYOFF — Leo (Close-Up Disbelief)
+  Spoken  : "You fixed my 3-hour panic in 12 seconds?"
+  Action  : Leo hands-on-head amazement; Nemo smugly tilts 10 deg.
+  Audio   : Beat drops for 0.3s -> comedic ding!
+
+[BEAT 12 | 0:30.5 - 0:33.4] WITTY JAB — Nemo (Close-Up)
+  Spoken  : "Twelve for Verilog. Two hours to forgive yourself."
+  Action  : Nemo cheeky arm wave; Leo laughs & shakes head.
+  Audio   : Playful rimshot sting.
+
+[BEAT 13 | 0:33.4 - 0:36.7] CTA & SEAMLESS LOOP — Leo (Pull-Back Wide)
+  Spoken  : "Save this tonight. Stop wasting time on broken tools."
+  Card    : "SAVE THIS // NEMOFY.TECH" (y=260)
+  Action  : Leo gestures toward viewer while looping smoothly back toward Frame 1 panic beat.
+  Audio   : Loop-matched synth tail bridging cleanly into Frame 1 thump.

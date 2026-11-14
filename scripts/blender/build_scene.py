@@ -183,6 +183,7 @@ def build_detailed_environment(scene: bpy.types.Scene, env_type: str, total_fram
         warm_light_data = bpy.data.lights.new(name="Env_MorphyWarmKey", type="POINT")
         warm_light_data.energy = 260.0
         warm_light_data.color = (1.0, 0.76, 0.38)
+        warm_light_data.use_shadow = False
         warm_light_obj = bpy.data.objects.new(name="Env_MorphyWarmKey", object_data=warm_light_data)
         scene.collection.objects.link(warm_light_obj)
         warm_light_obj.location = (1.45, -1.35, 1.45)
@@ -254,6 +255,7 @@ def build_detailed_environment(scene: bpy.types.Scene, env_type: str, total_fram
     core_light_data = bpy.data.lights.new(name="Env_AstrolabeCoreLight", type="POINT")
     core_light_data.energy = 180.0
     core_light_data.color = (0.22, 0.74, 0.98)
+    core_light_data.use_shadow = False
     core_light_obj = bpy.data.objects.new(name="Env_AstrolabeCoreLight", object_data=core_light_data)
     scene.collection.objects.link(core_light_obj)
     core_light_obj.location = (0, 2.15, 1.65)

@@ -1,8 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import {
-  AGENTMORPHY_SKIT_PROJECT,
-  NEMOFY_TECH_COMMERCIAL_PROJECT,
+  NEMO_LEO_PLAYFUL_ROAST_PROJECT,
 } from "../src/utils/default-project";
 import {
   getBlenderRenderJobStatus,
@@ -14,62 +13,25 @@ import { archiveAnimationToWorkspace } from "../src/server/animation-archive";
 
 async function main() {
   const refDir = path.resolve("./public/renders/reference-encounter");
-  fs.mkdirSync(refDir, { recursive: true });
+  const previewsDir = path.join(refDir, "previews");
+  fs.mkdirSync(previewsDir, { recursive: true });
 
-  // Step 1: Archive the previous 18.8s Nemo & Leo 98% Usage Limit animation into /saved-animations/
-  const existingMp4 = path.join(refDir, "nemo-and-leo-cinematic-encounter.mp4");
-  const existingBlend = path.join(refDir, "encounter.blend");
-  const existingSheet = path.join(refDir, "contact-sheet.jpg");
-  const existingReport = path.join(refDir, "verification-report.json");
-
-  if (fs.existsSync(existingMp4)) {
-    let prevDuration = 18.8;
-    let prevFrames = 564;
-    if (fs.existsSync(existingReport)) {
-      try {
-        const rep = JSON.parse(fs.readFileSync(existingReport, "utf8"));
-        prevDuration = rep.verification?.durationSeconds || 18.8;
-        prevFrames = Math.round(prevDuration * 30);
-      } catch {
-        // ignore
-      }
-    }
-    // Only archive as 01-nemo-and-leo-98-percent-usage-limit if it is the ~18.8s skit
-    if (prevDuration < 25) {
-      const archivedPrev = archiveAnimationToWorkspace({
-        slugPrefix: "01-nemo-and-leo-98-percent-usage-limit",
-        title: AGENTMORPHY_SKIT_PROJECT.name,
-        description: AGENTMORPHY_SKIT_PROJECT.brief.topic,
-        mp4SourcePath: existingMp4,
-        blendSourcePath: fs.existsSync(existingBlend) ? existingBlend : null,
-        contactSheetSourcePath: fs.existsSync(existingSheet) ? existingSheet : null,
-        fps: 30,
-        width: 1080,
-        height: 1920,
-        aspectRatio: "9:16",
-        totalFrames: prevFrames,
-      });
-      console.log(
-        `[Archive] Saved previous animation to workspace folder: ${archivedPrev.folderPath}`,
-      );
-    }
-  }
-
-  // Step 2: Synthesize broadcast-clarity neural voiceovers for all 7 shots of NEMOFY_TECH_COMMERCIAL_PROJECT
-  console.log("=== Step 2: Synthesizing Broadcast-Clarity Neural Voiceovers for Nemofy.tech (7 Shots) ===");
+  console.log(
+    "=== Step 1: Synthesizing Expressive Neural Voiceovers for Nemo & Leo Playful Roast (5 Shots) ===",
+  );
   await ensureLocalVoiceStudioService();
 
   const calibratedScenes = [];
   let totalSec = 0;
 
-  for (const scene of NEMOFY_TECH_COMMERCIAL_PROJECT.scenes) {
+  for (const scene of NEMO_LEO_PLAYFUL_ROAST_PROJECT.scenes) {
     const voiceId = scene.dialogueVoiceId || "nemo";
-    const speed = scene.dialogueSpeed || 1.06;
+    const speed = scene.dialogueSpeed || 1.05;
     const instruct =
       scene.dialogueInstruct ||
       (voiceId === "leo"
-        ? "male, young adult, expressive urgent comedic tone"
-        : "female, young adult, confident witty AI companion");
+        ? "male, young adult, expressive playful roast critique"
+        : "female, young adult, energetic witty playful banter");
 
     const voRes = await synthesizeSceneSpeechWithOmniVoice({
       sceneId: scene.id,
@@ -108,24 +70,25 @@ async function main() {
 
   const totalFrames = Math.round(totalSec * 30);
   console.log(
-    `=== Total Calibrated Commercial Duration: ${totalSec.toFixed(1)}s (${totalFrames} frames @ 30 FPS) ===`,
+    `=== Total Calibrated Playful Roast Duration: ${totalSec.toFixed(1)}s (${totalFrames} frames @ 30 FPS) ===`,
   );
 
   const calibratedProject = {
-    ...NEMOFY_TECH_COMMERCIAL_PROJECT,
+    ...NEMO_LEO_PLAYFUL_ROAST_PROJECT,
     brief: {
-      ...NEMOFY_TECH_COMMERCIAL_PROJECT.brief,
+      ...NEMO_LEO_PLAYFUL_ROAST_PROJECT.brief,
       targetDurationSeconds: Number(totalSec.toFixed(1)),
     },
     scenes: calibratedScenes,
-    audioTracks: NEMOFY_TECH_COMMERCIAL_PROJECT.audioTracks.map((t) => ({
+    audioTracks: NEMO_LEO_PLAYFUL_ROAST_PROJECT.audioTracks.map((t) => ({
       ...t,
       durationFrames: totalFrames,
     })),
   };
 
-  // Step 3: Render full 3D commercial in Blender + FFmpeg
-  console.log("=== Step 3: Starting Authoritative Blender Render: Nemofy.tech Official 3D Commercial ===");
+  console.log(
+    "=== Step 2: Starting Authoritative Stutter-Free Blender Render: Nemo & Leo Playful Code Roast ===",
+  );
   const initial = startFullBlenderRenderJob({
     project: calibratedProject,
     aspectRatio: "9:16",
@@ -165,16 +128,23 @@ async function main() {
       if (fs.existsSync(blendSrc)) fs.copyFileSync(blendSrc, blendDst);
       if (fs.existsSync(sheetSrc)) fs.copyFileSync(sheetSrc, sheetDst);
 
+      const copiedPreviewUrls: Array<{ frame: number; url: string }> = [];
       for (const prev of state.previewImageUrls) {
         const srcFile = path.resolve(`./public${prev.url}`);
         if (fs.existsSync(srcFile)) {
-          fs.copyFileSync(srcFile, path.join(refDir, path.basename(srcFile)));
+          const baseName = path.basename(srcFile);
+          fs.copyFileSync(srcFile, path.join(refDir, baseName));
+          fs.copyFileSync(srcFile, path.join(previewsDir, baseName));
+          copiedPreviewUrls.push({
+            frame: prev.frame,
+            url: `/renders/reference-encounter/previews/${baseName}`,
+          });
         }
       }
 
-      // Also save under canonical slug in /saved-animations/02-nemofy-tech-official-3d-commercial/
-      const archivedNemofy = archiveAnimationToWorkspace({
-        slugPrefix: "02-nemofy-tech-official-3d-commercial",
+      // Save under canonical slug in /saved-animations/03-nemo-and-leo-playful-code-roast/
+      const archivedRoast = archiveAnimationToWorkspace({
+        slugPrefix: "03-nemo-and-leo-playful-code-roast",
         title: calibratedProject.name,
         description: calibratedProject.brief.topic,
         mp4SourcePath: mp4Dst,
@@ -196,10 +166,11 @@ async function main() {
             jobId,
             projectName: state.projectName,
             mp4Url: "/renders/reference-encounter/nemo-and-leo-cinematic-encounter.mp4",
-            savedArchiveMp4Url: archivedNemofy.mp4Url,
-            savedArchiveFolderPath: archivedNemofy.folderPath,
+            savedArchiveMp4Url: archivedRoast.mp4Url,
+            savedArchiveFolderPath: archivedRoast.folderPath,
             blendUrl: "/renders/reference-encounter/encounter.blend",
             contactSheetUrl: "/renders/reference-encounter/contact-sheet.jpg",
+            previewImageUrls: copiedPreviewUrls,
             sceneInspection: state.sceneInspection,
             verification: state.verification,
             shotDurations: calibratedScenes.map((s) => ({
@@ -214,8 +185,8 @@ async function main() {
         ),
       );
 
-      console.log("=== NEMOFY.TECH COMMERCIAL RENDER COMPLETED, ARCHIVED & VERIFIED ===");
-      console.log("Saved to workspace folder:", archivedNemofy.folderPath);
+      console.log("=== NEMO & LEO PLAYFUL CODE ROAST RENDER COMPLETED, ARCHIVED & VERIFIED ===");
+      console.log("Saved to workspace folder:", archivedRoast.folderPath);
       console.log(JSON.stringify(state.verification, null, 2));
       process.exit(0);
     }

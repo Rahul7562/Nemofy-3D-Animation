@@ -1,0 +1,23 @@
+CREDITS & ASSET LICENSING — NEMOFY STUDENTHUB REEL
+===================================================
+
+1. 3D Character Rigs & Scene Geometry
+   - Leo (Leo_Rig) & Nemo (Nemo_Rig): Original AetherFrame procedural 31-bone Blender armature & mesh rigs authored in-project (scripts/blender/import_character.py). License: Project Original / Unlicensed proprietary project asset.
+   - Midnight Window Ledge & Nemofy StudentHub Holographic Verilog Waveform Set: Original in-project Blender geometry & ShaderNode materials (scripts/blender/build_scene.py).
+
+2. Animation & Rendering Engine
+   - Blender (GNU GPL v3+): Open-source 3D creation suite used for scene assembly, armature keyframing, camera switching, and rendering.
+
+3. Voice Synthesis
+   - VoiceStudio (OmniVoice API contract) + Piper Neural VITS TTS Engine (MIT License, https://github.com/rhasspy/piper).
+   - Neural Voice Models (HuggingFace rhasspy/piper-voices, MIT / CC0 compatible):
+     * Leo: en_US-ryan-medium.onnx
+     * Nemo: en_US-lessac-medium.onnx
+
+4. Audio Processing, Foley & Video Encoding
+   - Original Procedural Soundtrack & Sound Effects: Generated synthetically on-the-fly with FFmpeg / Python DSP (100% original synthetic waveforms; zero copyrighted commercial audio).
+   - FFmpeg (LGPL / GPL): Audio mastering (-14 LUFS two-pass EBU R128 loudnorm), H.264 + AAC encoding, and burned-in safe-zone subtitles.
+
+5. Content Scoring & Research Tooling
+   - Instagram Agent Skill (MIT License, https://github.com/Jakeschincariol/instagram-agent-skill): hookscore.py, beats.py, humanize.py, detect.py, caption.py.
+   - Lemo-Opuscar Production Reference (MIT License, https://github.com/lemomo-ai/lemo-opuscar): Audio mastering (-14 LUFS loudnorm) & production QA patterns only (no competing renderer used).

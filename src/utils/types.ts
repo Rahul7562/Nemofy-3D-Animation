@@ -66,7 +66,12 @@ export type CharacterAction =
   | "sit"
   | "type-code"
   | "panic-react"
-  | "celebrate";
+  | "celebrate"
+  | "chin-think"
+  | "head-scratch"
+  | "playful-roast"
+  | "energetic-wave"
+  | "facepalm-react";
 
 export type CharacterExpression =
   | "neutral"
@@ -305,18 +310,31 @@ export interface CharacterJointPose {
   hipBobY: number;
   torsoLeanX: number;
   torsoTwistY: number;
+  torsoRollZ?: number;
   headYawY: number;
   headPitchX: number;
+  headRollZ?: number;
+  bodySquashY?: number;
   leftThighX: number;
   leftShinX: number;
   rightThighX: number;
   rightShinX: number;
   leftUpperArmX: number;
+  leftUpperArmY?: number;
   leftUpperArmZ: number;
   leftForearmX: number;
+  leftForearmY?: number;
+  leftForearmZ?: number;
+  leftHandX?: number;
+  leftHandZ?: number;
   rightUpperArmX: number;
+  rightUpperArmY?: number;
   rightUpperArmZ: number;
   rightForearmX: number;
+  rightForearmY?: number;
+  rightForearmZ?: number;
+  rightHandX?: number;
+  rightHandZ?: number;
   mouthOpenness: number;
   mouthWidth: number;
   eyeBlink: number;

@@ -16,7 +16,7 @@ import {
 } from "../utils/types";
 import {
   DEFAULT_STUDIO_PROJECT,
-  NEMOFY_TECH_COMMERCIAL_PROJECT,
+  NEMO_LEO_PLAYFUL_ROAST_PROJECT,
   VERTICAL_SHOWCASE_PROJECT,
 } from "../utils/default-project";
 import {
@@ -42,17 +42,17 @@ type PhoneMediaMetadata = Awaited<ReturnType<typeof getMediaMetadata>>;
 
 export const StudioApp: React.FC = () => {
   const [project, setProject] = useState<StudioProject>(
-    NEMOFY_TECH_COMMERCIAL_PROJECT,
+    NEMO_LEO_PLAYFUL_ROAST_PROJECT,
   );
   const [activeStage, setActiveStage] = useState<WorkflowStage>("stage3d");
   const [activeCompositionMode, setActiveCompositionMode] = useState<
     "cinematic" | "phone-demo"
   >("cinematic");
   const [selectedSceneId, setSelectedSceneId] = useState<string>(
-    NEMOFY_TECH_COMMERCIAL_PROJECT.scenes[0].id,
+    NEMO_LEO_PLAYFUL_ROAST_PROJECT.scenes[0].id,
   );
   const [selectedCharacterId, setSelectedCharacterId] = useState<string>(
-    NEMOFY_TECH_COMMERCIAL_PROJECT.characters[0].id,
+    NEMO_LEO_PLAYFUL_ROAST_PROJECT.characters[0].id,
   );
   const [isolateSelectedScene, setIsolateSelectedScene] =
     useState<boolean>(false);

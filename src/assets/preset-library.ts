@@ -137,6 +137,11 @@ export const CHARACTER_ACTIONS: Array<{
   id: CharacterAction;
   label: string;
 }> = [
+  { id: "chin-think", label: "Chin-Stroke / Playful Judging (Leo)" },
+  { id: "head-scratch", label: "Head-Scratch / Temple Touch (Leo)" },
+  { id: "playful-roast", label: "Playful Code Roast / Sass" },
+  { id: "energetic-wave", label: "Energetic Bounce & Dual Wave (Nemo)" },
+  { id: "facepalm-react", label: "Forehead Facepalm / Disbelief" },
   { id: "type-code", label: "Vibe-Coding / Rapid Typing" },
   { id: "panic-react", label: "98% Limit Panic Reaction" },
   { id: "celebrate", label: "Prod Deploy Victory" },

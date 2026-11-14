@@ -1,14 +1,22 @@
 """
-AetherFrame 3D — Character Performance, Acting & Phoneme-to-Viseme Lip-Sync Engine
+AetherFrame 3D — High-Precision Character Performance, Free-Hand Choreography & Viseme Lip-Sync Engine
 (scripts/blender/animate_character.py)
 
-Authors keyframed Blender Actions with AUTO_CLAMPED Bezier F-curves for:
+Authors dense, C2-smooth keyframed Blender Actions with AUTO_CLAMPED Bezier F-curves:
 1. Phoneme-to-Viseme Lip-Sync (Preston Blair / ARKit visemes: SIL, MBP, FV, TH, L_NT, EE, IH, AA, OH, OU)
-   with 2-frame visual lead and mandatory bilabial closure on M/B/P.
-2. Mutual Character Acting & Reaction (Speaker vs. Listener gaze, 3/4 inward body angle, head turns, and nods).
-3. Grounded, Non-Shaky Phrased Gesture Choreography (Anticipation -> Arc -> Moving Hold -> Follow-Through)
-   with feet 100% planted on the window ledge (Z=0.0).
-4. Natural Asymmetric 5-Frame Eye Blinks.
+   tightly locked to the synthesized WAV RMS/ZCR lipSyncEnvelope (`mouthOpenness`, `mouthWidth`, `energy`).
+2. Smooth, Stutter-Free Multi-Axis Free Hand Choreography for Leo:
+   - Chin-Think / Playful Critique: Leo smoothly raises his right hand to stroke his chin while his left hand
+     gestures freely toward Nemo with wrist/forearm follow-through.
+   - Head-Scratch / Temple Touch: Leo smoothly arcs his left hand up to touch/scratch his head/temple while
+     his right hand gestures freely in playful banter.
+   - Facepalm / Forehead Disbelief: Leo brings his right hand to his forehead/brow in comedic disbelief while
+     leaning back and shaking his head.
+   - Playful Roast / Conversational Banter: Fluid transitions between chin-strokes, open-palm phrasing, and
+     expressive pointing with zero stiff pose resets.
+3. Energetic, Expressive Free Movements for Nemo:
+   - Rhythmic bouncy hops, subtle cube squash-and-stretch, expressive 3D body tilts/leans/rolls, and wide,
+     lively 3D dual-arm waves, pointing arcs, and celebratory flaps so Nemo is full of life on every frame.
 """
 
 import re
@@ -18,24 +26,29 @@ import bpy
 
 # Canonical Viseme Targets: (jaw_drop_z, jaw_scale_vertical, mouth_wide_scale_x, brow_lift_z)
 VISEME_TARGETS = {
-    "SIL":  ( 0.000, 0.55, 0.95, 0.000),
-    "MBP":  ( 0.001, 0.45, 0.90, 0.002),  # Bilabial pressed closed (M, B, P)
-    "FV":   (-0.004, 0.75, 1.00, 0.004),  # Labiodental slight open
-    "TH":   (-0.006, 0.95, 1.04, 0.005),  # Dental slight open
-    "L_NT": (-0.008, 1.15, 1.06, 0.006),  # Alveolar medium open
-    "EE":   (-0.009, 1.25, 1.22, 0.008),  # Wide front vowel
-    "IH":   (-0.012, 1.45, 1.12, 0.009),  # Relaxed mid vowel
-    "AA":   (-0.018, 2.15, 1.14, 0.014),  # Wide open vowel (A, AH)
-    "OH":   (-0.016, 1.95, 0.82, 0.012),  # Rounded open O
-    "OU":   (-0.008, 1.10, 0.72, 0.007),  # Tight pursed U/W
+    "SIL":  ( 0.000, 0.52, 0.95, 0.000),
+    "MBP":  ( 0.001, 0.44, 0.90, 0.002),  # Bilabial pressed closed (M, B, P)
+    "FV":   (-0.004, 0.78, 1.00, 0.004),  # Labiodental slight open
+    "TH":   (-0.006, 0.98, 1.04, 0.005),  # Dental slight open
+    "L_NT": (-0.009, 1.20, 1.06, 0.006),  # Alveolar medium open
+    "EE":   (-0.010, 1.32, 1.24, 0.008),  # Wide front vowel
+    "IH":   (-0.013, 1.52, 1.14, 0.009),  # Relaxed mid vowel
+    "AA":   (-0.020, 2.25, 1.16, 0.014),  # Wide open vowel (A, AH)
+    "OH":   (-0.018, 2.05, 0.82, 0.012),  # Rounded open O
+    "OU":   (-0.009, 1.15, 0.72, 0.007),  # Tight pursed U/W
 }
 
 
+def _smoothstep(x: float) -> float:
+    t = max(0.0, min(1.0, x))
+    return t * t * (3.0 - 2.0 * t)
+
+
+def _lerp(a: float, b: float, t: float) -> float:
+    return a + (b - a) * max(0.0, min(1.0, t))
+
+
 def word_to_viseme_sequence(word: str) -> list:
-    """
-    Decomposes an English/multilingual word into a sequence of canonical visemes
-    based on grapheme-to-phoneme rules rather than simple amplitude.
-    """
     clean = re.sub(r"[^a-zA-Z]", "", word).lower()
     if not clean:
         return ["SIL"]
@@ -103,6 +116,18 @@ def word_to_viseme_sequence(word: str) -> list:
     return compact[:4] if compact else ["IH"]
 
 
+def _sample_envelope_energy(lip_sync_envelope: list, local_frame: int) -> float:
+    if not lip_sync_envelope:
+        return 0.65
+    idx = min(len(lip_sync_envelope) - 1, max(0, int(local_frame)))
+    pt = lip_sync_envelope[idx]
+    if isinstance(pt, dict):
+        openness = float(pt.get("mouthOpenness", pt.get("openness", 0.5)))
+        energy = float(pt.get("energy", openness))
+        return max(0.0, min(1.0, 0.6 * openness + 0.4 * energy))
+    return 0.65
+
+
 def generate_dialogue_viseme_timeline(
     narration_text: str,
     shot_start_frame: int,
@@ -110,25 +135,24 @@ def generate_dialogue_viseme_timeline(
     fps: int,
     lip_sync_envelope: list = None,
 ) -> list:
-    """
-    Produces a list of (frame, viseme_name, energy_multiplier) tuples across a shot,
-    incorporating 2-frame visual anticipation lead and optional WAV envelope modulation.
-    """
     words = [w for w in narration_text.strip().split() if w]
     if not words:
-        return [(shot_start_frame, "SIL", 0.0), (shot_start_frame + shot_duration_frames, "SIL", 0.0)]
+        return [
+            (shot_start_frame, "SIL", 0.0),
+            (shot_start_frame + shot_duration_frames, "SIL", 0.0),
+        ]
 
-    lead_in_frames = min(5, max(2, int(fps * 0.10)))
-    tail_out_frames = min(14, max(6, int(fps * 0.35)))
+    lead_in_frames = min(4, max(2, int(fps * 0.08)))
+    tail_out_frames = min(12, max(5, int(fps * 0.28)))
     active_span = max(10, shot_duration_frames - lead_in_frames - tail_out_frames)
 
     weights = []
     for w in words:
         base_w = max(2.0, float(len(w)))
         if w.endswith((",", ";", ":")):
-            base_w += 2.2
+            base_w += 2.0
         elif w.endswith((".", "!", "?", "—")):
-            base_w += 3.5
+            base_w += 3.2
         weights.append(base_w)
 
     total_weight = sum(weights) or 1.0
@@ -138,19 +162,20 @@ def generate_dialogue_viseme_timeline(
     for w, weight in zip(words, weights):
         word_frames = max(3.0, (weight / total_weight) * active_span)
         visemes = word_to_viseme_sequence(w)
-        pause_ratio = 0.22 if w.endswith((".", "!", "?", ",")) else 0.08
+        pause_ratio = 0.20 if w.endswith((".", "!", "?", ",")) else 0.06
         speak_frames = word_frames * (1.0 - pause_ratio)
         step = speak_frames / max(1, len(visemes))
 
         for idx, vis in enumerate(visemes):
-            f = int(round(cursor + idx * step - 1.5))
-            f = max(shot_start_frame + 1, min(shot_start_frame + shot_duration_frames - 3, f))
-            energy = 1.15 if ("!" in w or "?" in w) else 1.0
+            f = int(round(cursor + idx * step - 1.0))
+            f = max(
+                shot_start_frame + 1,
+                min(shot_start_frame + shot_duration_frames - 3, f),
+            )
+            energy = 1.18 if ("!" in w or "?" in w) else 1.0
             if lip_sync_envelope:
-                env_idx = min(len(lip_sync_envelope) - 1, max(0, f - shot_start_frame))
-                env_pt = lip_sync_envelope[env_idx]
-                if isinstance(env_pt, dict):
-                    energy *= 0.70 + 0.45 * float(env_pt.get("openness", 0.75))
+                env_val = _sample_envelope_energy(lip_sync_envelope, f - shot_start_frame)
+                energy *= 0.65 + 0.55 * env_val
             events.append((f, vis, energy))
 
         end_word_f = int(round(cursor + speak_frames))
@@ -206,14 +231,13 @@ def author_character_timeline_performance(
     fps: int,
 ):
     """
-    Authors a complete, continuous, multi-shot skeletal & facial Action on arm_obj:
-    - Places the character accurately on stage per shot with feet planted at Z=0.0.
-    - Orients body 3/4 INWARD toward partner & camera:
-      In Blender Z-up (character front at -Y):
-      +Z rotation (+0.28 rad) turns Leo (at X = -0.38) inward toward +X (Nemo);
-      -Z rotation (-0.28 rad) turns Nemo (at X = +0.38) inward toward -X (Leo).
-    - Keeps root, hips, and legs 100% grounded so there is zero tipping, rocking, or foot sliding.
-    - Authors clean, expressive chest/head/arm arcs and smooth phoneme-to-viseme mouth animation.
+    Authors a dense, continuous, fluid multi-shot skeletal & facial Action on arm_obj:
+    - Evaluates C2-continuous harmonic & phrased curves every 3 frames so there are zero
+      robotic pauses, linear jerks, or stiff shot-boundary resets.
+    - Gives Leo articulated free hands that smoothly reach his chin (chin-think / playful critique),
+      his head/temple (head-scratch / comeback), his forehead (facepalm-react), and open-palm banter.
+    - Gives Nemo high-energy, bouncy, squash-and-stretch 3D movement with expressive cube tilts/rolls
+      and wide free dual-arm waves/pointing.
     """
     if not arm_obj.animation_data:
         arm_obj.animation_data_create()
@@ -221,6 +245,7 @@ def author_character_timeline_performance(
     arm_obj.animation_data.action = action
 
     is_nemo = "nemo" in char_id.lower() or "nemo" in arm_obj.name.lower()
+    safe_fps = max(1, int(fps))
 
     for shot_idx, shot in enumerate(shots):
         f_start = int(shot["startFrame"])
@@ -228,22 +253,25 @@ def author_character_timeline_performance(
         dur = max(10, f_end - f_start)
 
         my_stage = shot.get("characterStaging", {}).get(char_id, {})
-        stage_x = float(my_stage.get("x", 0.38 if is_nemo else -0.38))
+        stage_x = float(my_stage.get("x", 0.36 if is_nemo else -0.36))
         stage_y = float(my_stage.get("y", 0.0))
         partner_x = float(partner_pos_by_shot[shot_idx].get("x", -stage_x))
 
-        # In Blender World Z-up (front facing -Y):
-        # Rotating (0, -1, 0) around +Z by +theta gives (+sin(theta), -cos(theta), 0).
-        # So when partner is to the right (dx_to_partner > 0, Leo looking at Nemo), base_yaw > 0 (+0.26 rad).
-        # When partner is to the left (dx_to_partner < 0, Nemo looking at Leo), base_yaw < 0 (-0.26 rad).
         dx_to_partner = partner_x - stage_x
         turn_dir = 1.0 if dx_to_partner > 0 else -1.0
-        base_yaw = 0.26 * turn_dir
+        base_yaw = 0.28 * turn_dir
 
         speaker_name = str(shot.get("dialogueSpeaker", "")).lower()
-        is_speaking = ("nemo" in speaker_name and is_nemo) or ("leo" in speaker_name and not is_nemo)
-        emotion = str(shot.get("emotion", "curious" if not is_nemo else "excited")).lower()
+        is_speaking = ("nemo" in speaker_name and is_nemo) or (
+            "leo" in speaker_name and not is_nemo
+        )
+        emotion = str(shot.get("emotion", "")).lower()
+        speaker_action = str(shot.get("speakerAction", "talk")).lower()
+        listener_action = str(shot.get("listenerAction", "idle")).lower()
+        my_action = speaker_action if is_speaking else listener_action
+        lip_env = shot.get("lipSyncEnvelope") or []
 
+        # Keep feet grounded at Z=0.0 while allowing subtle dynamic stage drift
         arm_obj.location = (stage_x, stage_y, 0.0)
         arm_obj.rotation_euler = (0.0, 0.0, base_yaw)
         arm_obj.keyframe_insert(data_path="location", frame=f_start)
@@ -251,291 +279,452 @@ def author_character_timeline_performance(
         arm_obj.keyframe_insert(data_path="location", frame=f_end - 1)
         arm_obj.keyframe_insert(data_path="rotation_euler", frame=f_end - 1)
 
-        # Lock hips & legs firmly so character never rocks or tips over
         for f_lock in (f_start, f_end - 1):
-            _keyframe_bone_loc(arm_obj, "hips", f_lock, 0.0, 0.0, 0.0)
-            _keyframe_bone_rot(arm_obj, "hips", f_lock, 0.0, 0.0, 0.0)
-            _keyframe_bone_rot(arm_obj, "spine", f_lock, 0.0, 0.0, 0.0)
-            _keyframe_bone_rot(arm_obj, "chest", f_lock, 0.0, 0.0, 0.0)
-            _keyframe_bone_rot(arm_obj, "neck", f_lock, 0.0, 0.0, 0.0)
             for side in ("L", "R"):
-                _keyframe_bone_rot(arm_obj, f"thigh.{side}", f_lock, 0.0, 0.0, 0.0)
                 _keyframe_bone_rot(arm_obj, f"shin.{side}", f_lock, 0.0, 0.0, 0.0)
                 _keyframe_bone_rot(arm_obj, f"foot.{side}", f_lock, 0.0, 0.0, 0.0)
 
-        f_ant = min(f_end - 2, f_start + 7)
-        f_b1 = f_start + int(dur * 0.28)
-        f_b2 = f_start + int(dur * 0.56)
-        f_b3 = f_start + int(dur * 0.80)
-        f_settle = max(f_start + 2, f_end - 5)
+        # Dense 3-frame keyframe sampling across the shot for silky-smooth Bezier motion
+        sample_frames = list(range(f_start, f_end, 3))
+        if (f_end - 1) not in sample_frames:
+            sample_frames.append(f_end - 1)
 
-        speaker_action = str(shot.get("speakerAction", "talk")).lower()
-        listener_action = str(shot.get("listenerAction", "idle")).lower()
-        is_panic = "panic" in emotion or speaker_action == "panic-react"
-        is_stunned = "stunned" in emotion or "disbelief" in emotion or "surprised" in emotion
-        is_relief = "relief" in emotion or "grateful" in emotion or "emotional" in emotion
-        is_triumphant = (
-            "triumphant" in emotion
-            or "heroic" in emotion
-            or speaker_action == "celebrate"
-            or listener_action == "celebrate"
-        )
+        for f in sample_frames:
+            local_f = f - f_start
+            t_sec = f / float(safe_fps)
+            local_sec = local_f / float(safe_fps)
+            shot_prog = local_f / float(max(1, dur - 1))
+            # Smooth envelope at shot entry/exit so shots blend organically without snapping to 0
+            phrase_env = _smoothstep(min(1.0, local_f / 8.0)) * _smoothstep(
+                min(1.0, (dur - 1 - local_f) / 8.0)
+            )
+            speech_e = (
+                _sample_envelope_energy(lip_env, local_f)
+                if is_speaking
+                else 0.25 * math.sin(local_sec * 2.4) ** 2
+            )
 
-        if is_speaking:
-            # --- SPEAKER PERFORMANCE: Emotion-Driven Upper Body, Head & Arm Acting ---
-            if not is_nemo:
-                if is_panic:
-                    chest_keys = [
-                        (f_start, 0.03, 0.02 * turn_dir, 0.0),
-                        (f_ant, 0.06, -0.04 * turn_dir, -0.03 * turn_dir),
-                        (f_b1, -0.03, 0.08 * turn_dir, 0.035 * turn_dir),
-                        (f_b2, 0.05, -0.03 * turn_dir, -0.025 * turn_dir),
-                        (f_b3, -0.02, 0.07 * turn_dir, 0.02 * turn_dir),
-                        (f_settle, 0.01, 0.02 * turn_dir, 0.0),
-                    ]
-                elif is_relief:
-                    # Deep exhale and warm forward lean of gratitude
-                    chest_keys = [
-                        (f_start, -0.03, 0.02 * turn_dir, 0.0),
-                        (f_ant + 4, 0.045, 0.05 * turn_dir, 0.015 * turn_dir),
-                        (f_b1 + 4, 0.03, 0.07 * turn_dir, 0.02 * turn_dir),
-                        (f_b2, 0.01, 0.06 * turn_dir, -0.01 * turn_dir),
-                        (f_b3, -0.015, 0.05 * turn_dir, 0.01 * turn_dir),
-                        (f_settle, 0.01, 0.03 * turn_dir, 0.0),
-                    ]
+            if is_nemo:
+                # =====================================================================
+                # NEMO: ENERGETIC, BOUNCY, EXPRESSIVE CUBE AI COMPANION CHOREOGRAPHY
+                # =====================================================================
+                bounce_freq = (
+                    3.4
+                    if (
+                        is_speaking
+                        or my_action in ("energetic-wave", "playful-roast", "celebrate")
+                    )
+                    else 2.6
+                )
+                cycle = t_sec * bounce_freq + shot_idx * 1.3
+                hop_amp = (
+                    0.052
+                    if (
+                        is_speaking
+                        or my_action in ("energetic-wave", "playful-roast", "celebrate")
+                    )
+                    else 0.034
+                )
+                hop_z = abs(math.sin(cycle)) * hop_amp * (0.75 + 0.35 * speech_e)
+
+                # Squash and stretch on Nemo's cube body synchronized with the hop!
+                squash = 1.0 + math.cos(cycle * 2.0) * (0.048 if is_speaking else 0.032)
+                inv_sq = 1.0 / math.sqrt(max(0.8, squash))
+
+                # Note: For vertical bones (hips/head), local +Y is World +Z (vertical up)!
+                _keyframe_bone_loc(
+                    arm_obj,
+                    "hips",
+                    f,
+                    math.sin(cycle * 0.5) * 0.018,
+                    hop_z,
+                    0.0,
+                )
+                _keyframe_bone_scale(arm_obj, "head", f, inv_sq, squash, inv_sq)
+
+                # Expressive 3D cube tilts, leans, and yaw turns toward Leo
+                cube_pitch = (
+                    -0.05 * math.sin(cycle * 1.1)
+                    + (0.045 * speech_e if is_speaking else 0.02)
+                )
+                cube_yaw = (
+                    0.16 * turn_dir
+                    + math.sin(cycle * 0.75) * 0.095
+                    + (0.05 * math.cos(cycle * 1.4) if is_speaking else 0.0)
+                )
+                cube_roll = math.sin(cycle * 0.95) * (
+                    0.135
+                    if my_action in ("energetic-wave", "playful-roast", "celebrate")
+                    else 0.095
+                )
+
+                _keyframe_bone_rot(
+                    arm_obj,
+                    "chest",
+                    f,
+                    cube_pitch * 0.45,
+                    cube_yaw * 0.45,
+                    cube_roll * 0.45,
+                )
+                _keyframe_bone_rot(
+                    arm_obj, "head", f, cube_pitch, cube_yaw, cube_roll
+                )
+
+                # Free, energetic 2-segment side-arms for Nemo
+                if my_action in ("celebrate", "energetic-wave") or "triumphant" in emotion:
+                    ua_l = (
+                        -1.35 + math.sin(cycle * 1.4) * 0.42,
+                        0.18 * math.cos(cycle),
+                        0.38 + math.sin(cycle * 1.2) * 0.25,
+                    )
+                    fa_l = (-0.55 + math.sin(cycle * 1.8) * 0.30, 0.0, 0.22)
+                    ua_r = (
+                        -1.35 + math.cos(cycle * 1.4) * 0.42,
+                        -0.18 * math.sin(cycle),
+                        -0.38 - math.cos(cycle * 1.2) * 0.25,
+                    )
+                    fa_r = (-0.55 + math.cos(cycle * 1.8) * 0.30, 0.0, -0.22)
+                elif my_action == "playful-roast" or is_speaking:
+                    # Sassy alternating waves & pointing toward Leo
+                    ua_l = (
+                        -0.98 + math.sin(cycle * 1.25) * (0.42 + 0.18 * speech_e),
+                        0.20 * math.cos(cycle),
+                        0.34 + math.sin(cycle) * 0.22,
+                    )
+                    fa_l = (-0.62 + math.sin(cycle * 1.6) * 0.28, 0.0, 0.20)
+                    ua_r = (
+                        -1.08 + math.cos(cycle * 1.15) * (0.44 + 0.18 * speech_e),
+                        -0.20 * math.sin(cycle),
+                        -0.36 - math.cos(cycle) * 0.22,
+                    )
+                    fa_r = (-0.66 + math.cos(cycle * 1.6) * 0.28, 0.0, -0.20)
                 else:
-                    chest_keys = [
-                        (f_start, 0.01, 0.02 * turn_dir, 0.0),
-                        (f_ant, 0.025, 0.0, -0.015 * turn_dir),
-                        (f_b1, -0.025, 0.065 * turn_dir, 0.02 * turn_dir),
-                        (f_b2, -0.01, 0.045 * turn_dir, -0.018 * turn_dir),
-                        (f_b3, -0.02, 0.06 * turn_dir, 0.015 * turn_dir),
-                        (f_settle, 0.01, 0.02 * turn_dir, 0.0),
-                    ]
-                for f_c, c_pitch, c_twist_y, c_tilt_z in chest_keys:
-                    _keyframe_bone_rot(arm_obj, "chest", min(f_end - 1, f_c), c_pitch, c_twist_y, c_tilt_z)
+                    # Lively, expressive active listening waves (never static!)
+                    ua_l = (
+                        -0.62 + math.sin(cycle * 1.1) * 0.30,
+                        0.12 * math.cos(cycle * 0.8),
+                        0.26 + math.sin(cycle * 0.9) * 0.16,
+                    )
+                    fa_l = (-0.48 + math.sin(cycle * 1.4) * 0.22, 0.0, 0.15)
+                    ua_r = (
+                        -0.62 - math.sin(cycle * 1.1) * 0.30,
+                        -0.12 * math.cos(cycle * 0.8),
+                        -0.26 - math.cos(cycle * 0.9) * 0.16,
+                    )
+                    fa_r = (-0.48 + math.cos(cycle * 1.4) * 0.22, 0.0, -0.15)
 
-            # Head acting tailored to emotion
-            h_scale = 0.68 if is_nemo else 1.0
-            if is_panic:
-                head_keys = [
-                    (f_start, 0.02 * h_scale, 0.06 * turn_dir * h_scale, 0.0),
-                    (f_ant, -0.05 * h_scale, -0.06 * turn_dir * h_scale, -0.05 * turn_dir * h_scale),
-                    (f_b1, 0.04 * h_scale, 0.16 * turn_dir * h_scale, 0.05 * turn_dir * h_scale),
-                    (f_b2, -0.04 * h_scale, 0.04 * turn_dir * h_scale, -0.04 * turn_dir * h_scale),
-                    (f_b3, 0.03 * h_scale, 0.15 * turn_dir * h_scale, 0.03 * turn_dir * h_scale),
-                    (f_settle, 0.0, 0.08 * turn_dir * h_scale, 0.0),
-                ]
-            elif is_stunned:
-                # Comedic Double-Take: quick pull back at f_ant, then lean in amazed
-                head_keys = [
-                    (f_start, 0.0, 0.08 * turn_dir * h_scale, 0.0),
-                    (f_ant, -0.06 * h_scale, 0.02 * turn_dir * h_scale, -0.04 * turn_dir * h_scale),
-                    (min(f_end - 2, f_ant + 7), 0.045 * h_scale, 0.17 * turn_dir * h_scale, 0.04 * turn_dir * h_scale),
-                    (f_b1, -0.03 * h_scale, 0.15 * turn_dir * h_scale, 0.03 * turn_dir * h_scale),
-                    (f_b2, 0.03 * h_scale, 0.12 * turn_dir * h_scale, -0.03 * turn_dir * h_scale),
-                    (f_b3, -0.025 * h_scale, 0.15 * turn_dir * h_scale, 0.025 * turn_dir * h_scale),
-                    (f_settle, 0.0, 0.09 * turn_dir * h_scale, 0.0),
-                ]
-            elif is_relief:
-                # Warm heartfelt nod and gentle grateful head tilt
-                head_keys = [
-                    (f_start, 0.04 * h_scale, 0.08 * turn_dir * h_scale, 0.0),
-                    (f_ant + 3, 0.06 * h_scale, 0.12 * turn_dir * h_scale, 0.045 * turn_dir * h_scale),
-                    (f_b1, -0.02 * h_scale, 0.14 * turn_dir * h_scale, 0.035 * turn_dir * h_scale),
-                    (f_b2, 0.025 * h_scale, 0.13 * turn_dir * h_scale, -0.02 * turn_dir * h_scale),
-                    (f_b3, -0.015 * h_scale, 0.14 * turn_dir * h_scale, 0.02 * turn_dir * h_scale),
-                    (f_settle, 0.0, 0.09 * turn_dir * h_scale, 0.0),
-                ]
+                _keyframe_bone_rot(arm_obj, "upper_arm.L", f, *ua_l)
+                _keyframe_bone_rot(arm_obj, "forearm.L", f, *fa_l)
+                _keyframe_bone_rot(
+                    arm_obj, "hand.L", f, math.sin(cycle * 1.8) * 0.22, 0.0, 0.0
+                )
+                _keyframe_bone_rot(arm_obj, "upper_arm.R", f, *ua_r)
+                _keyframe_bone_rot(arm_obj, "forearm.R", f, *fa_r)
+                _keyframe_bone_rot(
+                    arm_obj, "hand.R", f, math.cos(cycle * 1.8) * 0.22, 0.0, 0.0
+                )
+
+                # Playful leg kicks synchronized with Nemo's hop
+                kick = math.sin(cycle) * 0.24
+                _keyframe_bone_rot(arm_obj, "thigh.L", f, kick, 0.0, 0.0)
+                _keyframe_bone_rot(arm_obj, "thigh.R", f, -kick, 0.0, 0.0)
+
+                # Expressive eyebrows
+                b_lift = 0.014 if is_speaking else 0.010 + 0.004 * math.sin(cycle)
+                b_tilt = 0.05 * math.sin(cycle * 0.8)
+                _keyframe_bone_loc(arm_obj, "brow.L", f, 0.0, b_lift, 0.0)
+                _keyframe_bone_loc(arm_obj, "brow.R", f, 0.0, b_lift, 0.0)
+                _keyframe_bone_rot(arm_obj, "brow.L", f, 0.0, 0.0, b_tilt)
+                _keyframe_bone_rot(arm_obj, "brow.R", f, 0.0, 0.0, -b_tilt)
+
             else:
-                head_keys = [
-                    (f_start, 0.0, 0.08 * turn_dir * h_scale, 0.0),
-                    (f_ant, 0.035 * h_scale, 0.05 * turn_dir * h_scale, -0.025 * turn_dir * h_scale),
-                    (f_b1, -0.04 * h_scale, 0.15 * turn_dir * h_scale, 0.035 * turn_dir * h_scale),
-                    (f_b2, 0.025 * h_scale, 0.11 * turn_dir * h_scale, -0.030 * turn_dir * h_scale),
-                    (f_b3, -0.03 * h_scale, 0.14 * turn_dir * h_scale, 0.025 * turn_dir * h_scale),
-                    (f_settle, 0.0, 0.08 * turn_dir * h_scale, 0.0),
-                ]
-            for f_h, h_pitch, h_twist_y, h_tilt_z in head_keys:
-                _keyframe_bone_rot(arm_obj, "head", min(f_end - 1, f_h), h_pitch, h_twist_y, h_tilt_z)
+                # =====================================================================
+                # LEO: SMOOTH, NATURAL MULTI-AXIS FREE-HAND & BODY CHOREOGRAPHY
+                # =====================================================================
+                cycle = t_sec * 2.15 + shot_idx * 0.9
+                # Smooth breathing & contrapposto weight shift
+                hip_sway_x = math.sin(cycle * 0.65) * 0.014
+                hip_bob_z = math.sin(cycle * 1.1) * 0.012
+                _keyframe_bone_loc(arm_obj, "hips", f, hip_sway_x, hip_bob_z, 0.0)
+                _keyframe_bone_rot(
+                    arm_obj,
+                    "hips",
+                    f,
+                    0.0,
+                    math.sin(cycle * 0.65) * 0.025,
+                    math.cos(cycle * 0.65) * 0.018,
+                )
 
-            # Arm Choreography tailored to comedic & emotional beats
-            if is_panic:
-                # Comedic "Hands up by temples in developer panic" silhouette
-                arm_keys = [
-                    (f_start, (-0.18, 0.0, -0.06), (-0.45, 0.0, 0.08), (-0.05, 0.0, 0.0), (-0.18, 0.0, 0.06), (-0.45, 0.0, -0.08), (-0.05, 0.0, 0.0)),
-                    (f_ant, (-0.78, 0.18, -0.22), (-1.05, 0.22, 0.25), (-0.16, 0.10, 0.0), (-0.76, -0.18, 0.22), (-1.02, -0.22, -0.25), (-0.16, -0.10, 0.0)),
-                    (f_b1, (-0.86, 0.22, -0.26), (-1.12, 0.25, 0.28), (-0.18, 0.12, 0.0), (-0.64, -0.14, 0.18), (-0.88, -0.18, -0.20), (-0.12, -0.08, 0.0)),
-                    (f_b2, (-0.62, 0.14, -0.18), (-0.86, 0.16, 0.18), (-0.12, 0.08, 0.0), (-0.84, -0.22, 0.25), (-1.10, -0.24, -0.26), (-0.18, -0.12, 0.0)),
-                    (f_b3, (-0.74, 0.18, -0.20), (-0.98, 0.20, 0.22), (-0.14, 0.08, 0.0), (-0.72, -0.18, 0.20), (-0.96, -0.20, -0.22), (-0.14, -0.08, 0.0)),
-                    (f_settle, (-0.18, 0.0, -0.06), (-0.44, 0.0, 0.06), (-0.04, 0.0, 0.0), (-0.18, 0.0, 0.06), (-0.44, 0.0, -0.06), (-0.04, 0.0, 0.0)),
-                ]
-            elif is_relief:
-                # Heartfelt "Hand to chest in genuine relief, then open gesture to partner"
-                arm_keys = [
-                    (f_start, (-0.14, 0.0, -0.04), (-0.36, 0.0, 0.05), (-0.04, 0.0, 0.0), (-0.14, 0.0, 0.04), (-0.36, 0.0, -0.05), (-0.04, 0.0, 0.0)),
-                    (f_ant + 2, (-0.22, 0.06, -0.06), (-0.48, 0.08, 0.08), (-0.06, 0.0, 0.0), (-0.48, 0.22, -0.18), (-0.98, 0.28, -0.32), (-0.12, 0.10, 0.0)),
-                    (f_b1, (-0.26, 0.08, -0.08), (-0.54, 0.10, 0.10), (-0.08, 0.0, 0.0), (-0.52, 0.25, -0.20), (-1.04, 0.30, -0.35), (-0.14, 0.12, 0.0)),
-                    (f_b2, (-0.56, 0.16, -0.18), (-0.88, 0.16, 0.16), (-0.12, 0.08, 0.0), (-0.32, -0.08, 0.10), (-0.64, -0.10, -0.12), (-0.08, -0.06, 0.0)),
-                    (f_b3, (-0.44, 0.12, -0.14), (-0.74, 0.12, 0.12), (-0.10, 0.06, 0.0), (-0.46, -0.12, 0.14), (-0.76, -0.12, -0.14), (-0.10, -0.06, 0.0)),
-                    (f_settle, (-0.16, 0.0, -0.05), (-0.42, 0.0, 0.06), (-0.04, 0.0, 0.0), (-0.16, 0.0, 0.05), (-0.42, 0.0, -0.06), (-0.04, 0.0, 0.0)),
-                ]
-            elif is_triumphant:
-                # Heroic / Celebratory double-arm V-lift
-                arm_keys = [
-                    (f_start, (-0.20, 0.0, -0.06), (-0.46, 0.0, 0.08), (-0.05, 0.0, 0.0), (-0.20, 0.0, 0.06), (-0.46, 0.0, -0.08), (-0.05, 0.0, 0.0)),
-                    (f_ant, (-0.58, 0.16, -0.20), (-0.86, 0.18, 0.18), (-0.12, 0.08, 0.0), (-0.58, -0.16, 0.20), (-0.86, -0.18, -0.18), (-0.12, -0.08, 0.0)),
-                    (f_b1, (-0.82, 0.22, -0.26), (-0.94, 0.22, 0.22), (-0.16, 0.10, 0.0), (-0.76, -0.20, 0.24), (-0.90, -0.20, -0.20), (-0.14, -0.10, 0.0)),
-                    (f_b2, (-0.70, 0.18, -0.22), (-0.84, 0.18, 0.18), (-0.12, 0.08, 0.0), (-0.84, -0.22, 0.26), (-0.96, -0.22, -0.22), (-0.16, -0.10, 0.0)),
-                    (f_b3, (-0.86, 0.24, -0.28), (-0.98, 0.24, 0.24), (-0.18, 0.12, 0.0), (-0.86, -0.24, 0.28), (-0.98, -0.24, -0.24), (-0.18, -0.12, 0.0)),
-                    (f_settle, (-0.22, 0.0, -0.08), (-0.48, 0.0, 0.08), (-0.06, 0.0, 0.0), (-0.22, 0.0, 0.08), (-0.48, 0.0, -0.08), (-0.06, 0.0, 0.0)),
-                ]
-            else:
-                # Expressive alternating conversational presentation arcs
-                arm_keys = [
-                    (f_start, (-0.16, 0.0, -0.05), (-0.42, 0.0, 0.06), (-0.04, 0.0, 0.0), (-0.16, 0.0, 0.05), (-0.42, 0.0, -0.06), (-0.04, 0.0, 0.0)),
-                    (f_ant, (-0.28, 0.06, -0.10), (-0.66, 0.08, 0.12), (-0.08, 0.04, 0.0), (-0.24, -0.06, 0.08), (-0.60, -0.08, -0.12), (-0.08, -0.04, 0.0)),
-                    (f_b1, (-0.58, 0.16, -0.18), (-0.92, 0.16, 0.16), (-0.14, 0.08, 0.0), (-0.30, -0.08, 0.10), (-0.58, -0.08, -0.10), (-0.06, -0.05, 0.0)),
-                    (f_b2, (-0.30, 0.08, -0.10), (-0.56, 0.08, 0.10), (-0.06, 0.04, 0.0), (-0.60, -0.16, 0.18), (-0.94, -0.16, -0.16), (-0.14, -0.10, 0.0)),
-                    (f_b3, (-0.50, 0.14, -0.16), (-0.84, 0.14, 0.14), (-0.12, 0.08, 0.0), (-0.48, -0.14, 0.16), (-0.82, -0.14, -0.14), (-0.12, -0.08, 0.0)),
-                    (f_settle, (-0.16, 0.0, -0.05), (-0.42, 0.0, 0.06), (-0.04, 0.0, 0.0), (-0.16, 0.0, 0.05), (-0.42, 0.0, -0.06), (-0.04, 0.0, 0.0)),
-                ]
+                spine_pitch = 0.018 + math.sin(cycle * 0.75) * 0.022
+                spine_yaw = 0.035 * turn_dir + math.sin(cycle * 0.6) * 0.04
+                spine_roll = math.cos(cycle * 0.65) * 0.022
+                _keyframe_bone_rot(
+                    arm_obj,
+                    "spine",
+                    f,
+                    spine_pitch * 0.5,
+                    spine_yaw * 0.5,
+                    spine_roll * 0.5,
+                )
+                _keyframe_bone_rot(
+                    arm_obj, "chest", f, spine_pitch, spine_yaw, spine_roll
+                )
 
-            for f_base, ua_l, fa_l, h_l, ua_r, fa_r, h_r in arm_keys:
-                fc_arm = min(f_end - 1, f_base)
-                fc_fore = min(f_end - 1, f_base + 2)
-                fc_hand = min(f_end - 1, f_base + 3)
-                _keyframe_bone_rot(arm_obj, "upper_arm.L", fc_arm, *ua_l)
-                _keyframe_bone_rot(arm_obj, "forearm.L", fc_fore, *fa_l)
-                _keyframe_bone_rot(arm_obj, "hand.L", fc_hand, *h_l)
-                _keyframe_bone_rot(arm_obj, "upper_arm.R", fc_arm, *ua_r)
-                _keyframe_bone_rot(arm_obj, "forearm.R", fc_fore, *fa_r)
-                _keyframe_bone_rot(arm_obj, "hand.R", fc_hand, *h_r)
+                # Head & Neck natural tracking with thoughtful tilts
+                head_pitch = (
+                    -0.025 * math.sin(cycle * 1.2)
+                    + (0.042 * speech_e * math.sin(t_sec * 5.0) if is_speaking else 0.025 * math.sin(cycle * 1.4))
+                )
+                head_yaw = 0.14 * turn_dir + math.sin(cycle * 0.8) * 0.055
+                head_roll = math.sin(cycle * 0.7) * 0.055
 
-            # Phrase-level eyebrow expression (worried slant for panic, high arch for stunned, warm lift for relief/joy)
-            if is_panic:
-                brow_lift = 0.016
-                brow_tilt = -0.11
-            elif is_stunned:
-                brow_lift = 0.018
-                brow_tilt = 0.06
-            elif is_relief:
-                brow_lift = 0.011
-                brow_tilt = -0.05
-            elif is_triumphant:
-                brow_lift = 0.016
-                brow_tilt = 0.05
-            else:
-                brow_lift = 0.012
-                brow_tilt = 0.03
+                if my_action == "chin-think":
+                    head_roll = -0.085 + math.sin(cycle * 0.65) * 0.035
+                    head_pitch += 0.025
+                elif my_action == "head-scratch":
+                    head_roll = 0.095 + math.sin(cycle * 0.75) * 0.04
+                elif my_action == "facepalm-react":
+                    head_pitch = 0.065 + math.sin(cycle * 1.3) * 0.03
+                    head_yaw = 0.08 * turn_dir + math.sin(cycle * 1.8) * 0.075
+                    head_roll = -0.09 + math.cos(cycle * 1.1) * 0.04
 
-            for f_br, b_mult in [
-                (f_start, 0.4),
-                (f_ant, 0.95),
-                (f_b1, 1.0),
-                (f_b2, 0.85),
-                (f_b3, 0.95),
-                (f_settle, 0.35),
-            ]:
-                _keyframe_bone_loc(arm_obj, "brow.L", min(f_end - 1, f_br), 0.0, brow_lift * b_mult, 0.0)
-                _keyframe_bone_loc(arm_obj, "brow.R", min(f_end - 1, f_br), 0.0, brow_lift * b_mult, 0.0)
-                _keyframe_bone_rot(arm_obj, "brow.L", min(f_end - 1, f_br), 0.0, 0.0, brow_tilt * b_mult)
-                _keyframe_bone_rot(arm_obj, "brow.R", min(f_end - 1, f_br), 0.0, 0.0, -brow_tilt * b_mult)
+                _keyframe_bone_rot(
+                    arm_obj,
+                    "neck",
+                    f,
+                    head_pitch * 0.35,
+                    head_yaw * 0.35,
+                    head_roll * 0.35,
+                )
+                _keyframe_bone_rot(
+                    arm_obj, "head", f, head_pitch, head_yaw, head_roll
+                )
 
-        else:
-            # --- LISTENER PERFORMANCE: Active Comedic & Emotional Reactions ---
-            if not is_nemo:
-                _keyframe_bone_rot(arm_obj, "chest", f_start, 0.01, 0.04 * turn_dir, 0.0)
-                _keyframe_bone_rot(arm_obj, "chest", f_b1 + 5, -0.015, 0.07 * turn_dir, 0.015 * turn_dir)
-                _keyframe_bone_rot(arm_obj, "chest", f_b2 + 5, 0.01, 0.06 * turn_dir, -0.01 * turn_dir)
-                _keyframe_bone_rot(arm_obj, "chest", f_settle, 0.01, 0.04 * turn_dir, 0.0)
+                # --- LEO'S ARTICULATED FREE HANDS (Chin, Head/Temple, Forehead, and Expressive Banter) ---
+                # Pose 1: Right hand at CHIN (stroking chin thoughtfully), Left hand gesturing freely
+                chin_sh_r = (0.0, -0.06, -0.10)
+                chin_ua_r = (
+                    -1.22 + math.sin(cycle * 0.85) * 0.06,
+                    -0.44 + math.cos(cycle * 0.85) * 0.05,
+                    -0.28 + math.sin(cycle * 0.9) * 0.04,
+                )
+                chin_fa_r = (
+                    -1.38 + math.sin(cycle * 1.9) * 0.08,
+                    -0.22,
+                    -0.38 + math.cos(cycle * 1.9) * 0.06,
+                )
+                chin_ha_r = (
+                    0.26 + math.sin(cycle * 2.7) * 0.12,
+                    0.0,
+                    0.10 * math.cos(cycle * 2.7),
+                )
 
-            h_scale = 0.68 if is_nemo else 1.0
-            f_turn = min(f_end - 2, f_start + 8)
-            f_nod1 = min(f_end - 4, f_b1 + 6)
-            f_nod2 = min(f_end - 3, f_b2 + 6)
-            f_nod3 = min(f_end - 2, f_b3 + 4)
-            for f_h, hp, h_twist_y, h_tilt_z in [
-                (f_start, 0.0, 0.08 * turn_dir * h_scale, 0.0),
-                (f_turn, -0.015 * h_scale, 0.16 * turn_dir * h_scale, 0.025 * turn_dir * h_scale),
-                (f_nod1, 0.060 * h_scale, 0.16 * turn_dir * h_scale, 0.030 * turn_dir * h_scale),
-                (min(f_end - 2, f_nod1 + 7), -0.015 * h_scale, 0.15 * turn_dir * h_scale, 0.015 * turn_dir * h_scale),
-                (f_nod2, 0.050 * h_scale, 0.15 * turn_dir * h_scale, -0.025 * turn_dir * h_scale),
-                (f_nod3, 0.045 * h_scale, 0.16 * turn_dir * h_scale, 0.020 * turn_dir * h_scale),
-                (f_settle, 0.0, 0.12 * turn_dir * h_scale, 0.01 * turn_dir * h_scale),
-            ]:
-                _keyframe_bone_rot(arm_obj, "head", f_h, hp, h_twist_y, h_tilt_z)
+                # Pose 2: Left hand at HEAD / TEMPLE (scratching head / mind-blown), Right hand gesturing freely
+                head_sh_l = (0.0, 0.08, 0.14)
+                head_ua_l = (
+                    -1.72 + math.sin(cycle * 1.2) * 0.08,
+                    0.38 + math.cos(cycle * 1.1) * 0.06,
+                    0.24 + math.sin(cycle * 0.9) * 0.05,
+                )
+                head_fa_l = (
+                    -1.36 + math.sin(cycle * 2.4) * 0.11,
+                    0.18,
+                    0.42 + math.cos(cycle * 2.4) * 0.07,
+                )
+                head_ha_l = (
+                    0.28 + math.sin(cycle * 2.9) * 0.14,
+                    0.0,
+                    -0.10 * math.cos(cycle * 2.9),
+                )
 
-            if listener_action == "celebrate" or is_triumphant:
-                # Listener joins the celebration!
-                listener_arms = [
-                    (f_start, (-0.16, 0.0, -0.05), (-0.40, 0.0, 0.06), (-0.16, 0.0, 0.05), (-0.40, 0.0, -0.06)),
-                    (f_b1, (-0.68, 0.18, -0.20), (-0.86, 0.18, 0.18), (-0.68, -0.18, 0.20), (-0.86, -0.18, -0.18)),
-                    (f_b2, (-0.54, 0.14, -0.16), (-0.76, 0.14, 0.14), (-0.54, -0.14, 0.16), (-0.76, -0.14, -0.14)),
-                    (f_b3, (-0.74, 0.20, -0.22), (-0.90, 0.20, 0.20), (-0.74, -0.20, 0.22), (-0.90, -0.20, -0.20)),
-                    (f_settle, (-0.18, 0.0, -0.06), (-0.42, 0.0, 0.06), (-0.18, 0.0, 0.06), (-0.42, 0.0, -0.06)),
-                ]
-            else:
-                # Expressive attentive listening arms
-                listener_arms = [
-                    (f_start, (-0.12, 0.0, -0.04), (-0.34, 0.0, 0.06), (-0.14, 0.0, 0.04), (-0.38, 0.0, -0.06)),
-                    (f_b1 + 5, (-0.22, 0.04, -0.08), (-0.50, 0.06, 0.10), (-0.24, -0.04, 0.08), (-0.52, -0.06, -0.10)),
-                    (f_b2 + 5, (-0.16, 0.02, -0.05), (-0.40, 0.04, 0.07), (-0.28, -0.06, 0.10), (-0.58, -0.08, -0.12)),
-                    (f_settle, (-0.12, 0.0, -0.04), (-0.34, 0.0, 0.06), (-0.14, 0.0, 0.04), (-0.38, 0.0, -0.06)),
-                ]
-            for f_a, ua_l, fa_l, ua_r, fa_r in listener_arms:
-                _keyframe_bone_rot(arm_obj, "upper_arm.L", min(f_end - 1, f_a), *ua_l)
-                _keyframe_bone_rot(arm_obj, "forearm.L", min(f_end - 1, f_a), *fa_l)
-                _keyframe_bone_rot(arm_obj, "upper_arm.R", min(f_end - 1, f_a), *ua_r)
-                _keyframe_bone_rot(arm_obj, "forearm.R", min(f_end - 1, f_a), *fa_r)
+                # Pose 3: Right hand at FOREHEAD (facepalm disbelief)
+                fp_sh_r = (0.0, -0.08, -0.12)
+                fp_ua_r = (
+                    -1.64 + math.sin(cycle * 0.95) * 0.07,
+                    -0.38,
+                    -0.26 + math.cos(cycle * 0.95) * 0.05,
+                )
+                fp_fa_r = (
+                    -1.42 + math.sin(cycle * 1.5) * 0.08,
+                    -0.20,
+                    -0.42 + math.cos(cycle * 1.5) * 0.06,
+                )
+                fp_ha_r = (0.24, 0.0, 0.08)
 
-            for f_br, b_lift in [(f_start, 0.003), (f_b1 + 6, 0.012), (f_b2 + 6, 0.010), (f_b3 + 4, 0.012), (f_settle, 0.003)]:
-                _keyframe_bone_loc(arm_obj, "brow.L", min(f_end - 1, f_br), 0.0, b_lift, 0.0)
-                _keyframe_bone_loc(arm_obj, "brow.R", min(f_end - 1, f_br), 0.0, b_lift, 0.0)
-                _keyframe_bone_rot(arm_obj, "brow.L", min(f_end - 1, f_br), 0.0, 0.0, 0.0)
-                _keyframe_bone_rot(arm_obj, "brow.R", min(f_end - 1, f_br), 0.0, 0.0, 0.0)
+                # Pose 4: Free Conversational / Banter Gestures for Left & Right Arms
+                free_sh_l = (0.0, 0.0, 0.04 * math.sin(cycle))
+                free_ua_l = (
+                    -0.64 + math.sin(cycle * 1.05) * (0.26 + 0.18 * speech_e),
+                    0.16 * math.cos(cycle * 0.85),
+                    -0.18 - math.sin(cycle * 0.8) * 0.10,
+                )
+                free_fa_l = (
+                    -0.84 + math.cos(cycle * 1.2) * (0.24 + 0.14 * speech_e),
+                    0.12 * math.sin(cycle),
+                    0.16,
+                )
+                free_ha_l = (
+                    -0.16 + math.sin(cycle * 1.6) * 0.16,
+                    0.08 * math.cos(cycle),
+                    0.0,
+                )
+
+                free_sh_r = (0.0, 0.0, -0.04 * math.cos(cycle))
+                free_ua_r = (
+                    -0.72 + math.cos(cycle * 1.0) * (0.28 + 0.18 * speech_e),
+                    -0.16 * math.sin(cycle * 0.85),
+                    0.18 + math.cos(cycle * 0.8) * 0.10,
+                )
+                free_fa_r = (
+                    -0.88 + math.sin(cycle * 1.15) * (0.24 + 0.14 * speech_e),
+                    -0.12 * math.cos(cycle),
+                    -0.16,
+                )
+                free_ha_r = (
+                    -0.16 + math.cos(cycle * 1.6) * 0.16,
+                    -0.08 * math.sin(cycle),
+                    0.0,
+                )
+
+                if my_action == "chin-think":
+                    # Right hand smoothly strokes chin for 75% of the shot, opening out naturally at phrasing peaks
+                    w_chin = phrase_env * (0.78 + 0.22 * math.cos(shot_prog * math.pi * 1.2))
+                    sh_r = tuple(_lerp(free_sh_r[i], chin_sh_r[i], w_chin) for i in range(3))
+                    ua_r = tuple(_lerp(free_ua_r[i], chin_ua_r[i], w_chin) for i in range(3))
+                    fa_r = tuple(_lerp(free_fa_r[i], chin_fa_r[i], w_chin) for i in range(3))
+                    ha_r = tuple(_lerp(free_ha_r[i], chin_ha_r[i], w_chin) for i in range(3))
+                    sh_l, ua_l, fa_l, ha_l = free_sh_l, free_ua_l, free_fa_l, free_ha_l
+
+                elif my_action == "head-scratch":
+                    # Left hand smoothly reaches up to scratch head/temple while right hand gestures freely
+                    w_head = phrase_env * (0.80 + 0.20 * math.sin(shot_prog * math.pi * 1.1 + 0.4))
+                    sh_l = tuple(_lerp(free_sh_l[i], head_sh_l[i], w_head) for i in range(3))
+                    ua_l = tuple(_lerp(free_ua_l[i], head_ua_l[i], w_head) for i in range(3))
+                    fa_l = tuple(_lerp(free_fa_l[i], head_fa_l[i], w_head) for i in range(3))
+                    ha_l = tuple(_lerp(free_ha_l[i], head_ha_l[i], w_head) for i in range(3))
+                    sh_r, ua_r, fa_r, ha_r = free_sh_r, free_ua_r, free_fa_r, free_ha_r
+
+                elif my_action == "facepalm-react":
+                    # Right hand arcs up to forehead in playful disbelief while left hand gestures out
+                    w_fp = phrase_env * _smoothstep(min(1.0, (local_f + 4) / 14.0))
+                    sh_r = tuple(_lerp(free_sh_r[i], fp_sh_r[i], w_fp) for i in range(3))
+                    ua_r = tuple(_lerp(free_ua_r[i], fp_ua_r[i], w_fp) for i in range(3))
+                    fa_r = tuple(_lerp(free_fa_r[i], fp_fa_r[i], w_fp) for i in range(3))
+                    ha_r = tuple(_lerp(free_ha_r[i], fp_ha_r[i], w_fp) for i in range(3))
+                    sh_l, ua_l, fa_l, ha_l = free_sh_l, free_ua_l, free_fa_l, free_ha_l
+
+                elif my_action == "panic-react" or "panic" in emotion:
+                    sh_l, sh_r = (0.0, 0.06, 0.10), (0.0, -0.06, -0.10)
+                    ua_l = (-1.42 + math.sin(cycle * 1.3) * 0.14, 0.28, 0.22)
+                    fa_l = (-1.18 + math.cos(cycle * 1.6) * 0.12, 0.16, 0.34)
+                    ha_l = (0.20, 0.0, 0.0)
+                    ua_r = (-1.42 + math.cos(cycle * 1.3) * 0.14, -0.28, -0.22)
+                    fa_r = (-1.18 + math.sin(cycle * 1.6) * 0.12, -0.16, -0.34)
+                    ha_r = (0.20, 0.0, 0.0)
+
+                elif my_action == "celebrate" or "triumphant" in emotion:
+                    sh_l, sh_r = (0.0, 0.05, 0.12), (0.0, -0.05, -0.12)
+                    ua_l = (-1.45 + math.sin(cycle * 1.3) * 0.22, 0.22, -0.24)
+                    fa_l = (-0.75 + math.sin(cycle * 1.6) * 0.18, 0.14, 0.18)
+                    ha_l = (-0.15, 0.0, 0.0)
+                    ua_r = (-1.45 - math.sin(cycle * 1.3) * 0.22, -0.22, 0.24)
+                    fa_r = (-0.75 + math.cos(cycle * 1.6) * 0.18, -0.14, -0.18)
+                    ha_r = (-0.15, 0.0, 0.0)
+
+                else:
+                    # Playful roast / talk / gesture / idle: smoothly blend in chin-touch during thoughtful beats
+                    w_chin = phrase_env * (0.45 + 0.45 * math.sin(cycle * 0.55))
+                    sh_r = tuple(_lerp(free_sh_r[i], chin_sh_r[i], w_chin) for i in range(3))
+                    ua_r = tuple(_lerp(free_ua_r[i], chin_ua_r[i], w_chin) for i in range(3))
+                    fa_r = tuple(_lerp(free_fa_r[i], chin_fa_r[i], w_chin) for i in range(3))
+                    ha_r = tuple(_lerp(free_ha_r[i], chin_ha_r[i], w_chin) for i in range(3))
+                    sh_l, ua_l, fa_l, ha_l = free_sh_l, free_ua_l, free_fa_l, free_ha_l
+
+                _keyframe_bone_rot(arm_obj, "shoulder.L", f, *sh_l)
+                _keyframe_bone_rot(arm_obj, "upper_arm.L", f, *ua_l)
+                _keyframe_bone_rot(arm_obj, "forearm.L", f, *fa_l)
+                _keyframe_bone_rot(arm_obj, "hand.L", f, *ha_l)
+
+                _keyframe_bone_rot(arm_obj, "shoulder.R", f, *sh_r)
+                _keyframe_bone_rot(arm_obj, "upper_arm.R", f, *ua_r)
+                _keyframe_bone_rot(arm_obj, "forearm.R", f, *fa_r)
+                _keyframe_bone_rot(arm_obj, "hand.R", f, *ha_r)
+
+                # Expressive eyebrows for Leo
+                b_lift = (
+                    0.016
+                    if my_action in ("facepalm-react", "panic-react", "head-scratch")
+                    else (0.012 + 0.004 * speech_e)
+                )
+                b_tilt = (
+                    -0.08
+                    if my_action == "facepalm-react"
+                    else 0.04 * math.sin(cycle * 0.85)
+                )
+                _keyframe_bone_loc(arm_obj, "brow.L", f, 0.0, b_lift, 0.0)
+                _keyframe_bone_loc(arm_obj, "brow.R", f, 0.0, b_lift, 0.0)
+                _keyframe_bone_rot(arm_obj, "brow.L", f, 0.0, 0.0, b_tilt)
+                _keyframe_bone_rot(arm_obj, "brow.R", f, 0.0, 0.0, -b_tilt)
 
         # --- PHONEME-TO-VISEME LIP-SYNC ---
-        # Note: For vertical facial bones (roll=0), local +Y (ly) is World +Z (vertical up/down)!
         if is_speaking and shot.get("narrationText"):
             viseme_events = generate_dialogue_viseme_timeline(
                 shot["narrationText"],
                 f_start,
                 dur,
-                fps,
-                shot.get("lipSyncEnvelope"),
+                safe_fps,
+                lip_env,
             )
             for f_vis, vis_name, energy in viseme_events:
-                jaw_z, jaw_sy, mouth_scale_x, _ = VISEME_TARGETS.get(vis_name, VISEME_TARGETS["SIL"])
-                e = min(1.25, max(0.45, energy))
-                open_sy = 0.55 + (jaw_sy - 0.55) * e
+                jaw_z, jaw_sy, mouth_scale_x, _ = VISEME_TARGETS.get(
+                    vis_name, VISEME_TARGETS["SIL"]
+                )
+                e = min(1.30, max(0.45, energy))
+                open_sy = 0.52 + (jaw_sy - 0.52) * e
                 _keyframe_bone_loc(arm_obj, "jaw", f_vis, 0.0, jaw_z * e, 0.0)
-                _keyframe_bone_scale(arm_obj, "jaw", f_vis, mouth_scale_x, open_sy, 1.0)
-                _keyframe_bone_loc(arm_obj, "lip_lower", f_vis, 0.0, jaw_z * 0.6 * e, 0.0)
-                _keyframe_bone_scale(arm_obj, "lip_lower", f_vis, mouth_scale_x, 1.0, 1.0)
+                _keyframe_bone_scale(
+                    arm_obj, "jaw", f_vis, mouth_scale_x, open_sy, 1.0
+                )
+                _keyframe_bone_loc(
+                    arm_obj, "lip_lower", f_vis, 0.0, jaw_z * 0.6 * e, 0.0
+                )
+                _keyframe_bone_scale(
+                    arm_obj, "lip_lower", f_vis, mouth_scale_x, 1.0, 1.0
+                )
                 _keyframe_bone_loc(arm_obj, "lip_upper", f_vis, 0.0, 0.0, 0.0)
-                _keyframe_bone_scale(arm_obj, "lip_upper", f_vis, mouth_scale_x, 1.0, 1.0)
+                _keyframe_bone_scale(
+                    arm_obj, "lip_upper", f_vis, mouth_scale_x, 1.0, 1.0
+                )
         else:
-            for f_sil in (f_start, f_b1 + 8, f_b2 + 8, f_end - 1):
+            # Listener expressive smile / closed mouth
+            for f_sil in range(f_start, f_end, 12):
                 _keyframe_bone_loc(arm_obj, "jaw", f_sil, 0.0, 0.0, 0.0)
-                _keyframe_bone_scale(arm_obj, "jaw", f_sil, 0.96, 0.48, 1.0)
+                _keyframe_bone_scale(arm_obj, "jaw", f_sil, 1.02, 0.48, 1.0)
                 _keyframe_bone_loc(arm_obj, "lip_lower", f_sil, 0.0, 0.0, 0.0)
-                _keyframe_bone_scale(arm_obj, "lip_lower", f_sil, 0.96, 1.0, 1.0)
+                _keyframe_bone_scale(arm_obj, "lip_lower", f_sil, 1.02, 1.0, 1.0)
                 _keyframe_bone_loc(arm_obj, "lip_upper", f_sil, 0.0, 0.0, 0.0)
-                _keyframe_bone_scale(arm_obj, "lip_upper", f_sil, 0.96, 1.0, 1.0)
+                _keyframe_bone_scale(arm_obj, "lip_upper", f_sil, 1.02, 1.0, 1.0)
 
-        # --- NATURAL 5-FRAME ASYMMETRIC EYE BLINKS (plus Double-Take Blink on Stunned Shots) ---
-        blink_frames = [f_start + 11, f_start + int(dur * 0.60)]
-        if is_speaking and is_stunned:
-            blink_frames.insert(1, f_start + 18)
+        # --- NATURAL 5-FRAME ASYMMETRIC EYE BLINKS ---
+        blink_frames = [
+            f_start + 12,
+            f_start + int(dur * 0.48),
+            f_start + int(dur * 0.82),
+        ]
         for bf in blink_frames:
             if bf + 5 >= f_end:
                 continue
             for side in ("L", "R"):
                 _keyframe_bone_loc(arm_obj, f"eyelid_upper.{side}", bf, 0.0, 0.0, 0.0)
-                _keyframe_bone_loc(arm_obj, f"eyelid_upper.{side}", bf + 2, 0.0, -0.020, 0.0)
-                _keyframe_bone_loc(arm_obj, f"eyelid_upper.{side}", bf + 3, 0.0, -0.020, 0.0)
-                _keyframe_bone_loc(arm_obj, f"eyelid_upper.{side}", bf + 5, 0.0, 0.0, 0.0)
+                _keyframe_bone_loc(
+                    arm_obj, f"eyelid_upper.{side}", bf + 2, 0.0, -0.020, 0.0
+                )
+                _keyframe_bone_loc(
+                    arm_obj, f"eyelid_upper.{side}", bf + 3, 0.0, -0.020, 0.0
+                )
+                _keyframe_bone_loc(
+                    arm_obj, f"eyelid_upper.{side}", bf + 5, 0.0, 0.0, 0.0
+                )
 
     _smooth_all_fcurves(arm_obj)
     return action

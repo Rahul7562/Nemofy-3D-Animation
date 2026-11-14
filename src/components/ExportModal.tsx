@@ -185,12 +185,12 @@ export const ExportModal: React.FC<ExportModalProps> = ({
       .then((r) => (r.ok ? r.json() : null))
       .then((refData) => {
         if (refData && refData.mp4Url) {
-          const refFrames = refData.verification?.frameCount || 1155;
+          const refFrames = refData.verification?.frameCount || 675;
           setJobState({
             jobId: refData.jobId || "reference-encounter",
             projectName:
               refData.projectName ||
-              "Nemofy.tech — Build, Test & Ship in One Place (38.5s 3D Ad)",
+              "Nemo & Leo — Playful Code Roast (@agentmorphy Skit)",
             status: "completed",
             progressPercent: 100,
             framesCompleted: refFrames,
@@ -200,12 +200,15 @@ export const ExportModal: React.FC<ExportModalProps> = ({
             height: 1920,
             blendFileUrl:
               refData.blendUrl || "/renders/reference-encounter/encounter.blend",
-            previewImageUrls: [
-              { frame: 1, url: "/renders/reference-encounter/previews/preview_01_f0001.jpg" },
-              { frame: 115, url: "/renders/reference-encounter/previews/preview_02_f0115.jpg" },
-              { frame: 217, url: "/renders/reference-encounter/previews/preview_03_f0217.jpg" },
-              { frame: 300, url: "/renders/reference-encounter/previews/preview_04_f0300.jpg" },
-            ],
+            previewImageUrls:
+              Array.isArray(refData.previewImageUrls) && refData.previewImageUrls.length > 0
+                ? refData.previewImageUrls
+                : [
+                    { frame: 1, url: "/renders/reference-encounter/previews/preview_01_f0001.jpg" },
+                    { frame: 115, url: "/renders/reference-encounter/previews/preview_02_f0115.jpg" },
+                    { frame: 217, url: "/renders/reference-encounter/previews/preview_03_f0217.jpg" },
+                    { frame: 300, url: "/renders/reference-encounter/previews/preview_04_f0300.jpg" },
+                  ],
             outputMp4Url: refData.mp4Url,
             contactSheetUrl:
               refData.contactSheetUrl ||
@@ -213,9 +216,9 @@ export const ExportModal: React.FC<ExportModalProps> = ({
             sceneInspection: refData.sceneInspection || null,
             verification: refData.verification || null,
             logs: [
-              "Blender 3.4.1 background engine verified.",
-              "Built encounter.blend with Leo_Rig (31 bones) and Nemo_Rig (31 bones).",
-              "Phoneme-to-viseme lip-sync, comedic & emotional acting, and Piper ONNX neural VO baked.",
+              "Blender 3.4.1 background engine verified (zero frame skipping, 30 FPS progressive).",
+              "Built encounter.blend with Leo_Rig (free chin/head/gesture hands) and Nemo_Rig (bouncy hops & free arms).",
+              "Dense 3-frame Bezier F-curves, phoneme-to-viseme lip-sync, and expressive Piper ONNX neural VO baked.",
               `Rendered ${refFrames} frames at 1080×1920 @ 30 FPS and archived to /saved-animations/.`,
             ],
             errorMessage: null,

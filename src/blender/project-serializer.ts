@@ -105,7 +105,17 @@ export function serializeProjectToBlenderManifest(params: {
     ).toLowerCase();
 
     let resolvedEmotion = `${spkExpr}-${spkAction}`;
-    if (spkAction === "panic-react" || instructStr.includes("panic")) {
+    if (spkAction === "chin-think" || instructStr.includes("critique")) {
+      resolvedEmotion = "chin-think-critique";
+    } else if (spkAction === "head-scratch" || instructStr.includes("comeback")) {
+      resolvedEmotion = "head-scratch-banter";
+    } else if (spkAction === "facepalm-react") {
+      resolvedEmotion = "facepalm-disbelief";
+    } else if (spkAction === "playful-roast" || instructStr.includes("roast") || instructStr.includes("sassy")) {
+      resolvedEmotion = "playful-roast-sass";
+    } else if (spkAction === "energetic-wave" || instructStr.includes("energetic")) {
+      resolvedEmotion = "energetic-wave-bounce";
+    } else if (spkAction === "panic-react" || instructStr.includes("panic")) {
       resolvedEmotion = "panic-despair";
     } else if (instructStr.includes("stunned") || instructStr.includes("disbelief")) {
       resolvedEmotion = "stunned-disbelief";

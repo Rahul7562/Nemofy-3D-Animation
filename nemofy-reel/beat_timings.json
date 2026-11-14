@@ -1,0 +1,4784 @@
+{
+  "fps": 30,
+  "width": 1080,
+  "height": 1920,
+  "totalFrames": 1109,
+  "totalDuration": 36.9667,
+  "dialogueWav": "/app/applet/nemofy-reel/voices/mixed/dialogue_full.wav",
+  "beats": [
+    {
+      "id": 1,
+      "speaker": "leo",
+      "voice": "leo",
+      "instruct": "urgent panicked college student, energetic fast delivery",
+      "speed": 1.12,
+      "gapAfter": 0.14,
+      "camera": "crash-zoom",
+      "speakerAction": "facepalm-react",
+      "listenerAction": "playful-roast",
+      "emotion": "panic-urgency",
+      "card": "3 HOURS WASTED INSTALLING",
+      "ttsText": "Stop wasting three hours installing broken Verilog tools.",
+      "subtitle": "Stop wasting 3 hours installing broken Verilog tools.",
+      "wavPath": "/app/applet/nemofy-reel/voices/leo/beat_01_leo.wav",
+      "paddedWavPath": "/app/applet/nemofy-reel/voices/_raw/beat_01_leo_padded.wav",
+      "startSec": 0.0,
+      "speechEndSec": 2.7595,
+      "endSec": 2.9,
+      "speechDuration": 2.7595,
+      "durationSeconds": 2.9,
+      "startFrame": 1,
+      "endFrame": 88,
+      "lipSyncEnvelope": [
+        {
+          "mouthOpenness": 0.15,
+          "energy": 0.13
+        },
+        {
+          "mouthOpenness": 0.457,
+          "energy": 0.396
+        },
+        {
+          "mouthOpenness": 0.494,
+          "energy": 0.427
+        },
+        {
+          "mouthOpenness": 0.18,
+          "energy": 0.156
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.998
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.905
+        },
+        {
+          "mouthOpenness": 0.949,
+          "energy": 0.821
+        },
+        {
+          "mouthOpenness": 0.368,
+          "energy": 0.319
+        },
+        {
+          "mouthOpenness": 0.189,
+          "energy": 0.163
+        },
+        {
+          "mouthOpenness": 0.653,
+          "energy": 0.565
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.987
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.936
+        },
+        {
+          "mouthOpenness": 0.871,
+          "energy": 0.754
+        },
+        {
+          "mouthOpenness": 0.509,
+          "energy": 0.44
+        },
+        {
+          "mouthOpenness": 0.666,
+          "energy": 0.576
+        },
+        {
+          "mouthOpenness": 0.423,
+          "energy": 0.366
+        },
+        {
+          "mouthOpenness": 0.53,
+          "energy": 0.459
+        },
+        {
+          "mouthOpenness": 0.73,
+          "energy": 0.632
+        },
+        {
+          "mouthOpenness": 0.672,
+          "energy": 0.582
+        },
+        {
+          "mouthOpenness": 0.374,
+          "energy": 0.324
+        },
+        {
+          "mouthOpenness": 0.171,
+          "energy": 0.148
+        },
+        {
+          "mouthOpenness": 0.395,
+          "energy": 0.342
+        },
+        {
+          "mouthOpenness": 0.915,
+          "energy": 0.791
+        },
+        {
+          "mouthOpenness": 0.916,
+          "energy": 0.792
+        },
+        {
+          "mouthOpenness": 0.983,
+          "energy": 0.85
+        },
+        {
+          "mouthOpenness": 0.386,
+          "energy": 0.334
+        },
+        {
+          "mouthOpenness": 0.805,
+          "energy": 0.696
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.898
+        },
+        {
+          "mouthOpenness": 0.935,
+          "energy": 0.809
+        },
+        {
+          "mouthOpenness": 0.895,
+          "energy": 0.775
+        },
+        {
+          "mouthOpenness": 0.859,
+          "energy": 0.744
+        },
+        {
+          "mouthOpenness": 0.822,
+          "energy": 0.711
+        },
+        {
+          "mouthOpenness": 0.662,
+          "energy": 0.573
+        },
+        {
+          "mouthOpenness": 0.587,
+          "energy": 0.508
+        },
+        {
+          "mouthOpenness": 0.363,
+          "energy": 0.314
+        },
+        {
+          "mouthOpenness": 0.431,
+          "energy": 0.373
+        },
+        {
+          "mouthOpenness": 0.262,
+          "energy": 0.227
+        },
+        {
+          "mouthOpenness": 0.433,
+          "energy": 0.375
+        },
+        {
+          "mouthOpenness": 0.571,
+          "energy": 0.495
+        },
+        {
+          "mouthOpenness": 0.485,
+          "energy": 0.42
+        },
+        {
+          "mouthOpenness": 0.517,
+          "energy": 0.447
+        },
+        {
+          "mouthOpenness": 0.533,
+          "energy": 0.461
+        },
+        {
+          "mouthOpenness": 0.421,
+          "energy": 0.364
+        },
+        {
+          "mouthOpenness": 0.707,
+          "energy": 0.612
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.883
+        },
+        {
+          "mouthOpenness": 0.965,
+          "energy": 0.835
+        },
+        {
+          "mouthOpenness": 0.765,
+          "energy": 0.662
+        },
+        {
+          "mouthOpenness": 0.806,
+          "energy": 0.697
+        },
+        {
+          "mouthOpenness": 0.818,
+          "energy": 0.708
+        },
+        {
+          "mouthOpenness": 0.493,
+          "energy": 0.427
+        },
+        {
+          "mouthOpenness": 0.131,
+          "energy": 0.113
+        },
+        {
+          "mouthOpenness": 0.753,
+          "energy": 0.651
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.999
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.944
+        },
+        {
+          "mouthOpenness": 0.741,
+          "energy": 0.641
+        },
+        {
+          "mouthOpenness": 0.161,
+          "energy": 0.139
+        },
+        {
+          "mouthOpenness": 0.637,
+          "energy": 0.551
+        },
+        {
+          "mouthOpenness": 0.727,
+          "energy": 0.629
+        },
+        {
+          "mouthOpenness": 0.667,
+          "energy": 0.577
+        },
+        {
+          "mouthOpenness": 0.445,
+          "energy": 0.385
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.92
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.892
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.907
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.917
+        },
+        {
+          "mouthOpenness": 0.972,
+          "energy": 0.841
+        },
+        {
+          "mouthOpenness": 0.76,
+          "energy": 0.657
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.888
+        },
+        {
+          "mouthOpenness": 0.917,
+          "energy": 0.793
+        },
+        {
+          "mouthOpenness": 0.873,
+          "energy": 0.756
+        },
+        {
+          "mouthOpenness": 0.336,
+          "energy": 0.291
+        },
+        {
+          "mouthOpenness": 0.126,
+          "energy": 0.109
+        },
+        {
+          "mouthOpenness": 0.13,
+          "energy": 0.113
+        },
+        {
+          "mouthOpenness": 0.276,
+          "energy": 0.239
+        },
+        {
+          "mouthOpenness": 0.154,
+          "energy": 0.133
+        },
+        {
+          "mouthOpenness": 0.73,
+          "energy": 0.632
+        },
+        {
+          "mouthOpenness": 0.583,
+          "energy": 0.505
+        },
+        {
+          "mouthOpenness": 0.571,
+          "energy": 0.494
+        },
+        {
+          "mouthOpenness": 0.404,
+          "energy": 0.35
+        },
+        {
+          "mouthOpenness": 0.25,
+          "energy": 0.216
+        },
+        {
+          "mouthOpenness": 0.126,
+          "energy": 0.109
+        },
+        {
+          "mouthOpenness": 0.154,
+          "energy": 0.133
+        },
+        {
+          "mouthOpenness": 0.149,
+          "energy": 0.129
+        },
+        {
+          "mouthOpenness": 0.021,
+          "energy": 0.019
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "speaker": "leo",
+      "voice": "leo",
+      "instruct": "confused exasperated young male student, natural conversational",
+      "speed": 1.08,
+      "gapAfter": 0.14,
+      "camera": "establishing-wide",
+      "speakerAction": "panic-react",
+      "listenerAction": "idle",
+      "emotion": "frustrated",
+      "card": "",
+      "ttsText": "Wait a second. Why does my laptop sound like a jet?",
+      "subtitle": "Wait a second. Why does my laptop sound like a jet?",
+      "wavPath": "/app/applet/nemofy-reel/voices/leo/beat_02_leo.wav",
+      "paddedWavPath": "/app/applet/nemofy-reel/voices/_raw/beat_02_leo_padded.wav",
+      "startSec": 2.9,
+      "speechEndSec": 5.6968,
+      "endSec": 5.8333,
+      "speechDuration": 2.7968,
+      "durationSeconds": 2.9333,
+      "startFrame": 88,
+      "endFrame": 176,
+      "lipSyncEnvelope": [
+        {
+          "mouthOpenness": 0.638,
+          "energy": 0.552
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 1.0
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 1.0
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.978
+        },
+        {
+          "mouthOpenness": 0.416,
+          "energy": 0.36
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.949
+        },
+        {
+          "mouthOpenness": 0.761,
+          "energy": 0.658
+        },
+        {
+          "mouthOpenness": 0.47,
+          "energy": 0.406
+        },
+        {
+          "mouthOpenness": 0.604,
+          "energy": 0.522
+        },
+        {
+          "mouthOpenness": 0.692,
+          "energy": 0.599
+        },
+        {
+          "mouthOpenness": 0.942,
+          "energy": 0.815
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.917
+        },
+        {
+          "mouthOpenness": 0.744,
+          "energy": 0.644
+        },
+        {
+          "mouthOpenness": 0.303,
+          "energy": 0.263
+        },
+        {
+          "mouthOpenness": 0.078,
+          "energy": 0.068
+        },
+        {
+          "mouthOpenness": 0.304,
+          "energy": 0.263
+        },
+        {
+          "mouthOpenness": 0.418,
+          "energy": 0.362
+        },
+        {
+          "mouthOpenness": 0.296,
+          "energy": 0.256
+        },
+        {
+          "mouthOpenness": 0.124,
+          "energy": 0.107
+        },
+        {
+          "mouthOpenness": 0.049,
+          "energy": 0.043
+        },
+        {
+          "mouthOpenness": 0.039,
+          "energy": 0.034
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.47,
+          "energy": 0.407
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.978
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 1.0
+        },
+        {
+          "mouthOpenness": 0.554,
+          "energy": 0.48
+        },
+        {
+          "mouthOpenness": 0.593,
+          "energy": 0.513
+        },
+        {
+          "mouthOpenness": 0.829,
+          "energy": 0.718
+        },
+        {
+          "mouthOpenness": 0.633,
+          "energy": 0.548
+        },
+        {
+          "mouthOpenness": 0.498,
+          "energy": 0.431
+        },
+        {
+          "mouthOpenness": 0.97,
+          "energy": 0.839
+        },
+        {
+          "mouthOpenness": 0.982,
+          "energy": 0.85
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.892
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.89
+        },
+        {
+          "mouthOpenness": 0.864,
+          "energy": 0.747
+        },
+        {
+          "mouthOpenness": 0.827,
+          "energy": 0.715
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.887
+        },
+        {
+          "mouthOpenness": 0.811,
+          "energy": 0.702
+        },
+        {
+          "mouthOpenness": 0.897,
+          "energy": 0.776
+        },
+        {
+          "mouthOpenness": 0.858,
+          "energy": 0.742
+        },
+        {
+          "mouthOpenness": 0.277,
+          "energy": 0.24
+        },
+        {
+          "mouthOpenness": 0.053,
+          "energy": 0.046
+        },
+        {
+          "mouthOpenness": 0.021,
+          "energy": 0.018
+        },
+        {
+          "mouthOpenness": 0.264,
+          "energy": 0.229
+        },
+        {
+          "mouthOpenness": 0.226,
+          "energy": 0.196
+        },
+        {
+          "mouthOpenness": 0.787,
+          "energy": 0.681
+        },
+        {
+          "mouthOpenness": 0.984,
+          "energy": 0.852
+        },
+        {
+          "mouthOpenness": 0.987,
+          "energy": 0.854
+        },
+        {
+          "mouthOpenness": 0.945,
+          "energy": 0.818
+        },
+        {
+          "mouthOpenness": 0.653,
+          "energy": 0.565
+        },
+        {
+          "mouthOpenness": 0.084,
+          "energy": 0.073
+        },
+        {
+          "mouthOpenness": 0.261,
+          "energy": 0.226
+        },
+        {
+          "mouthOpenness": 0.522,
+          "energy": 0.452
+        },
+        {
+          "mouthOpenness": 0.538,
+          "energy": 0.466
+        },
+        {
+          "mouthOpenness": 0.471,
+          "energy": 0.408
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.931
+        },
+        {
+          "mouthOpenness": 0.887,
+          "energy": 0.768
+        },
+        {
+          "mouthOpenness": 0.778,
+          "energy": 0.673
+        },
+        {
+          "mouthOpenness": 0.671,
+          "energy": 0.58
+        },
+        {
+          "mouthOpenness": 0.572,
+          "energy": 0.495
+        },
+        {
+          "mouthOpenness": 0.669,
+          "energy": 0.579
+        },
+        {
+          "mouthOpenness": 0.65,
+          "energy": 0.563
+        },
+        {
+          "mouthOpenness": 0.933,
+          "energy": 0.807
+        },
+        {
+          "mouthOpenness": 0.908,
+          "energy": 0.786
+        },
+        {
+          "mouthOpenness": 0.885,
+          "energy": 0.766
+        },
+        {
+          "mouthOpenness": 0.742,
+          "energy": 0.642
+        },
+        {
+          "mouthOpenness": 0.116,
+          "energy": 0.101
+        },
+        {
+          "mouthOpenness": 0.135,
+          "energy": 0.117
+        },
+        {
+          "mouthOpenness": 0.93,
+          "energy": 0.805
+        },
+        {
+          "mouthOpenness": 0.664,
+          "energy": 0.574
+        },
+        {
+          "mouthOpenness": 0.288,
+          "energy": 0.249
+        },
+        {
+          "mouthOpenness": 0.383,
+          "energy": 0.332
+        },
+        {
+          "mouthOpenness": 0.631,
+          "energy": 0.546
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 1.0
+        },
+        {
+          "mouthOpenness": 0.929,
+          "energy": 0.804
+        },
+        {
+          "mouthOpenness": 0.827,
+          "energy": 0.716
+        },
+        {
+          "mouthOpenness": 0.401,
+          "energy": 0.347
+        },
+        {
+          "mouthOpenness": 0.177,
+          "energy": 0.153
+        },
+        {
+          "mouthOpenness": 0.043,
+          "energy": 0.037
+        },
+        {
+          "mouthOpenness": 0.023,
+          "energy": 0.02
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "speaker": "nemo",
+      "voice": "nemo",
+      "instruct": "playful witty teasing female AI companion, sassy roast",
+      "speed": 1.08,
+      "gapAfter": 0.14,
+      "camera": "close-up",
+      "speakerAction": "playful-roast",
+      "listenerAction": "chin-think",
+      "emotion": "playful-sarcasm",
+      "card": "",
+      "ttsText": "Leo, you downloaded forty gigabytes for an AND gate.",
+      "subtitle": "Leo, you downloaded 40GB for an AND gate.",
+      "wavPath": "/app/applet/nemofy-reel/voices/nemo/beat_03_nemo.wav",
+      "paddedWavPath": "/app/applet/nemofy-reel/voices/_raw/beat_03_nemo_padded.wav",
+      "startSec": 5.8333,
+      "speechEndSec": 8.4141,
+      "endSec": 8.5667,
+      "speechDuration": 2.5808,
+      "durationSeconds": 2.7333,
+      "startFrame": 176,
+      "endFrame": 258,
+      "lipSyncEnvelope": [
+        {
+          "mouthOpenness": 0.389,
+          "energy": 0.337
+        },
+        {
+          "mouthOpenness": 0.838,
+          "energy": 0.725
+        },
+        {
+          "mouthOpenness": 0.993,
+          "energy": 0.859
+        },
+        {
+          "mouthOpenness": 0.885,
+          "energy": 0.765
+        },
+        {
+          "mouthOpenness": 0.839,
+          "energy": 0.726
+        },
+        {
+          "mouthOpenness": 0.804,
+          "energy": 0.696
+        },
+        {
+          "mouthOpenness": 0.646,
+          "energy": 0.559
+        },
+        {
+          "mouthOpenness": 0.532,
+          "energy": 0.46
+        },
+        {
+          "mouthOpenness": 0.466,
+          "energy": 0.403
+        },
+        {
+          "mouthOpenness": 0.357,
+          "energy": 0.309
+        },
+        {
+          "mouthOpenness": 0.284,
+          "energy": 0.246
+        },
+        {
+          "mouthOpenness": 0.125,
+          "energy": 0.109
+        },
+        {
+          "mouthOpenness": 0.022,
+          "energy": 0.019
+        },
+        {
+          "mouthOpenness": 0.42,
+          "energy": 0.364
+        },
+        {
+          "mouthOpenness": 0.952,
+          "energy": 0.824
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.954
+        },
+        {
+          "mouthOpenness": 0.921,
+          "energy": 0.797
+        },
+        {
+          "mouthOpenness": 0.524,
+          "energy": 0.454
+        },
+        {
+          "mouthOpenness": 0.698,
+          "energy": 0.604
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 1.0
+        },
+        {
+          "mouthOpenness": 0.925,
+          "energy": 0.8
+        },
+        {
+          "mouthOpenness": 0.85,
+          "energy": 0.736
+        },
+        {
+          "mouthOpenness": 0.92,
+          "energy": 0.797
+        },
+        {
+          "mouthOpenness": 0.757,
+          "energy": 0.655
+        },
+        {
+          "mouthOpenness": 0.639,
+          "energy": 0.553
+        },
+        {
+          "mouthOpenness": 0.585,
+          "energy": 0.506
+        },
+        {
+          "mouthOpenness": 0.583,
+          "energy": 0.505
+        },
+        {
+          "mouthOpenness": 0.364,
+          "energy": 0.315
+        },
+        {
+          "mouthOpenness": 0.428,
+          "energy": 0.37
+        },
+        {
+          "mouthOpenness": 0.813,
+          "energy": 0.704
+        },
+        {
+          "mouthOpenness": 0.45,
+          "energy": 0.39
+        },
+        {
+          "mouthOpenness": 0.245,
+          "energy": 0.212
+        },
+        {
+          "mouthOpenness": 0.107,
+          "energy": 0.093
+        },
+        {
+          "mouthOpenness": 0.092,
+          "energy": 0.079
+        },
+        {
+          "mouthOpenness": 0.111,
+          "energy": 0.096
+        },
+        {
+          "mouthOpenness": 0.976,
+          "energy": 0.844
+        },
+        {
+          "mouthOpenness": 0.815,
+          "energy": 0.705
+        },
+        {
+          "mouthOpenness": 0.537,
+          "energy": 0.464
+        },
+        {
+          "mouthOpenness": 0.824,
+          "energy": 0.713
+        },
+        {
+          "mouthOpenness": 0.703,
+          "energy": 0.609
+        },
+        {
+          "mouthOpenness": 0.357,
+          "energy": 0.309
+        },
+        {
+          "mouthOpenness": 0.677,
+          "energy": 0.586
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.867
+        },
+        {
+          "mouthOpenness": 0.501,
+          "energy": 0.434
+        },
+        {
+          "mouthOpenness": 0.477,
+          "energy": 0.413
+        },
+        {
+          "mouthOpenness": 0.742,
+          "energy": 0.642
+        },
+        {
+          "mouthOpenness": 0.161,
+          "energy": 0.14
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.958
+        },
+        {
+          "mouthOpenness": 0.829,
+          "energy": 0.717
+        },
+        {
+          "mouthOpenness": 0.716,
+          "energy": 0.62
+        },
+        {
+          "mouthOpenness": 0.643,
+          "energy": 0.557
+        },
+        {
+          "mouthOpenness": 0.142,
+          "energy": 0.123
+        },
+        {
+          "mouthOpenness": 0.237,
+          "energy": 0.205
+        },
+        {
+          "mouthOpenness": 0.507,
+          "energy": 0.439
+        },
+        {
+          "mouthOpenness": 0.202,
+          "energy": 0.175
+        },
+        {
+          "mouthOpenness": 0.071,
+          "energy": 0.062
+        },
+        {
+          "mouthOpenness": 0.786,
+          "energy": 0.68
+        },
+        {
+          "mouthOpenness": 0.893,
+          "energy": 0.773
+        },
+        {
+          "mouthOpenness": 0.847,
+          "energy": 0.733
+        },
+        {
+          "mouthOpenness": 0.784,
+          "energy": 0.678
+        },
+        {
+          "mouthOpenness": 0.744,
+          "energy": 0.644
+        },
+        {
+          "mouthOpenness": 0.853,
+          "energy": 0.738
+        },
+        {
+          "mouthOpenness": 0.874,
+          "energy": 0.756
+        },
+        {
+          "mouthOpenness": 0.896,
+          "energy": 0.775
+        },
+        {
+          "mouthOpenness": 0.91,
+          "energy": 0.788
+        },
+        {
+          "mouthOpenness": 0.778,
+          "energy": 0.673
+        },
+        {
+          "mouthOpenness": 0.466,
+          "energy": 0.403
+        },
+        {
+          "mouthOpenness": 0.149,
+          "energy": 0.129
+        },
+        {
+          "mouthOpenness": 0.419,
+          "energy": 0.363
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.897
+        },
+        {
+          "mouthOpenness": 0.748,
+          "energy": 0.647
+        },
+        {
+          "mouthOpenness": 0.558,
+          "energy": 0.483
+        },
+        {
+          "mouthOpenness": 0.349,
+          "energy": 0.302
+        },
+        {
+          "mouthOpenness": 0.239,
+          "energy": 0.207
+        },
+        {
+          "mouthOpenness": 0.014,
+          "energy": 0.012
+        },
+        {
+          "mouthOpenness": 0.121,
+          "energy": 0.105
+        },
+        {
+          "mouthOpenness": 0.078,
+          "energy": 0.068
+        },
+        {
+          "mouthOpenness": 0.008,
+          "energy": 0.007
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "speaker": "leo",
+      "voice": "leo",
+      "instruct": "sheepish defensive young male student, conversational comeback",
+      "speed": 1.05,
+      "gapAfter": 0.14,
+      "camera": "close-up",
+      "speakerAction": "head-scratch",
+      "listenerAction": "idle",
+      "emotion": "sheepish",
+      "card": "",
+      "ttsText": "My T A insisted.",
+      "subtitle": "My TA insisted.",
+      "wavPath": "/app/applet/nemofy-reel/voices/leo/beat_04_leo.wav",
+      "paddedWavPath": "/app/applet/nemofy-reel/voices/_raw/beat_04_leo_padded.wav",
+      "startSec": 8.5667,
+      "speechEndSec": 9.6202,
+      "endSec": 9.7667,
+      "speechDuration": 1.0535,
+      "durationSeconds": 1.2,
+      "startFrame": 258,
+      "endFrame": 294,
+      "lipSyncEnvelope": [
+        {
+          "mouthOpenness": 0.615,
+          "energy": 0.532
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.936
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 1.0
+        },
+        {
+          "mouthOpenness": 0.753,
+          "energy": 0.651
+        },
+        {
+          "mouthOpenness": 0.139,
+          "energy": 0.121
+        },
+        {
+          "mouthOpenness": 0.603,
+          "energy": 0.522
+        },
+        {
+          "mouthOpenness": 0.494,
+          "energy": 0.428
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.914
+        },
+        {
+          "mouthOpenness": 0.93,
+          "energy": 0.804
+        },
+        {
+          "mouthOpenness": 0.911,
+          "energy": 0.789
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 1.0
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 1.0
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.871
+        },
+        {
+          "mouthOpenness": 0.563,
+          "energy": 0.487
+        },
+        {
+          "mouthOpenness": 0.712,
+          "energy": 0.616
+        },
+        {
+          "mouthOpenness": 0.838,
+          "energy": 0.725
+        },
+        {
+          "mouthOpenness": 0.855,
+          "energy": 0.74
+        },
+        {
+          "mouthOpenness": 0.582,
+          "energy": 0.503
+        },
+        {
+          "mouthOpenness": 0.752,
+          "energy": 0.651
+        },
+        {
+          "mouthOpenness": 0.631,
+          "energy": 0.546
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.902
+        },
+        {
+          "mouthOpenness": 0.885,
+          "energy": 0.766
+        },
+        {
+          "mouthOpenness": 0.504,
+          "energy": 0.436
+        },
+        {
+          "mouthOpenness": 0.718,
+          "energy": 0.621
+        },
+        {
+          "mouthOpenness": 0.237,
+          "energy": 0.205
+        },
+        {
+          "mouthOpenness": 0.182,
+          "energy": 0.157
+        },
+        {
+          "mouthOpenness": 0.851,
+          "energy": 0.736
+        },
+        {
+          "mouthOpenness": 0.608,
+          "energy": 0.526
+        },
+        {
+          "mouthOpenness": 0.334,
+          "energy": 0.289
+        },
+        {
+          "mouthOpenness": 0.115,
+          "energy": 0.099
+        },
+        {
+          "mouthOpenness": 0.077,
+          "energy": 0.066
+        },
+        {
+          "mouthOpenness": 0.001,
+          "energy": 0.001
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "speaker": "nemo",
+      "voice": "nemo",
+      "instruct": "amused sharp teasing female AI companion, banter",
+      "speed": 1.08,
+      "gapAfter": 0.12,
+      "camera": "dolly-in",
+      "speakerAction": "playful-roast",
+      "listenerAction": "panic-react",
+      "emotion": "teasing-urgency",
+      "card": "",
+      "ttsText": "Wait. That forty gigabyte installer freezes before eleven fifty-nine?",
+      "subtitle": "Wait. That 40GB installer freezes before 11:59?",
+      "wavPath": "/app/applet/nemofy-reel/voices/nemo/beat_05_nemo.wav",
+      "paddedWavPath": "/app/applet/nemofy-reel/voices/_raw/beat_05_nemo_padded.wav",
+      "startSec": 9.7667,
+      "speechEndSec": 13.2373,
+      "endSec": 13.3667,
+      "speechDuration": 3.4707,
+      "durationSeconds": 3.6,
+      "startFrame": 294,
+      "endFrame": 402,
+      "lipSyncEnvelope": [
+        {
+          "mouthOpenness": 0.409,
+          "energy": 0.354
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.877
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 1.0
+        },
+        {
+          "mouthOpenness": 0.869,
+          "energy": 0.752
+        },
+        {
+          "mouthOpenness": 0.66,
+          "energy": 0.571
+        },
+        {
+          "mouthOpenness": 0.45,
+          "energy": 0.39
+        },
+        {
+          "mouthOpenness": 0.052,
+          "energy": 0.045
+        },
+        {
+          "mouthOpenness": 0.077,
+          "energy": 0.067
+        },
+        {
+          "mouthOpenness": 0.103,
+          "energy": 0.089
+        },
+        {
+          "mouthOpenness": 0.021,
+          "energy": 0.018
+        },
+        {
+          "mouthOpenness": 0.004,
+          "energy": 0.004
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.617,
+          "energy": 0.534
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.972
+        },
+        {
+          "mouthOpenness": 0.643,
+          "energy": 0.556
+        },
+        {
+          "mouthOpenness": 0.174,
+          "energy": 0.151
+        },
+        {
+          "mouthOpenness": 0.108,
+          "energy": 0.094
+        },
+        {
+          "mouthOpenness": 0.075,
+          "energy": 0.065
+        },
+        {
+          "mouthOpenness": 0.58,
+          "energy": 0.502
+        },
+        {
+          "mouthOpenness": 0.994,
+          "energy": 0.86
+        },
+        {
+          "mouthOpenness": 0.856,
+          "energy": 0.741
+        },
+        {
+          "mouthOpenness": 0.41,
+          "energy": 0.355
+        },
+        {
+          "mouthOpenness": 0.778,
+          "energy": 0.673
+        },
+        {
+          "mouthOpenness": 0.612,
+          "energy": 0.53
+        },
+        {
+          "mouthOpenness": 0.395,
+          "energy": 0.342
+        },
+        {
+          "mouthOpenness": 0.654,
+          "energy": 0.566
+        },
+        {
+          "mouthOpenness": 0.975,
+          "energy": 0.843
+        },
+        {
+          "mouthOpenness": 0.487,
+          "energy": 0.421
+        },
+        {
+          "mouthOpenness": 0.905,
+          "energy": 0.783
+        },
+        {
+          "mouthOpenness": 0.47,
+          "energy": 0.407
+        },
+        {
+          "mouthOpenness": 0.148,
+          "energy": 0.128
+        },
+        {
+          "mouthOpenness": 0.815,
+          "energy": 0.705
+        },
+        {
+          "mouthOpenness": 0.747,
+          "energy": 0.646
+        },
+        {
+          "mouthOpenness": 0.713,
+          "energy": 0.617
+        },
+        {
+          "mouthOpenness": 0.602,
+          "energy": 0.521
+        },
+        {
+          "mouthOpenness": 0.493,
+          "energy": 0.427
+        },
+        {
+          "mouthOpenness": 0.159,
+          "energy": 0.138
+        },
+        {
+          "mouthOpenness": 0.476,
+          "energy": 0.412
+        },
+        {
+          "mouthOpenness": 0.701,
+          "energy": 0.606
+        },
+        {
+          "mouthOpenness": 0.673,
+          "energy": 0.582
+        },
+        {
+          "mouthOpenness": 0.429,
+          "energy": 0.371
+        },
+        {
+          "mouthOpenness": 0.451,
+          "energy": 0.39
+        },
+        {
+          "mouthOpenness": 0.028,
+          "energy": 0.024
+        },
+        {
+          "mouthOpenness": 0.722,
+          "energy": 0.625
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.922
+        },
+        {
+          "mouthOpenness": 0.85,
+          "energy": 0.736
+        },
+        {
+          "mouthOpenness": 0.727,
+          "energy": 0.629
+        },
+        {
+          "mouthOpenness": 0.639,
+          "energy": 0.553
+        },
+        {
+          "mouthOpenness": 0.655,
+          "energy": 0.567
+        },
+        {
+          "mouthOpenness": 0.506,
+          "energy": 0.438
+        },
+        {
+          "mouthOpenness": 0.146,
+          "energy": 0.126
+        },
+        {
+          "mouthOpenness": 0.064,
+          "energy": 0.055
+        },
+        {
+          "mouthOpenness": 0.08,
+          "energy": 0.069
+        },
+        {
+          "mouthOpenness": 0.105,
+          "energy": 0.091
+        },
+        {
+          "mouthOpenness": 0.81,
+          "energy": 0.701
+        },
+        {
+          "mouthOpenness": 0.866,
+          "energy": 0.75
+        },
+        {
+          "mouthOpenness": 0.891,
+          "energy": 0.771
+        },
+        {
+          "mouthOpenness": 0.45,
+          "energy": 0.389
+        },
+        {
+          "mouthOpenness": 0.44,
+          "energy": 0.381
+        },
+        {
+          "mouthOpenness": 0.412,
+          "energy": 0.357
+        },
+        {
+          "mouthOpenness": 0.589,
+          "energy": 0.51
+        },
+        {
+          "mouthOpenness": 0.401,
+          "energy": 0.347
+        },
+        {
+          "mouthOpenness": 0.416,
+          "energy": 0.36
+        },
+        {
+          "mouthOpenness": 0.031,
+          "energy": 0.027
+        },
+        {
+          "mouthOpenness": 0.156,
+          "energy": 0.135
+        },
+        {
+          "mouthOpenness": 0.762,
+          "energy": 0.659
+        },
+        {
+          "mouthOpenness": 0.49,
+          "energy": 0.424
+        },
+        {
+          "mouthOpenness": 0.073,
+          "energy": 0.063
+        },
+        {
+          "mouthOpenness": 0.093,
+          "energy": 0.081
+        },
+        {
+          "mouthOpenness": 0.831,
+          "energy": 0.719
+        },
+        {
+          "mouthOpenness": 0.839,
+          "energy": 0.726
+        },
+        {
+          "mouthOpenness": 0.783,
+          "energy": 0.678
+        },
+        {
+          "mouthOpenness": 0.744,
+          "energy": 0.644
+        },
+        {
+          "mouthOpenness": 0.674,
+          "energy": 0.584
+        },
+        {
+          "mouthOpenness": 0.479,
+          "energy": 0.414
+        },
+        {
+          "mouthOpenness": 0.748,
+          "energy": 0.648
+        },
+        {
+          "mouthOpenness": 0.917,
+          "energy": 0.793
+        },
+        {
+          "mouthOpenness": 0.655,
+          "energy": 0.567
+        },
+        {
+          "mouthOpenness": 0.276,
+          "energy": 0.239
+        },
+        {
+          "mouthOpenness": 0.792,
+          "energy": 0.686
+        },
+        {
+          "mouthOpenness": 0.578,
+          "energy": 0.5
+        },
+        {
+          "mouthOpenness": 0.068,
+          "energy": 0.059
+        },
+        {
+          "mouthOpenness": 0.097,
+          "energy": 0.084
+        },
+        {
+          "mouthOpenness": 0.928,
+          "energy": 0.803
+        },
+        {
+          "mouthOpenness": 0.488,
+          "energy": 0.423
+        },
+        {
+          "mouthOpenness": 0.066,
+          "energy": 0.057
+        },
+        {
+          "mouthOpenness": 0.044,
+          "energy": 0.038
+        },
+        {
+          "mouthOpenness": 0.704,
+          "energy": 0.609
+        },
+        {
+          "mouthOpenness": 0.811,
+          "energy": 0.702
+        },
+        {
+          "mouthOpenness": 0.702,
+          "energy": 0.608
+        },
+        {
+          "mouthOpenness": 0.702,
+          "energy": 0.607
+        },
+        {
+          "mouthOpenness": 0.544,
+          "energy": 0.471
+        },
+        {
+          "mouthOpenness": 0.6,
+          "energy": 0.519
+        },
+        {
+          "mouthOpenness": 0.636,
+          "energy": 0.55
+        },
+        {
+          "mouthOpenness": 0.731,
+          "energy": 0.633
+        },
+        {
+          "mouthOpenness": 0.521,
+          "energy": 0.451
+        },
+        {
+          "mouthOpenness": 0.065,
+          "energy": 0.056
+        },
+        {
+          "mouthOpenness": 0.001,
+          "energy": 0.001
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "speaker": "leo",
+      "voice": "leo",
+      "instruct": "urgent pleading college student, natural panicked",
+      "speed": 1.1,
+      "gapAfter": 0.16,
+      "camera": "close-up",
+      "speakerAction": "chin-think",
+      "listenerAction": "playful-roast",
+      "emotion": "desperate",
+      "card": "",
+      "ttsText": "I'm totally cooked. What else works?",
+      "subtitle": "I'm totally cooked. What else works?",
+      "wavPath": "/app/applet/nemofy-reel/voices/leo/beat_06_leo.wav",
+      "paddedWavPath": "/app/applet/nemofy-reel/voices/_raw/beat_06_leo_padded.wav",
+      "startSec": 13.3667,
+      "speechEndSec": 15.2939,
+      "endSec": 15.4667,
+      "speechDuration": 1.9272,
+      "durationSeconds": 2.1,
+      "startFrame": 402,
+      "endFrame": 465,
+      "lipSyncEnvelope": [
+        {
+          "mouthOpenness": 0.886,
+          "energy": 0.767
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.899
+        },
+        {
+          "mouthOpenness": 0.802,
+          "energy": 0.694
+        },
+        {
+          "mouthOpenness": 0.922,
+          "energy": 0.798
+        },
+        {
+          "mouthOpenness": 0.883,
+          "energy": 0.764
+        },
+        {
+          "mouthOpenness": 0.414,
+          "energy": 0.359
+        },
+        {
+          "mouthOpenness": 0.093,
+          "energy": 0.081
+        },
+        {
+          "mouthOpenness": 0.409,
+          "energy": 0.354
+        },
+        {
+          "mouthOpenness": 0.278,
+          "energy": 0.24
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 1.0
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.958
+        },
+        {
+          "mouthOpenness": 0.891,
+          "energy": 0.771
+        },
+        {
+          "mouthOpenness": 0.58,
+          "energy": 0.502
+        },
+        {
+          "mouthOpenness": 0.706,
+          "energy": 0.611
+        },
+        {
+          "mouthOpenness": 0.69,
+          "energy": 0.597
+        },
+        {
+          "mouthOpenness": 0.762,
+          "energy": 0.66
+        },
+        {
+          "mouthOpenness": 0.65,
+          "energy": 0.562
+        },
+        {
+          "mouthOpenness": 0.212,
+          "energy": 0.183
+        },
+        {
+          "mouthOpenness": 0.047,
+          "energy": 0.04
+        },
+        {
+          "mouthOpenness": 0.11,
+          "energy": 0.095
+        },
+        {
+          "mouthOpenness": 0.527,
+          "energy": 0.456
+        },
+        {
+          "mouthOpenness": 0.762,
+          "energy": 0.659
+        },
+        {
+          "mouthOpenness": 0.616,
+          "energy": 0.533
+        },
+        {
+          "mouthOpenness": 0.257,
+          "energy": 0.222
+        },
+        {
+          "mouthOpenness": 0.023,
+          "energy": 0.02
+        },
+        {
+          "mouthOpenness": 0.031,
+          "energy": 0.026
+        },
+        {
+          "mouthOpenness": 0.005,
+          "energy": 0.004
+        },
+        {
+          "mouthOpenness": 0.06,
+          "energy": 0.052
+        },
+        {
+          "mouthOpenness": 0.003,
+          "energy": 0.003
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.256,
+          "energy": 0.222
+        },
+        {
+          "mouthOpenness": 0.957,
+          "energy": 0.828
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.923
+        },
+        {
+          "mouthOpenness": 0.953,
+          "energy": 0.825
+        },
+        {
+          "mouthOpenness": 0.562,
+          "energy": 0.487
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.906
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.956
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.877
+        },
+        {
+          "mouthOpenness": 0.708,
+          "energy": 0.613
+        },
+        {
+          "mouthOpenness": 0.372,
+          "energy": 0.322
+        },
+        {
+          "mouthOpenness": 0.516,
+          "energy": 0.446
+        },
+        {
+          "mouthOpenness": 0.24,
+          "energy": 0.207
+        },
+        {
+          "mouthOpenness": 0.561,
+          "energy": 0.486
+        },
+        {
+          "mouthOpenness": 0.917,
+          "energy": 0.793
+        },
+        {
+          "mouthOpenness": 0.977,
+          "energy": 0.846
+        },
+        {
+          "mouthOpenness": 0.863,
+          "energy": 0.747
+        },
+        {
+          "mouthOpenness": 0.719,
+          "energy": 0.622
+        },
+        {
+          "mouthOpenness": 0.329,
+          "energy": 0.285
+        },
+        {
+          "mouthOpenness": 0.037,
+          "energy": 0.032
+        },
+        {
+          "mouthOpenness": 0.037,
+          "energy": 0.032
+        },
+        {
+          "mouthOpenness": 0.128,
+          "energy": 0.11
+        },
+        {
+          "mouthOpenness": 0.266,
+          "energy": 0.23
+        },
+        {
+          "mouthOpenness": 0.226,
+          "energy": 0.195
+        },
+        {
+          "mouthOpenness": 0.18,
+          "energy": 0.156
+        },
+        {
+          "mouthOpenness": 0.128,
+          "energy": 0.11
+        },
+        {
+          "mouthOpenness": 0.017,
+          "energy": 0.015
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "speaker": "nemo",
+      "voice": "nemo",
+      "instruct": "confident crisp witty female AI companion, energetic reveal",
+      "speed": 1.08,
+      "gapAfter": 0.14,
+      "camera": "dolly-in",
+      "speakerAction": "energetic-wave",
+      "listenerAction": "chin-think",
+      "emotion": "confident-reveal",
+      "card": "NEMOFY.TECH  ->  STUDENTHUB",
+      "ttsText": "Open Nemofy dot tech. Tap StudentHub.",
+      "subtitle": "Open Nemofy.tech. Tap StudentHub.",
+      "wavPath": "/app/applet/nemofy-reel/voices/nemo/beat_07_nemo.wav",
+      "paddedWavPath": "/app/applet/nemofy-reel/voices/_raw/beat_07_nemo_padded.wav",
+      "startSec": 15.4667,
+      "speechEndSec": 17.9833,
+      "endSec": 18.1333,
+      "speechDuration": 2.5166,
+      "durationSeconds": 2.6667,
+      "startFrame": 465,
+      "endFrame": 545,
+      "lipSyncEnvelope": [
+        {
+          "mouthOpenness": 0.651,
+          "energy": 0.563
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 1.0
+        },
+        {
+          "mouthOpenness": 0.962,
+          "energy": 0.832
+        },
+        {
+          "mouthOpenness": 0.413,
+          "energy": 0.357
+        },
+        {
+          "mouthOpenness": 0.092,
+          "energy": 0.08
+        },
+        {
+          "mouthOpenness": 0.902,
+          "energy": 0.78
+        },
+        {
+          "mouthOpenness": 0.909,
+          "energy": 0.786
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.994
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.92
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.925
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.941
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.882
+        },
+        {
+          "mouthOpenness": 0.952,
+          "energy": 0.824
+        },
+        {
+          "mouthOpenness": 0.828,
+          "energy": 0.716
+        },
+        {
+          "mouthOpenness": 0.578,
+          "energy": 0.501
+        },
+        {
+          "mouthOpenness": 0.157,
+          "energy": 0.136
+        },
+        {
+          "mouthOpenness": 0.085,
+          "energy": 0.074
+        },
+        {
+          "mouthOpenness": 0.352,
+          "energy": 0.304
+        },
+        {
+          "mouthOpenness": 0.775,
+          "energy": 0.671
+        },
+        {
+          "mouthOpenness": 0.564,
+          "energy": 0.488
+        },
+        {
+          "mouthOpenness": 0.52,
+          "energy": 0.45
+        },
+        {
+          "mouthOpenness": 0.624,
+          "energy": 0.54
+        },
+        {
+          "mouthOpenness": 0.362,
+          "energy": 0.313
+        },
+        {
+          "mouthOpenness": 0.179,
+          "energy": 0.155
+        },
+        {
+          "mouthOpenness": 0.994,
+          "energy": 0.86
+        },
+        {
+          "mouthOpenness": 0.933,
+          "energy": 0.808
+        },
+        {
+          "mouthOpenness": 0.746,
+          "energy": 0.646
+        },
+        {
+          "mouthOpenness": 0.505,
+          "energy": 0.437
+        },
+        {
+          "mouthOpenness": 0.051,
+          "energy": 0.044
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.001,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.377,
+          "energy": 0.326
+        },
+        {
+          "mouthOpenness": 0.473,
+          "energy": 0.41
+        },
+        {
+          "mouthOpenness": 0.845,
+          "energy": 0.731
+        },
+        {
+          "mouthOpenness": 0.68,
+          "energy": 0.588
+        },
+        {
+          "mouthOpenness": 0.421,
+          "energy": 0.364
+        },
+        {
+          "mouthOpenness": 0.174,
+          "energy": 0.151
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.144,
+          "energy": 0.125
+        },
+        {
+          "mouthOpenness": 0.037,
+          "energy": 0.032
+        },
+        {
+          "mouthOpenness": 0.008,
+          "energy": 0.007
+        },
+        {
+          "mouthOpenness": 0.001,
+          "energy": 0.001
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.207,
+          "energy": 0.179
+        },
+        {
+          "mouthOpenness": 0.563,
+          "energy": 0.487
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.965
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.885
+        },
+        {
+          "mouthOpenness": 0.259,
+          "energy": 0.224
+        },
+        {
+          "mouthOpenness": 0.284,
+          "energy": 0.246
+        },
+        {
+          "mouthOpenness": 0.85,
+          "energy": 0.735
+        },
+        {
+          "mouthOpenness": 0.407,
+          "energy": 0.353
+        },
+        {
+          "mouthOpenness": 0.343,
+          "energy": 0.297
+        },
+        {
+          "mouthOpenness": 0.997,
+          "energy": 0.863
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 1.0
+        },
+        {
+          "mouthOpenness": 0.942,
+          "energy": 0.815
+        },
+        {
+          "mouthOpenness": 0.417,
+          "energy": 0.361
+        },
+        {
+          "mouthOpenness": 0.877,
+          "energy": 0.759
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.956
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.935
+        },
+        {
+          "mouthOpenness": 0.653,
+          "energy": 0.565
+        },
+        {
+          "mouthOpenness": 0.294,
+          "energy": 0.255
+        },
+        {
+          "mouthOpenness": 0.221,
+          "energy": 0.191
+        },
+        {
+          "mouthOpenness": 0.831,
+          "energy": 0.719
+        },
+        {
+          "mouthOpenness": 0.911,
+          "energy": 0.788
+        },
+        {
+          "mouthOpenness": 0.779,
+          "energy": 0.674
+        },
+        {
+          "mouthOpenness": 0.609,
+          "energy": 0.527
+        },
+        {
+          "mouthOpenness": 0.338,
+          "energy": 0.293
+        },
+        {
+          "mouthOpenness": 0.364,
+          "energy": 0.315
+        },
+        {
+          "mouthOpenness": 0.386,
+          "energy": 0.334
+        },
+        {
+          "mouthOpenness": 0.16,
+          "energy": 0.138
+        },
+        {
+          "mouthOpenness": 0.002,
+          "energy": 0.002
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "speaker": "leo",
+      "voice": "leo",
+      "instruct": "surprised curious young male student, conversational",
+      "speed": 1.08,
+      "gapAfter": 0.14,
+      "camera": "close-up",
+      "speakerAction": "head-scratch",
+      "listenerAction": "idle",
+      "emotion": "curious-relief",
+      "card": "",
+      "ttsText": "Wait, no setup? Zero install.",
+      "subtitle": "Wait, no setup? Zero install.",
+      "wavPath": "/app/applet/nemofy-reel/voices/leo/beat_08_leo.wav",
+      "paddedWavPath": "/app/applet/nemofy-reel/voices/_raw/beat_08_leo_padded.wav",
+      "startSec": 18.1333,
+      "speechEndSec": 20.2275,
+      "endSec": 20.3667,
+      "speechDuration": 2.0942,
+      "durationSeconds": 2.2333,
+      "startFrame": 545,
+      "endFrame": 612,
+      "lipSyncEnvelope": [
+        {
+          "mouthOpenness": 0.258,
+          "energy": 0.223
+        },
+        {
+          "mouthOpenness": 0.856,
+          "energy": 0.741
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 1.0
+        },
+        {
+          "mouthOpenness": 0.968,
+          "energy": 0.837
+        },
+        {
+          "mouthOpenness": 0.961,
+          "energy": 0.832
+        },
+        {
+          "mouthOpenness": 0.519,
+          "energy": 0.449
+        },
+        {
+          "mouthOpenness": 0.091,
+          "energy": 0.079
+        },
+        {
+          "mouthOpenness": 0.206,
+          "energy": 0.178
+        },
+        {
+          "mouthOpenness": 0.096,
+          "energy": 0.083
+        },
+        {
+          "mouthOpenness": 0.025,
+          "energy": 0.022
+        },
+        {
+          "mouthOpenness": 0.007,
+          "energy": 0.006
+        },
+        {
+          "mouthOpenness": 0.001,
+          "energy": 0.001
+        },
+        {
+          "mouthOpenness": 0.001,
+          "energy": 0.001
+        },
+        {
+          "mouthOpenness": 0.031,
+          "energy": 0.027
+        },
+        {
+          "mouthOpenness": 0.561,
+          "energy": 0.485
+        },
+        {
+          "mouthOpenness": 0.981,
+          "energy": 0.849
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 1.0
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.9
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.871
+        },
+        {
+          "mouthOpenness": 0.654,
+          "energy": 0.566
+        },
+        {
+          "mouthOpenness": 0.476,
+          "energy": 0.412
+        },
+        {
+          "mouthOpenness": 0.529,
+          "energy": 0.457
+        },
+        {
+          "mouthOpenness": 0.575,
+          "energy": 0.498
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 1.0
+        },
+        {
+          "mouthOpenness": 0.935,
+          "energy": 0.809
+        },
+        {
+          "mouthOpenness": 0.513,
+          "energy": 0.444
+        },
+        {
+          "mouthOpenness": 0.984,
+          "energy": 0.852
+        },
+        {
+          "mouthOpenness": 0.807,
+          "energy": 0.698
+        },
+        {
+          "mouthOpenness": 0.421,
+          "energy": 0.364
+        },
+        {
+          "mouthOpenness": 0.062,
+          "energy": 0.054
+        },
+        {
+          "mouthOpenness": 0.019,
+          "energy": 0.016
+        },
+        {
+          "mouthOpenness": 0.032,
+          "energy": 0.027
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.091,
+          "energy": 0.079
+        },
+        {
+          "mouthOpenness": 0.363,
+          "energy": 0.315
+        },
+        {
+          "mouthOpenness": 0.611,
+          "energy": 0.529
+        },
+        {
+          "mouthOpenness": 0.935,
+          "energy": 0.809
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.937
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.903
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 1.0
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.932
+        },
+        {
+          "mouthOpenness": 0.799,
+          "energy": 0.692
+        },
+        {
+          "mouthOpenness": 0.699,
+          "energy": 0.605
+        },
+        {
+          "mouthOpenness": 0.687,
+          "energy": 0.595
+        },
+        {
+          "mouthOpenness": 0.862,
+          "energy": 0.746
+        },
+        {
+          "mouthOpenness": 0.644,
+          "energy": 0.558
+        },
+        {
+          "mouthOpenness": 0.49,
+          "energy": 0.424
+        },
+        {
+          "mouthOpenness": 0.499,
+          "energy": 0.432
+        },
+        {
+          "mouthOpenness": 0.282,
+          "energy": 0.244
+        },
+        {
+          "mouthOpenness": 0.141,
+          "energy": 0.122
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.985
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.875
+        },
+        {
+          "mouthOpenness": 0.911,
+          "energy": 0.788
+        },
+        {
+          "mouthOpenness": 0.844,
+          "energy": 0.73
+        },
+        {
+          "mouthOpenness": 0.754,
+          "energy": 0.653
+        },
+        {
+          "mouthOpenness": 0.685,
+          "energy": 0.593
+        },
+        {
+          "mouthOpenness": 0.408,
+          "energy": 0.353
+        },
+        {
+          "mouthOpenness": 0.198,
+          "energy": 0.172
+        },
+        {
+          "mouthOpenness": 0.009,
+          "energy": 0.008
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "speaker": "nemo",
+      "voice": "nemo",
+      "instruct": "bright energetic confident female AI companion, triumphant",
+      "speed": 1.1,
+      "gapAfter": 0.12,
+      "camera": "dolly-in",
+      "speakerAction": "energetic-wave",
+      "listenerAction": "celebrate",
+      "emotion": "triumphant",
+      "card": "LIVE VERILOG IN CHROME",
+      "ttsText": "It's one hundred percent free inside Chrome, with live Verilog waveforms and Python.",
+      "subtitle": "100% free in Chrome \u2014 live Verilog waveforms & Python.",
+      "wavPath": "/app/applet/nemofy-reel/voices/nemo/beat_09_nemo.wav",
+      "paddedWavPath": "/app/applet/nemofy-reel/voices/_raw/beat_09_nemo_padded.wav",
+      "startSec": 20.3667,
+      "speechEndSec": 24.0647,
+      "endSec": 24.2,
+      "speechDuration": 3.6981,
+      "durationSeconds": 3.8333,
+      "startFrame": 612,
+      "endFrame": 727,
+      "lipSyncEnvelope": [
+        {
+          "mouthOpenness": 0.605,
+          "energy": 0.524
+        },
+        {
+          "mouthOpenness": 0.498,
+          "energy": 0.431
+        },
+        {
+          "mouthOpenness": 0.298,
+          "energy": 0.258
+        },
+        {
+          "mouthOpenness": 0.08,
+          "energy": 0.069
+        },
+        {
+          "mouthOpenness": 0.749,
+          "energy": 0.648
+        },
+        {
+          "mouthOpenness": 0.885,
+          "energy": 0.766
+        },
+        {
+          "mouthOpenness": 0.501,
+          "energy": 0.433
+        },
+        {
+          "mouthOpenness": 0.197,
+          "energy": 0.171
+        },
+        {
+          "mouthOpenness": 0.315,
+          "energy": 0.272
+        },
+        {
+          "mouthOpenness": 0.747,
+          "energy": 0.647
+        },
+        {
+          "mouthOpenness": 0.975,
+          "energy": 0.844
+        },
+        {
+          "mouthOpenness": 0.906,
+          "energy": 0.784
+        },
+        {
+          "mouthOpenness": 0.16,
+          "energy": 0.139
+        },
+        {
+          "mouthOpenness": 0.651,
+          "energy": 0.563
+        },
+        {
+          "mouthOpenness": 0.657,
+          "energy": 0.568
+        },
+        {
+          "mouthOpenness": 0.195,
+          "energy": 0.169
+        },
+        {
+          "mouthOpenness": 0.112,
+          "energy": 0.097
+        },
+        {
+          "mouthOpenness": 0.093,
+          "energy": 0.08
+        },
+        {
+          "mouthOpenness": 0.646,
+          "energy": 0.559
+        },
+        {
+          "mouthOpenness": 0.678,
+          "energy": 0.587
+        },
+        {
+          "mouthOpenness": 0.51,
+          "energy": 0.441
+        },
+        {
+          "mouthOpenness": 0.57,
+          "energy": 0.494
+        },
+        {
+          "mouthOpenness": 0.611,
+          "energy": 0.529
+        },
+        {
+          "mouthOpenness": 0.954,
+          "energy": 0.826
+        },
+        {
+          "mouthOpenness": 0.746,
+          "energy": 0.645
+        },
+        {
+          "mouthOpenness": 0.584,
+          "energy": 0.506
+        },
+        {
+          "mouthOpenness": 0.192,
+          "energy": 0.166
+        },
+        {
+          "mouthOpenness": 0.102,
+          "energy": 0.088
+        },
+        {
+          "mouthOpenness": 0.101,
+          "energy": 0.087
+        },
+        {
+          "mouthOpenness": 0.317,
+          "energy": 0.274
+        },
+        {
+          "mouthOpenness": 0.88,
+          "energy": 0.762
+        },
+        {
+          "mouthOpenness": 0.771,
+          "energy": 0.667
+        },
+        {
+          "mouthOpenness": 0.881,
+          "energy": 0.762
+        },
+        {
+          "mouthOpenness": 0.758,
+          "energy": 0.656
+        },
+        {
+          "mouthOpenness": 0.826,
+          "energy": 0.715
+        },
+        {
+          "mouthOpenness": 0.35,
+          "energy": 0.303
+        },
+        {
+          "mouthOpenness": 0.65,
+          "energy": 0.563
+        },
+        {
+          "mouthOpenness": 0.571,
+          "energy": 0.494
+        },
+        {
+          "mouthOpenness": 0.904,
+          "energy": 0.782
+        },
+        {
+          "mouthOpenness": 0.854,
+          "energy": 0.739
+        },
+        {
+          "mouthOpenness": 0.785,
+          "energy": 0.68
+        },
+        {
+          "mouthOpenness": 0.513,
+          "energy": 0.444
+        },
+        {
+          "mouthOpenness": 0.294,
+          "energy": 0.255
+        },
+        {
+          "mouthOpenness": 0.061,
+          "energy": 0.053
+        },
+        {
+          "mouthOpenness": 0.23,
+          "energy": 0.199
+        },
+        {
+          "mouthOpenness": 0.355,
+          "energy": 0.307
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.865
+        },
+        {
+          "mouthOpenness": 0.77,
+          "energy": 0.667
+        },
+        {
+          "mouthOpenness": 0.54,
+          "energy": 0.468
+        },
+        {
+          "mouthOpenness": 0.514,
+          "energy": 0.445
+        },
+        {
+          "mouthOpenness": 0.485,
+          "energy": 0.42
+        },
+        {
+          "mouthOpenness": 0.458,
+          "energy": 0.396
+        },
+        {
+          "mouthOpenness": 0.296,
+          "energy": 0.256
+        },
+        {
+          "mouthOpenness": 0.007,
+          "energy": 0.006
+        },
+        {
+          "mouthOpenness": 0.014,
+          "energy": 0.012
+        },
+        {
+          "mouthOpenness": 0.014,
+          "energy": 0.012
+        },
+        {
+          "mouthOpenness": 0.014,
+          "energy": 0.012
+        },
+        {
+          "mouthOpenness": 0.009,
+          "energy": 0.008
+        },
+        {
+          "mouthOpenness": 0.003,
+          "energy": 0.003
+        },
+        {
+          "mouthOpenness": 0.052,
+          "energy": 0.045
+        },
+        {
+          "mouthOpenness": 0.798,
+          "energy": 0.691
+        },
+        {
+          "mouthOpenness": 0.575,
+          "energy": 0.498
+        },
+        {
+          "mouthOpenness": 0.076,
+          "energy": 0.066
+        },
+        {
+          "mouthOpenness": 0.683,
+          "energy": 0.591
+        },
+        {
+          "mouthOpenness": 0.914,
+          "energy": 0.791
+        },
+        {
+          "mouthOpenness": 0.877,
+          "energy": 0.759
+        },
+        {
+          "mouthOpenness": 0.893,
+          "energy": 0.773
+        },
+        {
+          "mouthOpenness": 0.805,
+          "energy": 0.696
+        },
+        {
+          "mouthOpenness": 0.389,
+          "energy": 0.337
+        },
+        {
+          "mouthOpenness": 0.172,
+          "energy": 0.149
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.888
+        },
+        {
+          "mouthOpenness": 0.909,
+          "energy": 0.786
+        },
+        {
+          "mouthOpenness": 0.741,
+          "energy": 0.641
+        },
+        {
+          "mouthOpenness": 0.76,
+          "energy": 0.658
+        },
+        {
+          "mouthOpenness": 0.523,
+          "energy": 0.452
+        },
+        {
+          "mouthOpenness": 0.605,
+          "energy": 0.523
+        },
+        {
+          "mouthOpenness": 0.651,
+          "energy": 0.564
+        },
+        {
+          "mouthOpenness": 0.73,
+          "energy": 0.632
+        },
+        {
+          "mouthOpenness": 0.709,
+          "energy": 0.614
+        },
+        {
+          "mouthOpenness": 0.333,
+          "energy": 0.289
+        },
+        {
+          "mouthOpenness": 0.435,
+          "energy": 0.377
+        },
+        {
+          "mouthOpenness": 0.438,
+          "energy": 0.379
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.865
+        },
+        {
+          "mouthOpenness": 0.971,
+          "energy": 0.84
+        },
+        {
+          "mouthOpenness": 0.834,
+          "energy": 0.722
+        },
+        {
+          "mouthOpenness": 0.71,
+          "energy": 0.614
+        },
+        {
+          "mouthOpenness": 0.154,
+          "energy": 0.133
+        },
+        {
+          "mouthOpenness": 0.096,
+          "energy": 0.083
+        },
+        {
+          "mouthOpenness": 0.456,
+          "energy": 0.395
+        },
+        {
+          "mouthOpenness": 0.771,
+          "energy": 0.668
+        },
+        {
+          "mouthOpenness": 0.529,
+          "energy": 0.457
+        },
+        {
+          "mouthOpenness": 0.564,
+          "energy": 0.488
+        },
+        {
+          "mouthOpenness": 0.56,
+          "energy": 0.485
+        },
+        {
+          "mouthOpenness": 0.755,
+          "energy": 0.653
+        },
+        {
+          "mouthOpenness": 0.631,
+          "energy": 0.546
+        },
+        {
+          "mouthOpenness": 0.391,
+          "energy": 0.339
+        },
+        {
+          "mouthOpenness": 0.764,
+          "energy": 0.661
+        },
+        {
+          "mouthOpenness": 0.778,
+          "energy": 0.673
+        },
+        {
+          "mouthOpenness": 0.699,
+          "energy": 0.605
+        },
+        {
+          "mouthOpenness": 0.212,
+          "energy": 0.183
+        },
+        {
+          "mouthOpenness": 0.037,
+          "energy": 0.032
+        },
+        {
+          "mouthOpenness": 0.205,
+          "energy": 0.178
+        },
+        {
+          "mouthOpenness": 0.841,
+          "energy": 0.728
+        },
+        {
+          "mouthOpenness": 0.843,
+          "energy": 0.73
+        },
+        {
+          "mouthOpenness": 0.231,
+          "energy": 0.2
+        },
+        {
+          "mouthOpenness": 0.081,
+          "energy": 0.07
+        },
+        {
+          "mouthOpenness": 0.378,
+          "energy": 0.327
+        },
+        {
+          "mouthOpenness": 0.515,
+          "energy": 0.446
+        },
+        {
+          "mouthOpenness": 0.435,
+          "energy": 0.376
+        },
+        {
+          "mouthOpenness": 0.274,
+          "energy": 0.237
+        },
+        {
+          "mouthOpenness": 0.062,
+          "energy": 0.054
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "speaker": "nemo",
+      "voice": "nemo",
+      "instruct": "fast energetic enthusiastic female AI companion",
+      "speed": 1.12,
+      "gapAfter": 0.28,
+      "camera": "orbit",
+      "speakerAction": "celebrate",
+      "listenerAction": "chin-think",
+      "emotion": "energetic",
+      "card": "",
+      "ttsText": "It runs C plus plus, Java, binary math, and Word to P D F too.",
+      "subtitle": "Runs C++, Java, binary math, and Word to PDF too.",
+      "wavPath": "/app/applet/nemofy-reel/voices/nemo/beat_10_nemo.wav",
+      "paddedWavPath": "/app/applet/nemofy-reel/voices/_raw/beat_10_nemo_padded.wav",
+      "startSec": 24.2,
+      "speechEndSec": 27.8999,
+      "endSec": 28.1667,
+      "speechDuration": 3.6999,
+      "durationSeconds": 3.9667,
+      "startFrame": 727,
+      "endFrame": 846,
+      "lipSyncEnvelope": [
+        {
+          "mouthOpenness": 0.416,
+          "energy": 0.36
+        },
+        {
+          "mouthOpenness": 0.728,
+          "energy": 0.63
+        },
+        {
+          "mouthOpenness": 0.243,
+          "energy": 0.211
+        },
+        {
+          "mouthOpenness": 0.235,
+          "energy": 0.204
+        },
+        {
+          "mouthOpenness": 0.872,
+          "energy": 0.754
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.907
+        },
+        {
+          "mouthOpenness": 0.688,
+          "energy": 0.596
+        },
+        {
+          "mouthOpenness": 0.669,
+          "energy": 0.579
+        },
+        {
+          "mouthOpenness": 0.696,
+          "energy": 0.602
+        },
+        {
+          "mouthOpenness": 0.543,
+          "energy": 0.47
+        },
+        {
+          "mouthOpenness": 0.583,
+          "energy": 0.504
+        },
+        {
+          "mouthOpenness": 0.474,
+          "energy": 0.41
+        },
+        {
+          "mouthOpenness": 0.479,
+          "energy": 0.414
+        },
+        {
+          "mouthOpenness": 0.725,
+          "energy": 0.627
+        },
+        {
+          "mouthOpenness": 0.263,
+          "energy": 0.228
+        },
+        {
+          "mouthOpenness": 0.118,
+          "energy": 0.102
+        },
+        {
+          "mouthOpenness": 0.656,
+          "energy": 0.568
+        },
+        {
+          "mouthOpenness": 0.853,
+          "energy": 0.738
+        },
+        {
+          "mouthOpenness": 0.433,
+          "energy": 0.374
+        },
+        {
+          "mouthOpenness": 0.41,
+          "energy": 0.355
+        },
+        {
+          "mouthOpenness": 0.18,
+          "energy": 0.156
+        },
+        {
+          "mouthOpenness": 0.094,
+          "energy": 0.081
+        },
+        {
+          "mouthOpenness": 0.069,
+          "energy": 0.059
+        },
+        {
+          "mouthOpenness": 0.676,
+          "energy": 0.585
+        },
+        {
+          "mouthOpenness": 0.828,
+          "energy": 0.716
+        },
+        {
+          "mouthOpenness": 0.623,
+          "energy": 0.539
+        },
+        {
+          "mouthOpenness": 0.308,
+          "energy": 0.267
+        },
+        {
+          "mouthOpenness": 0.237,
+          "energy": 0.205
+        },
+        {
+          "mouthOpenness": 0.335,
+          "energy": 0.29
+        },
+        {
+          "mouthOpenness": 0.513,
+          "energy": 0.444
+        },
+        {
+          "mouthOpenness": 0.379,
+          "energy": 0.328
+        },
+        {
+          "mouthOpenness": 0.193,
+          "energy": 0.167
+        },
+        {
+          "mouthOpenness": 0.015,
+          "energy": 0.013
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.014,
+          "energy": 0.012
+        },
+        {
+          "mouthOpenness": 0.429,
+          "energy": 0.371
+        },
+        {
+          "mouthOpenness": 0.913,
+          "energy": 0.79
+        },
+        {
+          "mouthOpenness": 0.869,
+          "energy": 0.752
+        },
+        {
+          "mouthOpenness": 0.575,
+          "energy": 0.498
+        },
+        {
+          "mouthOpenness": 0.169,
+          "energy": 0.146
+        },
+        {
+          "mouthOpenness": 0.681,
+          "energy": 0.589
+        },
+        {
+          "mouthOpenness": 0.676,
+          "energy": 0.585
+        },
+        {
+          "mouthOpenness": 0.325,
+          "energy": 0.281
+        },
+        {
+          "mouthOpenness": 0.121,
+          "energy": 0.105
+        },
+        {
+          "mouthOpenness": 0.008,
+          "energy": 0.007
+        },
+        {
+          "mouthOpenness": 0.012,
+          "energy": 0.011
+        },
+        {
+          "mouthOpenness": 0.011,
+          "energy": 0.009
+        },
+        {
+          "mouthOpenness": 0.007,
+          "energy": 0.006
+        },
+        {
+          "mouthOpenness": 0.006,
+          "energy": 0.005
+        },
+        {
+          "mouthOpenness": 0.004,
+          "energy": 0.003
+        },
+        {
+          "mouthOpenness": 0.001,
+          "energy": 0.001
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.675,
+          "energy": 0.584
+        },
+        {
+          "mouthOpenness": 0.896,
+          "energy": 0.775
+        },
+        {
+          "mouthOpenness": 0.794,
+          "energy": 0.687
+        },
+        {
+          "mouthOpenness": 0.697,
+          "energy": 0.603
+        },
+        {
+          "mouthOpenness": 0.733,
+          "energy": 0.634
+        },
+        {
+          "mouthOpenness": 0.718,
+          "energy": 0.621
+        },
+        {
+          "mouthOpenness": 0.825,
+          "energy": 0.714
+        },
+        {
+          "mouthOpenness": 0.798,
+          "energy": 0.69
+        },
+        {
+          "mouthOpenness": 0.845,
+          "energy": 0.731
+        },
+        {
+          "mouthOpenness": 0.936,
+          "energy": 0.81
+        },
+        {
+          "mouthOpenness": 0.73,
+          "energy": 0.632
+        },
+        {
+          "mouthOpenness": 0.645,
+          "energy": 0.558
+        },
+        {
+          "mouthOpenness": 0.484,
+          "energy": 0.419
+        },
+        {
+          "mouthOpenness": 0.306,
+          "energy": 0.265
+        },
+        {
+          "mouthOpenness": 0.113,
+          "energy": 0.098
+        },
+        {
+          "mouthOpenness": 0.027,
+          "energy": 0.024
+        },
+        {
+          "mouthOpenness": 0.024,
+          "energy": 0.021
+        },
+        {
+          "mouthOpenness": 0.019,
+          "energy": 0.017
+        },
+        {
+          "mouthOpenness": 0.001,
+          "energy": 0.001
+        },
+        {
+          "mouthOpenness": 0.002,
+          "energy": 0.001
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.518,
+          "energy": 0.448
+        },
+        {
+          "mouthOpenness": 0.756,
+          "energy": 0.654
+        },
+        {
+          "mouthOpenness": 0.336,
+          "energy": 0.291
+        },
+        {
+          "mouthOpenness": 0.433,
+          "energy": 0.374
+        },
+        {
+          "mouthOpenness": 0.313,
+          "energy": 0.271
+        },
+        {
+          "mouthOpenness": 0.75,
+          "energy": 0.649
+        },
+        {
+          "mouthOpenness": 0.814,
+          "energy": 0.704
+        },
+        {
+          "mouthOpenness": 0.862,
+          "energy": 0.746
+        },
+        {
+          "mouthOpenness": 0.512,
+          "energy": 0.443
+        },
+        {
+          "mouthOpenness": 0.243,
+          "energy": 0.211
+        },
+        {
+          "mouthOpenness": 0.162,
+          "energy": 0.14
+        },
+        {
+          "mouthOpenness": 0.017,
+          "energy": 0.015
+        },
+        {
+          "mouthOpenness": 0.097,
+          "energy": 0.084
+        },
+        {
+          "mouthOpenness": 0.567,
+          "energy": 0.491
+        },
+        {
+          "mouthOpenness": 0.848,
+          "energy": 0.734
+        },
+        {
+          "mouthOpenness": 0.707,
+          "energy": 0.612
+        },
+        {
+          "mouthOpenness": 0.422,
+          "energy": 0.365
+        },
+        {
+          "mouthOpenness": 0.461,
+          "energy": 0.399
+        },
+        {
+          "mouthOpenness": 0.826,
+          "energy": 0.715
+        },
+        {
+          "mouthOpenness": 0.893,
+          "energy": 0.773
+        },
+        {
+          "mouthOpenness": 0.775,
+          "energy": 0.671
+        },
+        {
+          "mouthOpenness": 0.319,
+          "energy": 0.276
+        },
+        {
+          "mouthOpenness": 0.063,
+          "energy": 0.055
+        },
+        {
+          "mouthOpenness": 0.1,
+          "energy": 0.087
+        },
+        {
+          "mouthOpenness": 0.167,
+          "energy": 0.145
+        },
+        {
+          "mouthOpenness": 0.209,
+          "energy": 0.181
+        },
+        {
+          "mouthOpenness": 0.687,
+          "energy": 0.594
+        },
+        {
+          "mouthOpenness": 0.799,
+          "energy": 0.692
+        },
+        {
+          "mouthOpenness": 0.576,
+          "energy": 0.498
+        },
+        {
+          "mouthOpenness": 0.418,
+          "energy": 0.361
+        },
+        {
+          "mouthOpenness": 0.271,
+          "energy": 0.235
+        },
+        {
+          "mouthOpenness": 0.166,
+          "energy": 0.144
+        },
+        {
+          "mouthOpenness": 0.041,
+          "energy": 0.035
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "speaker": "leo",
+      "voice": "leo",
+      "instruct": "amazed comedic disbelief young male student",
+      "speed": 1.08,
+      "gapAfter": 0.14,
+      "camera": "close-up",
+      "speakerAction": "facepalm-react",
+      "listenerAction": "playful-roast",
+      "emotion": "amazed",
+      "card": "",
+      "ttsText": "You fixed my three hour panic in twelve seconds?",
+      "subtitle": "You fixed my 3-hour panic in 12 seconds?",
+      "wavPath": "/app/applet/nemofy-reel/voices/leo/beat_11_leo.wav",
+      "paddedWavPath": "/app/applet/nemofy-reel/voices/_raw/beat_11_leo_padded.wav",
+      "startSec": 28.1667,
+      "speechEndSec": 30.4952,
+      "endSec": 30.6333,
+      "speechDuration": 2.3286,
+      "durationSeconds": 2.4667,
+      "startFrame": 846,
+      "endFrame": 920,
+      "lipSyncEnvelope": [
+        {
+          "mouthOpenness": 0.556,
+          "energy": 0.481
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.911
+        },
+        {
+          "mouthOpenness": 0.771,
+          "energy": 0.667
+        },
+        {
+          "mouthOpenness": 0.14,
+          "energy": 0.121
+        },
+        {
+          "mouthOpenness": 0.848,
+          "energy": 0.734
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.892
+        },
+        {
+          "mouthOpenness": 0.449,
+          "energy": 0.388
+        },
+        {
+          "mouthOpenness": 0.467,
+          "energy": 0.405
+        },
+        {
+          "mouthOpenness": 0.756,
+          "energy": 0.655
+        },
+        {
+          "mouthOpenness": 0.213,
+          "energy": 0.185
+        },
+        {
+          "mouthOpenness": 0.185,
+          "energy": 0.16
+        },
+        {
+          "mouthOpenness": 0.832,
+          "energy": 0.72
+        },
+        {
+          "mouthOpenness": 0.879,
+          "energy": 0.761
+        },
+        {
+          "mouthOpenness": 0.756,
+          "energy": 0.654
+        },
+        {
+          "mouthOpenness": 0.447,
+          "energy": 0.387
+        },
+        {
+          "mouthOpenness": 0.11,
+          "energy": 0.095
+        },
+        {
+          "mouthOpenness": 0.044,
+          "energy": 0.038
+        },
+        {
+          "mouthOpenness": 0.131,
+          "energy": 0.113
+        },
+        {
+          "mouthOpenness": 0.664,
+          "energy": 0.574
+        },
+        {
+          "mouthOpenness": 0.98,
+          "energy": 0.848
+        },
+        {
+          "mouthOpenness": 0.91,
+          "energy": 0.787
+        },
+        {
+          "mouthOpenness": 0.774,
+          "energy": 0.67
+        },
+        {
+          "mouthOpenness": 0.696,
+          "energy": 0.603
+        },
+        {
+          "mouthOpenness": 0.995,
+          "energy": 0.861
+        },
+        {
+          "mouthOpenness": 0.911,
+          "energy": 0.788
+        },
+        {
+          "mouthOpenness": 0.895,
+          "energy": 0.774
+        },
+        {
+          "mouthOpenness": 0.91,
+          "energy": 0.788
+        },
+        {
+          "mouthOpenness": 0.891,
+          "energy": 0.771
+        },
+        {
+          "mouthOpenness": 0.483,
+          "energy": 0.418
+        },
+        {
+          "mouthOpenness": 0.083,
+          "energy": 0.072
+        },
+        {
+          "mouthOpenness": 0.125,
+          "energy": 0.108
+        },
+        {
+          "mouthOpenness": 0.306,
+          "energy": 0.265
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.876
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.87
+        },
+        {
+          "mouthOpenness": 0.853,
+          "energy": 0.738
+        },
+        {
+          "mouthOpenness": 0.769,
+          "energy": 0.665
+        },
+        {
+          "mouthOpenness": 0.726,
+          "energy": 0.628
+        },
+        {
+          "mouthOpenness": 0.901,
+          "energy": 0.78
+        },
+        {
+          "mouthOpenness": 0.609,
+          "energy": 0.527
+        },
+        {
+          "mouthOpenness": 0.057,
+          "energy": 0.05
+        },
+        {
+          "mouthOpenness": 0.176,
+          "energy": 0.153
+        },
+        {
+          "mouthOpenness": 0.062,
+          "energy": 0.053
+        },
+        {
+          "mouthOpenness": 0.007,
+          "energy": 0.006
+        },
+        {
+          "mouthOpenness": 0.57,
+          "energy": 0.494
+        },
+        {
+          "mouthOpenness": 0.707,
+          "energy": 0.612
+        },
+        {
+          "mouthOpenness": 0.675,
+          "energy": 0.584
+        },
+        {
+          "mouthOpenness": 0.517,
+          "energy": 0.447
+        },
+        {
+          "mouthOpenness": 0.271,
+          "energy": 0.235
+        },
+        {
+          "mouthOpenness": 0.254,
+          "energy": 0.22
+        },
+        {
+          "mouthOpenness": 0.498,
+          "energy": 0.431
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.922
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.876
+        },
+        {
+          "mouthOpenness": 0.893,
+          "energy": 0.773
+        },
+        {
+          "mouthOpenness": 0.302,
+          "energy": 0.261
+        },
+        {
+          "mouthOpenness": 0.234,
+          "energy": 0.203
+        },
+        {
+          "mouthOpenness": 0.423,
+          "energy": 0.366
+        },
+        {
+          "mouthOpenness": 0.473,
+          "energy": 0.41
+        },
+        {
+          "mouthOpenness": 0.42,
+          "energy": 0.364
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.997
+        },
+        {
+          "mouthOpenness": 0.863,
+          "energy": 0.747
+        },
+        {
+          "mouthOpenness": 0.305,
+          "energy": 0.264
+        },
+        {
+          "mouthOpenness": 0.088,
+          "energy": 0.076
+        },
+        {
+          "mouthOpenness": 0.692,
+          "energy": 0.599
+        },
+        {
+          "mouthOpenness": 0.692,
+          "energy": 0.599
+        },
+        {
+          "mouthOpenness": 0.717,
+          "energy": 0.621
+        },
+        {
+          "mouthOpenness": 0.552,
+          "energy": 0.478
+        },
+        {
+          "mouthOpenness": 0.265,
+          "energy": 0.229
+        },
+        {
+          "mouthOpenness": 0.279,
+          "energy": 0.242
+        },
+        {
+          "mouthOpenness": 0.168,
+          "energy": 0.145
+        },
+        {
+          "mouthOpenness": 0.015,
+          "energy": 0.013
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "speaker": "nemo",
+      "voice": "nemo",
+      "instruct": "sassy witty playful female AI companion, tease",
+      "speed": 1.08,
+      "gapAfter": 0.16,
+      "camera": "close-up",
+      "speakerAction": "playful-roast",
+      "listenerAction": "head-scratch",
+      "emotion": "witty-jab",
+      "card": "",
+      "ttsText": "Twelve for Verilog. Two hours to forgive yourself.",
+      "subtitle": "12 for Verilog. 2 hours to forgive yourself.",
+      "wavPath": "/app/applet/nemofy-reel/voices/nemo/beat_12_nemo.wav",
+      "paddedWavPath": "/app/applet/nemofy-reel/voices/_raw/beat_12_nemo_padded.wav",
+      "startSec": 30.6333,
+      "speechEndSec": 33.2186,
+      "endSec": 33.3667,
+      "speechDuration": 2.5852,
+      "durationSeconds": 2.7333,
+      "startFrame": 920,
+      "endFrame": 1002,
+      "lipSyncEnvelope": [
+        {
+          "mouthOpenness": 0.093,
+          "energy": 0.081
+        },
+        {
+          "mouthOpenness": 0.071,
+          "energy": 0.062
+        },
+        {
+          "mouthOpenness": 0.608,
+          "energy": 0.526
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 1.0
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.871
+        },
+        {
+          "mouthOpenness": 0.868,
+          "energy": 0.751
+        },
+        {
+          "mouthOpenness": 0.778,
+          "energy": 0.673
+        },
+        {
+          "mouthOpenness": 0.636,
+          "energy": 0.55
+        },
+        {
+          "mouthOpenness": 0.174,
+          "energy": 0.151
+        },
+        {
+          "mouthOpenness": 0.066,
+          "energy": 0.057
+        },
+        {
+          "mouthOpenness": 0.117,
+          "energy": 0.101
+        },
+        {
+          "mouthOpenness": 0.961,
+          "energy": 0.831
+        },
+        {
+          "mouthOpenness": 0.783,
+          "energy": 0.677
+        },
+        {
+          "mouthOpenness": 0.351,
+          "energy": 0.304
+        },
+        {
+          "mouthOpenness": 0.782,
+          "energy": 0.677
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.953
+        },
+        {
+          "mouthOpenness": 0.9,
+          "energy": 0.779
+        },
+        {
+          "mouthOpenness": 0.827,
+          "energy": 0.716
+        },
+        {
+          "mouthOpenness": 0.657,
+          "energy": 0.569
+        },
+        {
+          "mouthOpenness": 0.549,
+          "energy": 0.475
+        },
+        {
+          "mouthOpenness": 0.618,
+          "energy": 0.535
+        },
+        {
+          "mouthOpenness": 0.496,
+          "energy": 0.43
+        },
+        {
+          "mouthOpenness": 0.408,
+          "energy": 0.353
+        },
+        {
+          "mouthOpenness": 0.412,
+          "energy": 0.357
+        },
+        {
+          "mouthOpenness": 0.397,
+          "energy": 0.344
+        },
+        {
+          "mouthOpenness": 0.214,
+          "energy": 0.185
+        },
+        {
+          "mouthOpenness": 0.094,
+          "energy": 0.082
+        },
+        {
+          "mouthOpenness": 0.095,
+          "energy": 0.082
+        },
+        {
+          "mouthOpenness": 0.016,
+          "energy": 0.014
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.315,
+          "energy": 0.273
+        },
+        {
+          "mouthOpenness": 0.29,
+          "energy": 0.251
+        },
+        {
+          "mouthOpenness": 0.978,
+          "energy": 0.846
+        },
+        {
+          "mouthOpenness": 0.909,
+          "energy": 0.787
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 1.0
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.872
+        },
+        {
+          "mouthOpenness": 0.961,
+          "energy": 0.832
+        },
+        {
+          "mouthOpenness": 0.885,
+          "energy": 0.766
+        },
+        {
+          "mouthOpenness": 0.677,
+          "energy": 0.586
+        },
+        {
+          "mouthOpenness": 0.624,
+          "energy": 0.54
+        },
+        {
+          "mouthOpenness": 0.53,
+          "energy": 0.459
+        },
+        {
+          "mouthOpenness": 0.52,
+          "energy": 0.45
+        },
+        {
+          "mouthOpenness": 0.537,
+          "energy": 0.465
+        },
+        {
+          "mouthOpenness": 0.49,
+          "energy": 0.424
+        },
+        {
+          "mouthOpenness": 0.44,
+          "energy": 0.381
+        },
+        {
+          "mouthOpenness": 0.478,
+          "energy": 0.413
+        },
+        {
+          "mouthOpenness": 0.068,
+          "energy": 0.059
+        },
+        {
+          "mouthOpenness": 0.35,
+          "energy": 0.303
+        },
+        {
+          "mouthOpenness": 0.798,
+          "energy": 0.691
+        },
+        {
+          "mouthOpenness": 0.226,
+          "energy": 0.195
+        },
+        {
+          "mouthOpenness": 0.118,
+          "energy": 0.102
+        },
+        {
+          "mouthOpenness": 0.317,
+          "energy": 0.274
+        },
+        {
+          "mouthOpenness": 0.917,
+          "energy": 0.793
+        },
+        {
+          "mouthOpenness": 0.423,
+          "energy": 0.366
+        },
+        {
+          "mouthOpenness": 0.92,
+          "energy": 0.796
+        },
+        {
+          "mouthOpenness": 0.962,
+          "energy": 0.832
+        },
+        {
+          "mouthOpenness": 0.311,
+          "energy": 0.269
+        },
+        {
+          "mouthOpenness": 0.451,
+          "energy": 0.39
+        },
+        {
+          "mouthOpenness": 0.857,
+          "energy": 0.742
+        },
+        {
+          "mouthOpenness": 0.857,
+          "energy": 0.741
+        },
+        {
+          "mouthOpenness": 0.638,
+          "energy": 0.552
+        },
+        {
+          "mouthOpenness": 0.49,
+          "energy": 0.424
+        },
+        {
+          "mouthOpenness": 0.621,
+          "energy": 0.538
+        },
+        {
+          "mouthOpenness": 0.432,
+          "energy": 0.374
+        },
+        {
+          "mouthOpenness": 0.888,
+          "energy": 0.768
+        },
+        {
+          "mouthOpenness": 0.643,
+          "energy": 0.557
+        },
+        {
+          "mouthOpenness": 0.492,
+          "energy": 0.425
+        },
+        {
+          "mouthOpenness": 0.442,
+          "energy": 0.382
+        },
+        {
+          "mouthOpenness": 0.278,
+          "energy": 0.24
+        },
+        {
+          "mouthOpenness": 0.065,
+          "energy": 0.057
+        },
+        {
+          "mouthOpenness": 0.078,
+          "energy": 0.067
+        },
+        {
+          "mouthOpenness": 0.052,
+          "energy": 0.045
+        },
+        {
+          "mouthOpenness": 0.011,
+          "energy": 0.009
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "speaker": "leo",
+      "voice": "leo",
+      "instruct": "warm confident relatable male student, natural CTA",
+      "speed": 1.08,
+      "gapAfter": 0.35,
+      "camera": "establishing-wide",
+      "speakerAction": "celebrate",
+      "listenerAction": "energetic-wave",
+      "emotion": "loop-cta",
+      "card": "SAVE THIS  //  NEMOFY.TECH",
+      "ttsText": "Save this tonight. Stop wasting time on broken tools.",
+      "subtitle": "Save this tonight. Stop wasting time on broken tools.",
+      "wavPath": "/app/applet/nemofy-reel/voices/leo/beat_13_leo.wav",
+      "paddedWavPath": "/app/applet/nemofy-reel/voices/_raw/beat_13_leo_padded.wav",
+      "startSec": 33.3667,
+      "speechEndSec": 36.6012,
+      "endSec": 36.9667,
+      "speechDuration": 3.2346,
+      "durationSeconds": 3.6,
+      "startFrame": 1002,
+      "endFrame": 1110,
+      "lipSyncEnvelope": [
+        {
+          "mouthOpenness": 0.16,
+          "energy": 0.138
+        },
+        {
+          "mouthOpenness": 0.413,
+          "energy": 0.358
+        },
+        {
+          "mouthOpenness": 0.584,
+          "energy": 0.505
+        },
+        {
+          "mouthOpenness": 0.567,
+          "energy": 0.49
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.947
+        },
+        {
+          "mouthOpenness": 0.92,
+          "energy": 0.796
+        },
+        {
+          "mouthOpenness": 0.951,
+          "energy": 0.823
+        },
+        {
+          "mouthOpenness": 0.798,
+          "energy": 0.691
+        },
+        {
+          "mouthOpenness": 0.284,
+          "energy": 0.246
+        },
+        {
+          "mouthOpenness": 0.166,
+          "energy": 0.144
+        },
+        {
+          "mouthOpenness": 0.623,
+          "energy": 0.54
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 1.0
+        },
+        {
+          "mouthOpenness": 0.994,
+          "energy": 0.861
+        },
+        {
+          "mouthOpenness": 0.346,
+          "energy": 0.3
+        },
+        {
+          "mouthOpenness": 0.509,
+          "energy": 0.441
+        },
+        {
+          "mouthOpenness": 0.394,
+          "energy": 0.341
+        },
+        {
+          "mouthOpenness": 0.023,
+          "energy": 0.02
+        },
+        {
+          "mouthOpenness": 0.218,
+          "energy": 0.188
+        },
+        {
+          "mouthOpenness": 0.919,
+          "energy": 0.795
+        },
+        {
+          "mouthOpenness": 0.805,
+          "energy": 0.697
+        },
+        {
+          "mouthOpenness": 0.806,
+          "energy": 0.697
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.876
+        },
+        {
+          "mouthOpenness": 0.888,
+          "energy": 0.768
+        },
+        {
+          "mouthOpenness": 0.753,
+          "energy": 0.651
+        },
+        {
+          "mouthOpenness": 0.549,
+          "energy": 0.475
+        },
+        {
+          "mouthOpenness": 0.253,
+          "energy": 0.219
+        },
+        {
+          "mouthOpenness": 0.043,
+          "energy": 0.037
+        },
+        {
+          "mouthOpenness": 0.035,
+          "energy": 0.03
+        },
+        {
+          "mouthOpenness": 0.18,
+          "energy": 0.155
+        },
+        {
+          "mouthOpenness": 0.059,
+          "energy": 0.051
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.083,
+          "energy": 0.072
+        },
+        {
+          "mouthOpenness": 0.385,
+          "energy": 0.333
+        },
+        {
+          "mouthOpenness": 0.501,
+          "energy": 0.434
+        },
+        {
+          "mouthOpenness": 0.04,
+          "energy": 0.035
+        },
+        {
+          "mouthOpenness": 0.845,
+          "energy": 0.731
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.964
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.877
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.875
+        },
+        {
+          "mouthOpenness": 0.739,
+          "energy": 0.64
+        },
+        {
+          "mouthOpenness": 0.094,
+          "energy": 0.081
+        },
+        {
+          "mouthOpenness": 0.035,
+          "energy": 0.03
+        },
+        {
+          "mouthOpenness": 0.415,
+          "energy": 0.359
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 1.0
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.928
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.944
+        },
+        {
+          "mouthOpenness": 0.694,
+          "energy": 0.6
+        },
+        {
+          "mouthOpenness": 0.493,
+          "energy": 0.426
+        },
+        {
+          "mouthOpenness": 0.569,
+          "energy": 0.493
+        },
+        {
+          "mouthOpenness": 0.118,
+          "energy": 0.102
+        },
+        {
+          "mouthOpenness": 0.675,
+          "energy": 0.584
+        },
+        {
+          "mouthOpenness": 0.676,
+          "energy": 0.585
+        },
+        {
+          "mouthOpenness": 0.646,
+          "energy": 0.559
+        },
+        {
+          "mouthOpenness": 0.331,
+          "energy": 0.286
+        },
+        {
+          "mouthOpenness": 0.208,
+          "energy": 0.18
+        },
+        {
+          "mouthOpenness": 0.212,
+          "energy": 0.183
+        },
+        {
+          "mouthOpenness": 0.813,
+          "energy": 0.704
+        },
+        {
+          "mouthOpenness": 0.996,
+          "energy": 0.862
+        },
+        {
+          "mouthOpenness": 0.895,
+          "energy": 0.774
+        },
+        {
+          "mouthOpenness": 0.869,
+          "energy": 0.752
+        },
+        {
+          "mouthOpenness": 0.781,
+          "energy": 0.676
+        },
+        {
+          "mouthOpenness": 0.545,
+          "energy": 0.472
+        },
+        {
+          "mouthOpenness": 0.603,
+          "energy": 0.522
+        },
+        {
+          "mouthOpenness": 0.546,
+          "energy": 0.473
+        },
+        {
+          "mouthOpenness": 0.331,
+          "energy": 0.287
+        },
+        {
+          "mouthOpenness": 0.886,
+          "energy": 0.767
+        },
+        {
+          "mouthOpenness": 0.884,
+          "energy": 0.765
+        },
+        {
+          "mouthOpenness": 0.641,
+          "energy": 0.555
+        },
+        {
+          "mouthOpenness": 0.659,
+          "energy": 0.57
+        },
+        {
+          "mouthOpenness": 0.196,
+          "energy": 0.17
+        },
+        {
+          "mouthOpenness": 0.37,
+          "energy": 0.321
+        },
+        {
+          "mouthOpenness": 1.0,
+          "energy": 0.943
+        },
+        {
+          "mouthOpenness": 0.998,
+          "energy": 0.864
+        },
+        {
+          "mouthOpenness": 0.875,
+          "energy": 0.757
+        },
+        {
+          "mouthOpenness": 0.181,
+          "energy": 0.157
+        },
+        {
+          "mouthOpenness": 0.147,
+          "energy": 0.127
+        },
+        {
+          "mouthOpenness": 0.824,
+          "energy": 0.713
+        },
+        {
+          "mouthOpenness": 0.612,
+          "energy": 0.529
+        },
+        {
+          "mouthOpenness": 0.645,
+          "energy": 0.558
+        },
+        {
+          "mouthOpenness": 0.381,
+          "energy": 0.33
+        },
+        {
+          "mouthOpenness": 0.309,
+          "energy": 0.268
+        },
+        {
+          "mouthOpenness": 0.16,
+          "energy": 0.138
+        },
+        {
+          "mouthOpenness": 0.624,
+          "energy": 0.54
+        },
+        {
+          "mouthOpenness": 0.611,
+          "energy": 0.529
+        },
+        {
+          "mouthOpenness": 0.598,
+          "energy": 0.517
+        },
+        {
+          "mouthOpenness": 0.458,
+          "energy": 0.396
+        },
+        {
+          "mouthOpenness": 0.408,
+          "energy": 0.353
+        },
+        {
+          "mouthOpenness": 0.325,
+          "energy": 0.281
+        },
+        {
+          "mouthOpenness": 0.185,
+          "energy": 0.16
+        },
+        {
+          "mouthOpenness": 0.069,
+          "energy": 0.06
+        },
+        {
+          "mouthOpenness": 0.135,
+          "energy": 0.117
+        },
+        {
+          "mouthOpenness": 0.132,
+          "energy": 0.114
+        },
+        {
+          "mouthOpenness": 0.034,
+          "energy": 0.029
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        },
+        {
+          "mouthOpenness": 0.0,
+          "energy": 0.0
+        }
+      ]
+    }
+  ]
+}

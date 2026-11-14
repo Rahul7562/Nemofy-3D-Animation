@@ -1,0 +1,3 @@
+Stop wasting three hours installing broken Verilog tools.
+Your laptop shouldn't crash over two Verilog gates.
+Stop waiting four hours for forty gigabyte compilers.

@@ -143,7 +143,7 @@ def configure_scene_lighting_and_lookdev(
     rim_data.energy = pal["rim_energy"] * mult
     rim_data.color = hex_to_rgba(pal["rim_hex"])[:3]
     rim_data.size = 2.4
-    rim_data.use_shadow = True
+    rim_data.use_shadow = False
     rim_obj = bpy.data.objects.new(name="Cinema_Rim_Light", object_data=rim_data)
     scene.collection.objects.link(rim_obj)
     rim_obj.location = mathutils.Vector((0.0, 2.9, 3.1))
@@ -164,15 +164,15 @@ def configure_scene_lighting_and_lookdev(
         eevee = scene.eevee
         if hasattr(eevee, "use_gtao"):
             eevee.use_gtao = True
-            eevee.gtao_distance = 0.75
+            eevee.gtao_distance = 0.65
         if hasattr(eevee, "use_bloom"):
             eevee.use_bloom = True
             eevee.bloom_intensity = 0.045
             eevee.bloom_threshold = 0.95
         if hasattr(eevee, "use_ssr"):
-            eevee.use_ssr = render_quality == "final" and False
+            eevee.use_ssr = False
         if hasattr(eevee, "taa_render_samples"):
-            eevee.taa_render_samples = 4 if render_quality == "final" else 2
+            eevee.taa_render_samples = 2 if render_quality == "final" else 1
 
     # Filmic Colour Management
     try:

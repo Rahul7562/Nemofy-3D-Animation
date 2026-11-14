@@ -330,12 +330,12 @@ async function runBlenderJobPipeline(
     job.activeProcess = null;
     if ((job.status as string) === "cancelled") return;
 
-    // Copy 4 key frames (opening, close-up, interaction, final) to publicJobDir for direct inspection
+    // Copy 4 key frames (opening chin-think, close-up roast, head-scratch reaction, final celebration) to publicJobDir for direct inspection
     const keyFrames = [
-      1,
-      Math.max(2, Math.floor(manifest.totalFrames * 0.38)),
-      Math.max(3, Math.floor(manifest.totalFrames * 0.72)),
-      manifest.totalFrames,
+      Math.min(15, Math.max(1, Math.floor(manifest.totalFrames * 0.06))),
+      Math.max(2, Math.floor(manifest.totalFrames * 0.36)),
+      Math.max(3, Math.floor(manifest.totalFrames * 0.68)),
+      Math.max(1, manifest.totalFrames - 8),
     ];
     const previewUrls: Array<{ frame: number; url: string }> = [];
     for (const kf of keyFrames) {
@@ -479,6 +479,7 @@ async function runBlenderJobPipeline(
 
     const subtitleFilter = buildSubtitleFilterChain(manifest);
     const vfChain = [
+      "tblend=all_mode=average,tblend=all_mode=average",
       `scale=${manifest.width}:${manifest.height}:flags=lanczos`,
       subtitleFilter,
     ]

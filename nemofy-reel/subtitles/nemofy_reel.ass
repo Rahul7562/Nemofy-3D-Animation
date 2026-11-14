@@ -1,0 +1,33 @@
+[Script Info]
+Title: Nemofy StudentHub Reel
+ScriptType: v4.00+
+PlayResX: 1080
+PlayResY: 1920
+WrapStyle: 0
+ScaledBorderAndShadow: yes
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: HookCard,DejaVu Sans,44,&H00FFFFFF,&H00FFFFFF,&H0012100E,&HB80F172A,-1,0,0,0,100,100,1.2,0,3,18,0,8,55,245,255,1
+Style: LeoLine,DejaVu Sans,46,&H00FFFFFF,&H00FFFFFF,&H001A120A,&HC2101A38,-1,0,0,0,100,100,0.4,0,3,16,0,2,55,245,505,1
+Style: NemoLine,DejaVu Sans,46,&H00A8FAFF,&H00FFFFFF,&H00120E18,&HC2381912,-1,0,0,0,100,100,0.4,0,3,16,0,2,55,245,505,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Dialogue: 0,0:00:00.00,0:00:02.76,LeoLine,,0,0,0,,{\c&HFFCA7A&}LEO{\c&HFFFFFF&}: Stop wasting 3 hours installing broken Verilog tools.
+Dialogue: 1,0:00:00.00,0:00:03.35,HookCard,,0,0,0,,{\fad(90,120)}3 HOURS WASTED INSTALLING
+Dialogue: 0,0:00:02.90,0:00:05.70,LeoLine,,0,0,0,,{\c&HFFCA7A&}LEO{\c&HFFFFFF&}: Wait a second. Why does my laptop sound like a jet?
+Dialogue: 0,0:00:05.83,0:00:08.41,NemoLine,,0,0,0,,{\c&H6EE7B7&}NEMO{\c&HA8FAFF&}: Leo, you downloaded 40GB for an AND gate.
+Dialogue: 0,0:00:08.57,0:00:09.62,LeoLine,,0,0,0,,{\c&HFFCA7A&}LEO{\c&HFFFFFF&}: My TA insisted.
+Dialogue: 0,0:00:09.77,0:00:13.24,NemoLine,,0,0,0,,{\c&H6EE7B7&}NEMO{\c&HA8FAFF&}: Wait. That 40GB installer freezes before 11:59?
+Dialogue: 0,0:00:13.37,0:00:15.29,LeoLine,,0,0,0,,{\c&HFFCA7A&}LEO{\c&HFFFFFF&}: I'm totally cooked. What else works?
+Dialogue: 0,0:00:15.47,0:00:17.98,NemoLine,,0,0,0,,{\c&H6EE7B7&}NEMO{\c&HA8FAFF&}: Open Nemofy.tech. Tap StudentHub.
+Dialogue: 1,0:00:15.47,0:00:18.58,HookCard,,0,0,0,,{\fad(90,120)}NEMOFY.TECH  ->  STUDENTHUB
+Dialogue: 0,0:00:18.13,0:00:20.23,LeoLine,,0,0,0,,{\c&HFFCA7A&}LEO{\c&HFFFFFF&}: Wait, no setup? Zero install.
+Dialogue: 0,0:00:20.37,0:00:24.06,NemoLine,,0,0,0,,{\c&H6EE7B7&}NEMO{\c&HA8FAFF&}: 100% free in Chrome — live Verilog waveforms & Python.
+Dialogue: 1,0:00:20.37,0:00:24.65,HookCard,,0,0,0,,{\fad(90,120)}LIVE VERILOG IN CHROME
+Dialogue: 0,0:00:24.20,0:00:27.90,NemoLine,,0,0,0,,{\c&H6EE7B7&}NEMO{\c&HA8FAFF&}: Runs C++, Java, binary math, and Word to PDF too.
+Dialogue: 0,0:00:28.17,0:00:30.50,LeoLine,,0,0,0,,{\c&HFFCA7A&}LEO{\c&HFFFFFF&}: You fixed my 3-hour panic in 12 seconds?
+Dialogue: 0,0:00:30.63,0:00:33.22,NemoLine,,0,0,0,,{\c&H6EE7B7&}NEMO{\c&HA8FAFF&}: 12 for Verilog. 2 hours to forgive yourself.
+Dialogue: 0,0:00:33.37,0:00:36.60,LeoLine,,0,0,0,,{\c&HFFCA7A&}LEO{\c&HFFFFFF&}: Save this tonight. Stop wasting time on broken tools.
+Dialogue: 1,0:00:33.37,0:00:36.97,HookCard,,0,0,0,,{\fad(90,120)}SAVE THIS  //  NEMOFY.TECH

@@ -14,6 +14,7 @@ import {
 import {
   AGENTMORPHY_SKIT_PROJECT,
   DEFAULT_STUDIO_PROJECT,
+  NEMO_LEO_PLAYFUL_ROAST_PROJECT,
   NEMOFY_TECH_COMMERCIAL_PROJECT,
   STUDIO_PRESET_PROJECTS,
   VERTICAL_SHOWCASE_PROJECT,
@@ -367,5 +368,47 @@ test("NEMOFY_TECH_COMMERCIAL_PROJECT has 7 shots, >= 38.5s duration (1,155 frame
   const saved = listSavedAnimations();
   assert.ok(Array.isArray(saved));
 });
+
+test("NEMO_LEO_PLAYFUL_ROAST_PROJECT is the primary preset and supports Leo free-hand chin/head/facepalm kinematics and Nemo energetic bounce/wave poses", () => {
+  assert.equal(STUDIO_PRESET_PROJECTS[0].id, NEMO_LEO_PLAYFUL_ROAST_PROJECT.id);
+  assert.equal(NEMO_LEO_PLAYFUL_ROAST_PROJECT.scenes.length, 5);
+
+  const chinThinkPose = computeCharacterPoseAtFrame(
+    NEMO_LEO_PLAYFUL_ROAST_PROJECT.scenes[0].characters[0],
+    45,
+    150,
+    30,
+    "leo-chin-think",
+  );
+  // Leo's right arm reaches up and inward to his chin while left hand gestures freely
+  assert.ok(chinThinkPose.rightUpperArmX < -0.9);
+  assert.ok(chinThinkPose.rightForearmX < -1.1);
+  assert.ok(chinThinkPose.rightUpperArmY < -0.2);
+
+  const headScratchPose = computeCharacterPoseAtFrame(
+    NEMO_LEO_PLAYFUL_ROAST_PROJECT.scenes[2].characters[0],
+    45,
+    150,
+    30,
+    "leo-head-scratch",
+  );
+  // Leo's left hand reaches up to his head/temple while right arm gestures freely
+  assert.ok(headScratchPose.leftUpperArmX < -1.3);
+  assert.ok(headScratchPose.leftForearmX < -1.2);
+  assert.ok(headScratchPose.leftUpperArmY > 0.25);
+
+  const nemoRoastPose = computeCharacterPoseAtFrame(
+    NEMO_LEO_PLAYFUL_ROAST_PROJECT.scenes[1].characters[1],
+    35,
+    150,
+    30,
+    "nemo-playful-roast",
+    true,
+  );
+  assert.ok(Number.isFinite(nemoRoastPose.bodySquashY));
+  assert.ok(Number.isFinite(nemoRoastPose.torsoRollZ));
+  assert.ok(Math.abs(nemoRoastPose.leftUpperArmZ) > 0.2);
+});
+
 
 

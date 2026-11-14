@@ -163,21 +163,20 @@ export const ProceduralCharacter: React.FC<ProceduralCharacterProps> = ({
         : "#E06D53";
     const warmSideColor = "#F18F70";
     const legColor = "#C8563D";
-    const flapPitchL = pose.leftUpperArmX * 0.55;
-    const flapRollL = 0.25 + Math.max(0, pose.leftUpperArmZ) * 0.65;
-    const flapPitchR = pose.rightUpperArmX * 0.55;
-    const flapRollR = -0.25 + Math.min(0, pose.rightUpperArmZ) * 0.65;
+    const squashY = pose.bodySquashY ?? 1.0;
+    const invSquashXZ = 1 / Math.sqrt(Math.max(0.7, squashY));
 
     return (
       <group scale={config.scale}>
         <group position={[0, 0.42, 0]}>
-          {/* Main Wide Cube Head/Body (breathes gently while legs stay planted on the sill) */}
+          {/* Main Wide Cube Head/Body — Energetic bounce, 3D tilt/roll, and squash-and-stretch */}
           <group
-            position={[0, pose.hipBobY * 0.45, 0]}
+            position={[0, pose.hipBobY * 0.95, 0]}
+            scale={[invSquashXZ, squashY, invSquashXZ]}
             rotation={[
-              pose.headPitchX * 0.65 + pose.torsoLeanX * 0.45,
-              pose.headYawY * 0.8 + pose.torsoTwistY * 0.45,
-              0,
+              pose.headPitchX * 0.85 + pose.torsoLeanX * 0.85,
+              pose.headYawY * 0.95 + pose.torsoTwistY * 0.85,
+              (pose.torsoRollZ ?? 0) + (pose.headRollZ ?? 0) * 0.65,
             ]}
           >
             <mesh castShadow receiveShadow>
@@ -263,31 +262,65 @@ export const ProceduralCharacter: React.FC<ProceduralCharacterProps> = ({
               </mesh>
             )}
 
-            {/* Left & Right Stubby Waving Side-Arms */}
+            {/* Left & Right Articulated 2-Segment Free Waving Arms */}
             <group
-              position={[-0.32, -0.02, 0.02]}
-              rotation={[flapPitchL, 0, flapRollL]}
+              position={[-0.32, -0.01, 0.02]}
+              rotation={[
+                pose.leftUpperArmX * 0.85,
+                pose.leftUpperArmY ?? 0,
+                0.22 + pose.leftUpperArmZ * 0.85,
+              ]}
             >
-              <mesh position={[-0.055, 0, 0]} castShadow>
-                <boxGeometry args={[0.12, 0.135, 0.15]} />
+              <mesh position={[-0.048, -0.02, 0]} castShadow>
+                <boxGeometry args={[0.105, 0.125, 0.135]} />
                 <meshStandardMaterial color={cubeColor} roughness={0.44} />
               </mesh>
+              <group
+                position={[-0.085, -0.06, 0]}
+                rotation={[
+                  (pose.leftForearmX ?? -0.2) * 0.55,
+                  0,
+                  pose.leftForearmZ ?? 0,
+                ]}
+              >
+                <mesh position={[-0.035, -0.03, 0]} castShadow>
+                  <boxGeometry args={[0.09, 0.095, 0.115]} />
+                  <meshStandardMaterial color={warmSideColor} roughness={0.4} />
+                </mesh>
+              </group>
             </group>
             <group
-              position={[0.32, -0.02, 0.02]}
-              rotation={[flapPitchR, 0, flapRollR]}
+              position={[0.32, -0.01, 0.02]}
+              rotation={[
+                pose.rightUpperArmX * 0.85,
+                pose.rightUpperArmY ?? 0,
+                -0.22 + pose.rightUpperArmZ * 0.85,
+              ]}
             >
-              <mesh position={[0.055, 0, 0]} castShadow>
-                <boxGeometry args={[0.12, 0.135, 0.15]} />
+              <mesh position={[0.048, -0.02, 0]} castShadow>
+                <boxGeometry args={[0.105, 0.125, 0.135]} />
                 <meshStandardMaterial color={warmSideColor} roughness={0.4} />
               </mesh>
+              <group
+                position={[0.085, -0.06, 0]}
+                rotation={[
+                  (pose.rightForearmX ?? -0.2) * 0.55,
+                  0,
+                  pose.rightForearmZ ?? 0,
+                ]}
+              >
+                <mesh position={[0.035, -0.03, 0]} castShadow>
+                  <boxGeometry args={[0.09, 0.095, 0.115]} />
+                  <meshStandardMaterial color={warmSideColor} roughness={0.38} />
+                </mesh>
+              </group>
             </group>
           </group>
 
-          {/* 4 Cute Stubby Blocky Legs (Planted firmly on the window sill ledge) */}
+          {/* 4 Cute Stubby Blocky Legs */}
           <group
             position={[-0.165, -0.23, 0.105]}
-            rotation={[pose.leftThighX * 0.6, 0, 0]}
+            rotation={[pose.leftThighX * 0.75, 0, 0]}
           >
             <mesh position={[0, -0.095, 0]} castShadow>
               <boxGeometry args={[0.092, 0.21, 0.092]} />
@@ -296,7 +329,7 @@ export const ProceduralCharacter: React.FC<ProceduralCharacterProps> = ({
           </group>
           <group
             position={[0.165, -0.23, 0.105]}
-            rotation={[pose.rightThighX * 0.6, 0, 0]}
+            rotation={[pose.rightThighX * 0.75, 0, 0]}
           >
             <mesh position={[0, -0.095, 0]} castShadow>
               <boxGeometry args={[0.092, 0.21, 0.092]} />
@@ -305,7 +338,7 @@ export const ProceduralCharacter: React.FC<ProceduralCharacterProps> = ({
           </group>
           <group
             position={[-0.165, -0.23, -0.105]}
-            rotation={[pose.rightThighX * 0.5, 0, 0]}
+            rotation={[pose.rightThighX * 0.65, 0, 0]}
           >
             <mesh position={[0, -0.095, 0]} castShadow>
               <boxGeometry args={[0.092, 0.21, 0.092]} />
@@ -314,7 +347,7 @@ export const ProceduralCharacter: React.FC<ProceduralCharacterProps> = ({
           </group>
           <group
             position={[0.165, -0.23, -0.105]}
-            rotation={[pose.leftThighX * 0.5, 0, 0]}
+            rotation={[pose.leftThighX * 0.65, 0, 0]}
           >
             <mesh position={[0, -0.095, 0]} castShadow>
               <boxGeometry args={[0.092, 0.21, 0.092]} />
@@ -344,10 +377,14 @@ export const ProceduralCharacter: React.FC<ProceduralCharacterProps> = ({
             <meshStandardMaterial color={pantsBlue} roughness={0.5} />
           </mesh>
 
-          {/* Torso Group (upper body breathes softly while sneakers remain planted on the ledge) */}
+          {/* Torso Group (upper body breathes & shifts weight naturally while sneakers remain planted) */}
           <group
-            position={[0, 0.06 + pose.hipBobY * 0.45, 0]}
-            rotation={[pose.torsoLeanX, pose.torsoTwistY, 0]}
+            position={[0, 0.06 + pose.hipBobY * 0.55, 0]}
+            rotation={[
+              pose.torsoLeanX,
+              pose.torsoTwistY,
+              pose.torsoRollZ ?? 0,
+            ]}
           >
             {/* Cobalt-Blue Hoodie Torso */}
             <mesh position={[0, 0.22, 0]} castShadow receiveShadow>
@@ -361,28 +398,32 @@ export const ProceduralCharacter: React.FC<ProceduralCharacterProps> = ({
 
             {/* Center Hoodie Seam / Placket */}
             <mesh position={[0, 0.22, 0.147]}>
-              <boxGeometry args={[0.10, 0.43, 0.012]} />
+              <boxGeometry args={[0.1, 0.43, 0.012]} />
               <meshStandardMaterial color="#2B44B8" roughness={0.5} />
             </mesh>
 
             {/* Two Iconic Vertical White Collar/Drawstring Stripes on Chest */}
             <mesh position={[-0.088, 0.34, 0.152]} castShadow>
-              <boxGeometry args={[0.062, 0.20, 0.018]} />
+              <boxGeometry args={[0.062, 0.2, 0.018]} />
               <meshStandardMaterial color="#F8FAFC" roughness={0.35} />
             </mesh>
             <mesh position={[0.088, 0.34, 0.152]} castShadow>
-              <boxGeometry args={[0.062, 0.20, 0.018]} />
+              <boxGeometry args={[0.062, 0.2, 0.018]} />
               <meshStandardMaterial color="#F8FAFC" roughness={0.35} />
             </mesh>
 
             {/* Blocky Chibi Head + Spiky Hair Crown */}
             <group
               position={[0, 0.46, 0]}
-              rotation={[pose.headPitchX, pose.headYawY, 0]}
+              rotation={[
+                pose.headPitchX,
+                pose.headYawY,
+                pose.headRollZ ?? 0,
+              ]}
             >
               {/* Main Wide Blocky Head */}
               <mesh position={[0, 0.21, 0]} castShadow receiveShadow>
-                <boxGeometry args={[0.50, 0.40, 0.44]} />
+                <boxGeometry args={[0.5, 0.4, 0.44]} />
                 <meshStandardMaterial
                   color={skinPeach}
                   roughness={0.48}
@@ -391,11 +432,11 @@ export const ProceduralCharacter: React.FC<ProceduralCharacterProps> = ({
               </mesh>
 
               {/* Blocky Side Ears */}
-              <mesh position={[-0.265, 0.20, 0]} castShadow>
+              <mesh position={[-0.265, 0.2, 0]} castShadow>
                 <boxGeometry args={[0.05, 0.095, 0.08]} />
                 <meshStandardMaterial color="#E5AF90" roughness={0.5} />
               </mesh>
-              <mesh position={[0.265, 0.20, 0]} castShadow>
+              <mesh position={[0.265, 0.2, 0]} castShadow>
                 <boxGeometry args={[0.05, 0.095, 0.08]} />
                 <meshStandardMaterial color="#F6CBAF" roughness={0.45} />
               </mesh>
@@ -411,7 +452,7 @@ export const ProceduralCharacter: React.FC<ProceduralCharacterProps> = ({
                   />
                 </mesh>
                 <mesh position={[0, -0.12, -0.19]} castShadow>
-                  <boxGeometry args={[0.52, 0.28, 0.10]} />
+                  <boxGeometry args={[0.52, 0.28, 0.1]} />
                   <meshStandardMaterial
                     color={hairDark}
                     roughness={0.55}
@@ -461,7 +502,7 @@ export const ProceduralCharacter: React.FC<ProceduralCharacterProps> = ({
                   rotation={[0.28, -0.15, -0.14]}
                   castShadow
                 >
-                  <coneGeometry args={[0.115, 0.20, 4]} />
+                  <coneGeometry args={[0.115, 0.2, 4]} />
                   <meshStandardMaterial
                     color="#25215E"
                     roughness={0.5}
@@ -522,7 +563,7 @@ export const ProceduralCharacter: React.FC<ProceduralCharacterProps> = ({
                 <meshStandardMaterial color={hairDark} roughness={0.4} />
               </mesh>
 
-              {/* Articulated Mouth Cavity + Tongue (Clean @agentmorphy style without nose block) */}
+              {/* Articulated Mouth Cavity + Tongue */}
               <mesh position={[0, 0.112 - pose.mouthOpenness * 0.02, 0.222]}>
                 <boxGeometry
                   args={[mouthActualWidth, mouthOpenHeight, 0.028]}
@@ -545,10 +586,14 @@ export const ProceduralCharacter: React.FC<ProceduralCharacterProps> = ({
               )}
             </group>
 
-            {/* Left Blocky Hoodie Arm */}
+            {/* Left Blocky Hoodie Arm with Full 3-Axis Free Hand Articulation */}
             <group
               position={[-0.29, 0.39, 0]}
-              rotation={[pose.leftUpperArmX, 0, pose.leftUpperArmZ]}
+              rotation={[
+                pose.leftUpperArmX,
+                pose.leftUpperArmY ?? 0,
+                pose.leftUpperArmZ,
+              ]}
             >
               <mesh position={[0, -0.11, 0]} castShadow>
                 <boxGeometry args={[0.13, 0.23, 0.13]} />
@@ -556,23 +601,36 @@ export const ProceduralCharacter: React.FC<ProceduralCharacterProps> = ({
               </mesh>
               <group
                 position={[0, -0.22, 0]}
-                rotation={[pose.leftForearmX, 0, 0]}
+                rotation={[
+                  pose.leftForearmX,
+                  pose.leftForearmY ?? 0,
+                  pose.leftForearmZ ?? 0,
+                ]}
               >
-                <mesh position={[0, -0.10, 0]} castShadow>
-                  <boxGeometry args={[0.12, 0.20, 0.12]} />
+                <mesh position={[0, -0.1, 0]} castShadow>
+                  <boxGeometry args={[0.12, 0.2, 0.12]} />
                   <meshStandardMaterial color={hoodieBlue} roughness={0.46} />
                 </mesh>
-                <mesh position={[0, -0.22, 0]} castShadow>
-                  <boxGeometry args={[0.11, 0.10, 0.11]} />
-                  <meshStandardMaterial color={skinPeach} roughness={0.48} />
-                </mesh>
+                <group
+                  position={[0, -0.21, 0]}
+                  rotation={[pose.leftHandX ?? 0, 0, pose.leftHandZ ?? 0]}
+                >
+                  <mesh position={[0, -0.02, 0]} castShadow>
+                    <boxGeometry args={[0.11, 0.105, 0.11]} />
+                    <meshStandardMaterial color={skinPeach} roughness={0.48} />
+                  </mesh>
+                </group>
               </group>
             </group>
 
-            {/* Right Blocky Hoodie Arm */}
+            {/* Right Blocky Hoodie Arm with Full 3-Axis Free Hand Articulation */}
             <group
               position={[0.29, 0.39, 0]}
-              rotation={[pose.rightUpperArmX, 0, pose.rightUpperArmZ]}
+              rotation={[
+                pose.rightUpperArmX,
+                pose.rightUpperArmY ?? 0,
+                pose.rightUpperArmZ,
+              ]}
             >
               <mesh position={[0, -0.11, 0]} castShadow>
                 <boxGeometry args={[0.13, 0.23, 0.13]} />
@@ -580,16 +638,25 @@ export const ProceduralCharacter: React.FC<ProceduralCharacterProps> = ({
               </mesh>
               <group
                 position={[0, -0.22, 0]}
-                rotation={[pose.rightForearmX, 0, 0]}
+                rotation={[
+                  pose.rightForearmX,
+                  pose.rightForearmY ?? 0,
+                  pose.rightForearmZ ?? 0,
+                ]}
               >
-                <mesh position={[0, -0.10, 0]} castShadow>
-                  <boxGeometry args={[0.12, 0.20, 0.12]} />
+                <mesh position={[0, -0.1, 0]} castShadow>
+                  <boxGeometry args={[0.12, 0.2, 0.12]} />
                   <meshStandardMaterial color={hoodieBlue} roughness={0.46} />
                 </mesh>
-                <mesh position={[0, -0.22, 0]} castShadow>
-                  <boxGeometry args={[0.11, 0.10, 0.11]} />
-                  <meshStandardMaterial color={skinPeach} roughness={0.48} />
-                </mesh>
+                <group
+                  position={[0, -0.21, 0]}
+                  rotation={[pose.rightHandX ?? 0, 0, pose.rightHandZ ?? 0]}
+                >
+                  <mesh position={[0, -0.02, 0]} castShadow>
+                    <boxGeometry args={[0.11, 0.105, 0.11]} />
+                    <meshStandardMaterial color={skinPeach} roughness={0.48} />
+                  </mesh>
+                </group>
               </group>
             </group>
           </group>

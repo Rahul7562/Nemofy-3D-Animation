@@ -161,30 +161,81 @@ export async function ensureLocalVoiceStudioService(
       if (cfg.onnxModelPath) {
         try {
           const instLower = String(raw_instruct || instruct || "").toLowerCase();
-          // Emotion-aware neural prosody tuning for comedic timing, emotional warmth, and crisp articulation
-          let baseScale = 0.92;
-          let noiseScale = 0.50;
-          let noiseW = 0.65;
-          let sentenceSilence = "0.14";
+          const voiceLower = String(voice || "").toLowerCase();
+          const isNemoVoice = voiceLower.includes("nemo") || voiceLower.includes("aria");
 
-          if (instLower.includes("panic") || instLower.includes("urgent") || instLower.includes("stunned")) {
-            baseScale = 0.88;
-            noiseScale = 0.58;
-            noiseW = 0.70;
-            sentenceSilence = "0.12";
-          } else if (instLower.includes("relief") || instLower.includes("grateful") || instLower.includes("emotional")) {
-            baseScale = 0.96;
-            noiseScale = 0.48;
-            noiseW = 0.60;
+          // Emotion-aware neural prosody tuning for natural, expressive conversational banter
+          // Higher noiseScale (0.58-0.66) + balanced noiseW (0.72-0.78) yields rich pitch inflection & human warmth
+          let baseScale = isNemoVoice ? 0.91 : 0.95;
+          let noiseScale = isNemoVoice ? 0.62 : 0.58;
+          let noiseW = isNemoVoice ? 0.74 : 0.72;
+          let sentenceSilence = "0.18";
+
+          if (
+            instLower.includes("roast") ||
+            instLower.includes("sassy") ||
+            instLower.includes("tease") ||
+            instLower.includes("teasing") ||
+            instLower.includes("energetic")
+          ) {
+            baseScale = isNemoVoice ? 0.89 : 0.93;
+            noiseScale = 0.65;
+            noiseW = 0.76;
+            sentenceSilence = "0.16";
+          } else if (
+            instLower.includes("critique") ||
+            instLower.includes("banter") ||
+            instLower.includes("comeback") ||
+            instLower.includes("amused") ||
+            instLower.includes("camaraderie")
+          ) {
+            baseScale = isNemoVoice ? 0.91 : 0.94;
+            noiseScale = 0.61;
+            noiseW = 0.74;
             sentenceSilence = "0.18";
-          } else if (instLower.includes("witty") || instLower.includes("confident") || instLower.includes("triumphant") || instLower.includes("heroic")) {
-            baseScale = 0.90;
-            noiseScale = 0.54;
-            noiseW = 0.66;
-            sentenceSilence = "0.14";
+          } else if (
+            instLower.includes("panic") ||
+            instLower.includes("urgent") ||
+            instLower.includes("stunned")
+          ) {
+            baseScale = 0.89;
+            noiseScale = 0.62;
+            noiseW = 0.74;
+            sentenceSilence = "0.15";
+          } else if (
+            instLower.includes("relief") ||
+            instLower.includes("grateful") ||
+            instLower.includes("emotional") ||
+            instLower.includes("warm")
+          ) {
+            baseScale = 0.96;
+            noiseScale = 0.56;
+            noiseW = 0.68;
+            sentenceSilence = "0.20";
+          } else if (
+            instLower.includes("witty") ||
+            instLower.includes("confident") ||
+            instLower.includes("triumphant") ||
+            instLower.includes("heroic")
+          ) {
+            baseScale = 0.91;
+            noiseScale = 0.62;
+            noiseW = 0.74;
+            sentenceSilence = "0.16";
           }
 
-          const lengthScale = Math.max(0.72, Math.min(1.16, baseScale / numericSpeed));
+          // Smooth punctuation for natural conversational cadence without glottal stutters
+          const spokenText = text
+            .replace(/\.\.\./g, ", ")
+            .replace(/\?!/g, "?")
+            .replace(/!\?/g, "?")
+            .replace(/\s+/g, " ")
+            .trim();
+
+          const lengthScale = Math.max(
+            0.78,
+            Math.min(1.16, baseScale / numericSpeed),
+          );
           await new Promise<void>((resolve, reject) => {
             const args = [
               "--model",
@@ -219,7 +270,7 @@ export async function ensureLocalVoiceStudioService(
                 );
               }
             });
-            child.stdin.write(text + "\n");
+            child.stdin.write(spokenText + "\n");
             child.stdin.end();
           });
           synthesizedWithNeural = true;

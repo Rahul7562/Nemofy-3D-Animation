@@ -1,0 +1,7 @@
+Comment NEMOFY if your laptop fan takes off during Verilog lab night.
+
+Every semester starts the same way. You download a 40GB toolchain just to test an AND gate, and your laptop freezes an hour before 11:59 submission. That's brutal.
+
+Leo and Nemo switched to StudentHub on Nemofy instead. It's a zero-install student coding workbench right in your browser, with a live Verilog simulator, logic waveforms, Python, C++, Java, and a Word-to-PDF converter. You don't even need a sign-up.
+
+#VerilogSimulator #StudentCoding #Nemofy
